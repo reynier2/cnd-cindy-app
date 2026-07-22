@@ -10,17 +10,26 @@ import shutil
 # --- CONFIGURE PAGE ICON ---
 st.set_page_config(
     page_title="CND Real Estate Services",
-    page_icon="🏗️",  # <--- PASTE THE CRANE EMOJI HERE!
+    page_icon="🏗️", 
     layout="wide"
 )
+
 st.title("🏗️ CND Real Estate Services")
 st.subheader("Powered by Cindy AI Estimator")
 st.markdown("---")
 
 st.write("Upload photos of the repair job, and Cindy will generate a professional bid instantly.")
 
-# File Uploader
-uploaded_files = st.file_uploader("Choose images", accept_multiple_files=True, type=['jpg', 'jpeg', 'png'])
+# --- FILE UPLOADER (OPTIMIZED FOR MOBILE CAMERA) ---
+st.markdown("### 📸 Upload Photos")
+st.info("💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!")
+
+uploaded_files = st.file_uploader(
+    "Choose images", 
+    type=["png", "jpg", "jpeg"],
+    accept_multiple_files=True,
+    key="mobile_camera_fix_v3"  # Unique key to force browser refresh
+)
 
 if uploaded_files:
     st.write(f"✅ {len(uploaded_files)} photo(s) uploaded!")
