@@ -22,7 +22,9 @@ except Exception:
     pass
 
 # === CONFIGURATION ===
-def load_openai_key():
+def load_openai_key():    if os.getenv("OPENAI_API_KEY"):
+        return os.getenv("OPENAI_API_KEY").strip()
+    
     key_file = Path("E:/cindy/openai_api_key.txt")
     return key_file.read_text().strip() if key_file.exists() else None
 
