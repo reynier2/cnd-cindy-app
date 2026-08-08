@@ -22,15 +22,15 @@ except Exception:
     pass
 
 # === CONFIGURATION ===
-def load_openai_key():    if os.getenv("OPENAI_API_KEY"):
+def load_openai_key():
+    if os.getenv("OPENAI_API_KEY"):
         return os.getenv("OPENAI_API_KEY").strip()
-    
     key_file = Path("E:/cindy/openai_api_key.txt")
     return key_file.read_text().strip() if key_file.exists() else None
 
-def load_rentcast_key():    if os.getenv("RENTCAST_API_KEY"):
+def load_rentcast_key():
+    if os.getenv("RENTCAST_API_KEY"):
         return os.getenv("RENTCAST_API_KEY").strip()
-    
     key_file = Path("E:/cindy/rentcast_api_key.txt")
     if key_file.exists():
         return key_file.read_text().strip()
