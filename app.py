@@ -30,6 +30,16 @@ if not stripe_api_key:
     st.stop()
 
 stripe.api_key = stripe_api_key
+# --- PAYMENT VERIFICATION (READS THE RECEIPT FROM STRIPE) ---
+session_id = st.query_params.get("session_id")
+if session_id:
+    try:
+        checkout = stripe.checkout.Session.retrieve(session_id)
+        if checkout.payment_status == "paid":
+            st.session_state.payment_confirmed = True
+            st.success("✅ Payment confirmed! Upload your photos below to generate your estimate.")
+    except Exception as e:
+        st.error(f"Payment check error: {e}")
 
 # --- FILE UPLOADER (OPTIMIZED FOR MOBILE CAMERA) ---
 st.markdown("### 📸 Upload Photos")
