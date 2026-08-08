@@ -11,11 +11,11 @@ import stripe
 # --- CONFIGURE PAGE ICON ---
 st.set_page_config(
     page_title="CND Real Estate Services",
-    page_icon="🏗️", 
+    page_icon="cindy happy.png",
     layout="wide"
 )
 
-st.title("🏗️ CND Real Estate Services")
+st.title("CND Real Estate Services")
 st.subheader("Powered by Cindy AI Estimator")
 st.markdown("---")
 
