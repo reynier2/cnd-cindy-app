@@ -30,27 +30,32 @@ if not stripe_api_key:
     st.stop()
 
 stripe.api_key = stripe_api_key
+# --- ONE-TIME TICKET LEDGER (Bouncer remembers used tickets) ---
+@st.cache_resource
+def get_redeemed_tickets():
+    return set()
+
 # --- PAYMENT VERIFICATION (READS THE RECEIPT FROM STRIPE) ---
 session_id = st.query_params.get("session_id")
 if session_id:
+    redeemed = get_redeemed_tickets()
     try:
         checkout = stripe.checkout.Session.retrieve(session_id)
         if checkout.payment_status == "paid":
-            st.session_state.payment_confirmed = True
-            st.session_state.just_paid = True 
-            
-            # 🕵️‍♂️ THE BOUNCER FIX: Erase the receipt from the URL so it can't be shared!
-            del st.query_params["session_id"]
-            st.rerun() # Force a clean reload with a locked door
-            
+            if session_id in redeemed:
+                st.warning("🎟️ This payment ticket was already used. Please pay $5.00 to unlock your own estimate.")
+            else:
+                redeemed.add(session_id)
+                st.session_state.payment_confirmed = True
+                st.session_state.just_paid = True
+                del st.query_params["session_id"]
+                st.rerun()
     except Exception as e:
         st.error(f"Payment check error: {e}")
 
-# Show the success message on the clean reload
 if st.session_state.get("just_paid"):
     st.success("✅ Payment confirmed! Upload your photos below to generate your estimate.")
     st.session_state.just_paid = False
-
 # --- FILE UPLOADER (OPTIMIZED FOR MOBILE CAMERA) ---
 st.markdown("### 📸 Upload Photos")
 st.info("💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!")
