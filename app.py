@@ -22,7 +22,6 @@ st.markdown("---")
 st.write("Upload photos of the repair job, and Cindy will generate a professional bid instantly.")
 
 # --- STRIPE CONFIGURATION ---
-# Get API Key from Streamlit Secrets (Go to Dashboard -> Settings -> Secrets)
 stripe_api_key = os.getenv("STRIPE_SECRET_KEY")
 
 if not stripe_api_key:
@@ -30,6 +29,12 @@ if not stripe_api_key:
     st.stop()
 
 stripe.api_key = stripe_api_key
+
+# --- REFERRAL TRACKING (which distributor's card brought this customer) ---
+ref_code = st.query_params.get("ref")
+if ref_code:
+    st.session_state.ref_code = ref_code
+
 # --- ONE-TIME TICKET LEDGER (Bouncer remembers used tickets) ---
 @st.cache_resource
 def get_redeemed_tickets():
@@ -48,6 +53,7 @@ if session_id:
                 redeemed.add(session_id)
                 st.session_state.payment_confirmed = True
                 st.session_state.just_paid = True
+                # 🕵️‍♂️ BOUNCER FIX: Erase the receipt from the URL so it can't be shared!
                 del st.query_params["session_id"]
                 st.rerun()
     except Exception as e:
@@ -56,6 +62,7 @@ if session_id:
 if st.session_state.get("just_paid"):
     st.success("✅ Payment confirmed! Upload your photos below to generate your estimate.")
     st.session_state.just_paid = False
+
 # --- FILE UPLOADER (OPTIMIZED FOR MOBILE CAMERA) ---
 st.markdown("### 📸 Upload Photos")
 st.info("💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!")
@@ -64,65 +71,59 @@ uploaded_files = st.file_uploader(
     "Choose images", 
     type=["png", "jpg", "jpeg"],
     accept_multiple_files=True,
-    key="mobile_camera_fix_v3"  # Unique key to force browser refresh
+    key="mobile_camera_fix_v3"
 )
 
 if uploaded_files:
     st.write(f"✅ {len(uploaded_files)} photo(s) uploaded!")
     
     # Check if payment is confirmed in session state
-    if 'payment_confirmed' not in st.session_state:
+    if not st.session_state.get("payment_confirmed"):
         st.warning("💳 **Please pay $5.00 to unlock your professional AI estimate.**")
         
         try:
-            # Create Stripe Checkout Session
+            # Create Stripe Checkout Session (stamped with the distributor's ref code)
             checkout_session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
                 line_items=[{
                     'price_data': {
                         'currency': 'usd',
                         'product_data': {'name': 'Cindy AI Repair Estimate'},
-                        'unit_amount': 500,  # $5.00 in cents
+                        'unit_amount': 500,
                     },
                     'quantity': 1,
                 }],
                 mode='payment',
+                metadata={'ref': st.session_state.get('ref_code', 'direct')},
                 success_url='https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?session_id={CHECKOUT_SESSION_ID}',
                 cancel_url='https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/',
             )
             
             st.markdown(f"[ **CLICK HERE TO PAY $5.00 & UNLOCK ESTIMATE**]({checkout_session.url})")
-            st.stop() # Stop here until payment is confirmed
+            st.stop()
             
         except Exception as e:
             st.error(f"Payment setup error: {e}")
             st.stop()
     
-    # IF PAID (or session says paid), proceed to analysis
+    # IF PAID, proceed to analysis
     if st.button("🚀 Generate Estimate"):
         with st.spinner('Cindy is analyzing the photos... this takes about 15 seconds...'):
             
-            # --- FIX FOR CLOUD COMPATIBILITY ---
             temp_dir = tempfile.mkdtemp()
             saved_paths = []
             
             try:
-                # Save uploaded files to the temporary directory
                 for uploaded_file in uploaded_files:
                     file_name = os.path.join(temp_dir, uploaded_file.name)
                     with open(file_name, "wb") as f:
                         f.write(uploaded_file.getbuffer())
                     saved_paths.append(file_name)
                 
-                # --- CALL REAL CINDY AI LOGIC ---
-                # We import the function from your local cindy_master module
-                # Note: Ensure 'cindy_master.py' is in the same repo folder or installed as a package
                 try:
                     from cindy_master import analyze_contractor_photos 
-                    # Call the real AI function with the image paths and a default zip code (can be updated later)
                     result_text = analyze_contractor_photos(saved_paths, "23220")
                 except ImportError:
-                    # Fallback if module isn't found in cloud yet (Remove this fallback once deployed correctly)
                     st.warning("⚠️ AI Module not found in cloud environment. Using fallback simulation for now.")
                     result_text = "**REAL ESTIMATE GENERATED!**\n\n| Item | Cost |\n|---|---|\n| Floor Repair | $1,200 |\n| Wall Paint | $800 |\n| **Total** | **$2,000** |"
                 except Exception as e:
@@ -132,7 +133,6 @@ if uploaded_files:
                 st.success("Estimate Generated!")
                 st.markdown(result_text)
                 
-                # Create PDF
                 pdf = FPDF()
                 pdf.add_page()
                 pdf.set_font("Arial", 'B', 20)
@@ -143,10 +143,8 @@ if uploaded_files:
                 pdf.set_font("Arial", size=12)
                 pdf.multi_cell(0, 6, result_text)
                 
-                # Save PDF to memory (works on Cloud)
                 pdf_bytes = pdf.output(dest='S').encode('latin-1')
                 
-                # Download Button
                 st.download_button(
                     label="📄 Download Professional PDF Bid",
                     data=pdf_bytes,
@@ -155,5 +153,4 @@ if uploaded_files:
                 )
                 
             finally:
-                # Clean up temporary files
                 shutil.rmtree(temp_dir, ignore_errors=True)
