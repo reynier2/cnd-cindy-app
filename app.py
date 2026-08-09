@@ -37,9 +37,19 @@ if session_id:
         checkout = stripe.checkout.Session.retrieve(session_id)
         if checkout.payment_status == "paid":
             st.session_state.payment_confirmed = True
-            st.success("✅ Payment confirmed! Upload your photos below to generate your estimate.")
+            st.session_state.just_paid = True 
+            
+            # 🕵️‍♂️ THE BOUNCER FIX: Erase the receipt from the URL so it can't be shared!
+            del st.query_params["session_id"]
+            st.rerun() # Force a clean reload with a locked door
+            
     except Exception as e:
         st.error(f"Payment check error: {e}")
+
+# Show the success message on the clean reload
+if st.session_state.get("just_paid"):
+    st.success("✅ Payment confirmed! Upload your photos below to generate your estimate.")
+    st.session_state.just_paid = False
 
 # --- FILE UPLOADER (OPTIMIZED FOR MOBILE CAMERA) ---
 st.markdown("### 📸 Upload Photos")
