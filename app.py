@@ -195,15 +195,36 @@ if uploaded_files:
                 st.success(T["success"])
                 st.markdown(result_text)
 
+                               # --- PROFESSIONAL PDF LETTERHEAD ---
                 pdf = FPDF()
                 pdf.add_page()
-                pdf.set_font("Arial", 'B', 20)
+                
+                # Header
+                pdf.set_font("Arial", 'B', 22)
+                pdf.set_text_color(0, 51, 102)  # Professional dark blue
                 pdf.cell(0, 10, "CND REAL ESTATE SERVICES", ln=True, align='C')
+                
                 pdf.set_font("Arial", 'I', 12)
-                pdf.cell(0, 8, "Powered by Cindy AI", ln=True, align='C')
+                pdf.set_text_color(100, 100, 100)  # Gray
+                pdf.cell(0, 8, "Powered by Cindy AI Estimator", ln=True, align='C')
+                
+                # Thick Divider Line
+                pdf.ln(5)
+                pdf.set_draw_color(0, 51, 102)
+                pdf.set_line_width(1.5)  # Thick line
+                pdf.line(15, pdf.get_y(), 195, pdf.get_y())
+                pdf.ln(8)
+                
+                # Body Text (The Estimate)
+                pdf.set_text_color(0, 0, 0)  # Black
+                pdf.set_font("Arial", size=11)
+                pdf.multi_cell(0, 7, result_text)
+                
+                # Footer
                 pdf.ln(10)
-                pdf.set_font("Arial", size=12)
-                pdf.multi_cell(0, 6, result_text)
+                pdf.set_font("Arial", 'I', 9)
+                pdf.set_text_color(150, 150, 150)
+                pdf.cell(0, 5, "Thank you for choosing CND Real Estate Services.", ln=True, align='C')
 
                 pdf_bytes = pdf.output(dest='S').encode('latin-1')
 
