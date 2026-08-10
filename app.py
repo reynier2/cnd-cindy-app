@@ -37,7 +37,10 @@ if master_key and st.query_params.get("key") == master_key:
 ref_code = st.query_params.get("ref")
 if ref_code:
     st.session_state.ref_code = ref_code
-
+# --- BURNED TICKETS (leaked receipts that must NEVER work) ---
+BURNED_TICKETS = {
+    "cs_live_a1hA7Yia5vsCoyknw7h5UvTUpiEvchfbREQFHAgkS2zcfQaIYXvsSm1JBU",
+}
 # --- ONE-TIME TICKET LEDGER ---
 @st.cache_resource
 def get_redeemed_tickets():
@@ -50,7 +53,7 @@ if session_id:
     try:
         checkout = stripe.checkout.Session.retrieve(session_id)
         if checkout.payment_status == "paid":
-            if session_id in redeemed:
+            if session_id in redeemed or session_id in BURNED_TICKETS:
                 st.warning("🎟️ This payment ticket was already used. Please pay $5.00 to unlock your own estimate.")
             else:
                 redeemed.add(session_id)
