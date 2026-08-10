@@ -13,10 +13,68 @@ st.set_page_config(
 )
 
 st.title("CND Real Estate Services")
-st.subheader("Powered by Cindy AI Estimator")
 st.markdown("---")
 
-st.write("Get a professional repair bid instantly. Pay the $5 fee to unlock the uploader.")
+# --- LANGUAGE CAPTURE (two links: English & Spanish) ---
+lang_param = st.query_params.get("lang")
+if lang_param:
+    st.session_state.lang = lang_param
+
+# --- LANGUAGE TOGGLE ---
+tc1, tc2 = st.columns(2)
+if tc1.button("🇺🇸 English"):
+    st.session_state.lang = "en"
+    st.rerun()
+if tc2.button("🇪🇸 Español"):
+    st.session_state.lang = "es"
+    st.rerun()
+lang = st.session_state.get("lang", "en")
+
+if lang == "es":
+    T = {
+        "sub": "Con tecnología de Cindy AI",
+        "intro": "Suba fotos del trabajo de reparación y Cindy generará un presupuesto profesional al instante.",
+        "step1": "### 💳 Paso 1 de 2: Pague $5.00 para desbloquear",
+        "info1": "💡 Después de pagar, volverá automáticamente a esta página. Luego sube sus fotos UNA sola vez y obtiene su presupuesto.",
+        "paylink": "👉 HAGA CLIC AQUÍ PARA PAGAR $5.00 Y DESBLOQUEAR SU PRESUPUESTO",
+        "used": "🎟️ Este ticket de pago ya fue usado. Por favor pague $5.00 para desbloquear su propio presupuesto.",
+        "paid": "✅ ¡Pago confirmado! Ahora suba sus fotos abajo.",
+        "step2": "### 📸 Paso 2 de 2: Suba sus fotos",
+        "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.",
+        "uploader": "Elija imágenes",
+        "uploaded": "foto(s) subida(s)!",
+        "generate": "🚀 Generar Presupuesto",
+        "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...",
+        "success": "¡Presupuesto Generado!",
+        "download": "📄 Descargar Presupuesto PDF Profesional",
+        "product": "Presupuesto de Reparación Cindy AI",
+        "payerr": "Error al configurar el pago:",
+        "checkerr": "Error al verificar el pago:",
+    }
+else:
+    T = {
+        "sub": "Powered by Cindy AI Estimator",
+        "intro": "Upload photos of the repair job, and Cindy will generate a professional bid instantly.",
+        "step1": "### 💳 Step 1 of 2: Pay $5.00 to unlock",
+        "info1": "💡 After paying, you'll be brought right back to this page. Then you upload your photos ONE time and get your bid.",
+        "paylink": "👉 CLICK HERE TO PAY $5.00 & UNLOCK YOUR ESTIMATE",
+        "used": "🎟️ This payment ticket was already used. Please pay $5.00 to unlock your own estimate.",
+        "paid": "✅ Payment confirmed! Now upload your photos below.",
+        "step2": "### 📸 Step 2 of 2: Upload your photos",
+        "tip": "💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!",
+        "uploader": "Choose images",
+        "uploaded": "photo(s) uploaded!",
+        "generate": "🚀 Generate Estimate",
+        "spinner": "Cindy is analyzing the photos... this takes about 15 seconds...",
+        "success": "Estimate Generated!",
+        "download": "📄 Download Professional PDF Bid",
+        "product": "Cindy AI Repair Estimate",
+        "payerr": "Payment setup error:",
+        "checkerr": "Payment check error:",
+    }
+
+st.subheader(T["sub"])
+st.write(T["intro"])
 
 # --- STRIPE CONFIGURATION ---
 stripe_api_key = os.getenv("STRIPE_SECRET_KEY")
@@ -37,14 +95,16 @@ if master_key and st.query_params.get("key") == master_key:
 ref_code = st.query_params.get("ref")
 if ref_code:
     st.session_state.ref_code = ref_code
-# --- BURNED TICKETS (leaked receipts that must NEVER work) ---
-BURNED_TICKETS = {
-    "cs_live_a1hA7Yia5vsCoyknw7h5UvTUpiEvchfbREQFHAgkS2zcfQaIYXvsSm1JBU",
-}
+
 # --- ONE-TIME TICKET LEDGER ---
 @st.cache_resource
 def get_redeemed_tickets():
     return set()
+
+# --- BURNED TICKETS (leaked receipts that must NEVER work) ---
+BURNED_TICKETS = {
+    "cs_live_a1hA7Yia5vsCoyknw7h5UvTUpiEvchfbREQFHAgkS2zcfQaIYXvsSm1JBU",
+}
 
 # --- PAYMENT VERIFICATION ---
 session_id = st.query_params.get("session_id")
@@ -54,63 +114,63 @@ if session_id:
         checkout = stripe.checkout.Session.retrieve(session_id)
         if checkout.payment_status == "paid":
             if session_id in redeemed or session_id in BURNED_TICKETS:
-                st.warning("🎟️ This payment ticket was already used. Please pay $5.00 to unlock your own estimate.")
+                st.warning(T["used"])
             else:
                 redeemed.add(session_id)
                 st.session_state.payment_confirmed = True
                 st.session_state.just_paid = True
-                # Erase the receipt from the URL so it can't be shared!
                 del st.query_params["session_id"]
                 st.rerun()
     except Exception as e:
-        st.error(f"Payment check error: {e}")
+        st.error(f"{T['checkerr']} {e}")
 
 if st.session_state.get("just_paid"):
-    st.success("✅ Payment confirmed! Now upload your photos below.")
+    st.success(T["paid"])
     st.session_state.just_paid = False
 
 # --- PAY GATE: PAY FIRST, UPLOAD ONCE ---
 if not st.session_state.get("payment_confirmed"):
-    st.markdown("### 💳 Step 1 of 2: Pay $5.00 to unlock")
-    st.info("💡 After paying, you'll be brought right back to this page. Then you upload your photos ONE time and get your bid.")
+    st.markdown(T["step1"])
+    st.info(T["info1"])
     try:
+        meta = {'ref': st.session_state.get('ref_code', 'direct'), 'lang': lang}
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
                 'price_data': {
                     'currency': 'usd',
-                    'product_data': {'name': 'Cindy AI Repair Estimate'},
+                    'product_data': {'name': T['product']},
                     'unit_amount': 500,
                 },
                 'quantity': 1,
             }],
             mode='payment',
-            metadata={'ref': st.session_state.get('ref_code', 'direct')},
-            payment_intent_data={'metadata': {'ref': st.session_state.get('ref_code', 'direct')}},
+            metadata=meta,
+            payment_intent_data={'metadata': meta},
             success_url='https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?session_id={CHECKOUT_SESSION_ID}',
             cancel_url='https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/',
         )
-        st.markdown(f"[ **👉 CLICK HERE TO PAY $5.00 & UNLOCK YOUR ESTIMATE**]({checkout_session.url})")
+        st.markdown(f"[ **{T['paylink']}**]({checkout_session.url})")
     except Exception as e:
-        st.error(f"Payment setup error: {e}")
-    st.stop() # STOP HERE! Do not show uploader yet.
+        st.error(f"{T['payerr']} {e}")
+    st.stop()
 
-# --- STEP 2: UPLOAD PHOTOS (paid customers only) ---
-st.markdown("### 📸 Step 2 of 2: Upload your photos")
-st.info("💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!")
+# --- STEP 2: UPLOAD PHOTOS ---
+st.markdown(T["step2"])
+st.info(T["tip"])
 
 uploaded_files = st.file_uploader(
-    "Choose images",
+    T["uploader"],
     type=["png", "jpg", "jpeg"],
     accept_multiple_files=True,
     key="mobile_camera_fix_v3"
 )
 
 if uploaded_files:
-    st.write(f"✅ {len(uploaded_files)} photo(s) uploaded!")
+    st.write(f"✅ {len(uploaded_files)} {T['uploaded']}")
 
-    if st.button("🚀 Generate Estimate"):
-        with st.spinner('Cindy is analyzing the photos... this takes about 15 seconds...'):
+    if st.button(T["generate"]):
+        with st.spinner(T["spinner"]):
 
             temp_dir = tempfile.mkdtemp()
             saved_paths = []
@@ -132,7 +192,7 @@ if uploaded_files:
                     st.error(f"AI Analysis Error: {e}")
                     result_text = "Error analyzing photos."
 
-                st.success("Estimate Generated!")
+                st.success(T["success"])
                 st.markdown(result_text)
 
                 pdf = FPDF()
@@ -148,7 +208,7 @@ if uploaded_files:
                 pdf_bytes = pdf.output(dest='S').encode('latin-1')
 
                 st.download_button(
-                    label="📄 Download Professional PDF Bid",
+                    label=T["download"],
                     data=pdf_bytes,
                     file_name="CND_Bid_Estimate.pdf",
                     mime="application/pdf"
