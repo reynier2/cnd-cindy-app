@@ -33,7 +33,7 @@ lang = st.session_state.get("lang", "en")
 if lang == "es":
     T = {
         "sub": "Con tecnología de Cindy AI",
-        "intro": "Suba fotos del trabajo de reparación y Cindy generará un presupuesto profesional al instante.",
+        "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.",
         "step1": "### 💳 Paso 1 de 2: Pague $5.00 para desbloquear",
         "info1": "💡 Después de pagar, volverá automáticamente a esta página. Luego sube sus fotos UNA sola vez y obtiene su presupuesto.",
         "paylink": "👉 HAGA CLIC AQUÍ PARA PAGAR $5.00 Y DESBLOQUEAR SU PRESUPUESTO",
@@ -54,7 +54,7 @@ if lang == "es":
 else:
     T = {
         "sub": "Powered by Cindy AI Estimator",
-        "intro": "Upload photos of the repair job, and Cindy will generate a professional bid instantly.",
+        "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.",
         "step1": "### 💳 Step 1 of 2: Pay $5.00 to unlock",
         "info1": "💡 After paying, you'll be brought right back to this page. Then you upload your photos ONE time and get your bid.",
         "paylink": "👉 CLICK HERE TO PAY $5.00 & UNLOCK YOUR ESTIMATE",
