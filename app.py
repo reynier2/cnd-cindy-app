@@ -4,7 +4,51 @@ import tempfile
 import shutil
 from fpdf import FPDF
 import stripe
+import requests
+from urllib.parse import quote_plus
+from PIL import Image
 
+# --- DRIVE-BY GPS BRIDGE (proven code, ported from Cindy desktop) ---
+def get_gps_from_image(image_path):
+    try:
+        img = Image.open(image_path)
+        exif_data = img._getexif()
+        if not exif_data or 34853 not in exif_data:
+            return None, None
+        gps_info = exif_data[34853]
+        def safe_div(v):
+            if isinstance(v, tuple) and len(v) == 2:
+                return v[0] / v[1] if v[1] != 0 else 0.0
+            return float(v)
+        def to_deg(value):
+            return safe_div(value[0]) + (safe_div(value[1]) / 60.0) + (safe_div(value[2]) / 3600.0)
+        lat = lon = None
+        if 2 in gps_info:
+            lat = to_deg(gps_info[2])
+            if gps_info.get(1) == 'S':
+                lat = -lat
+        if 4 in gps_info:
+            lon = to_deg(gps_info[4])
+            if gps_info.get(3) == 'W':
+                lon = -lon
+        return lat, lon
+    except Exception:
+        return None, None
+
+def reverse_geocode_address(lat, lon):
+    try:
+        url = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + str(lat) + "&lon=" + str(lon)
+        r = requests.get(url, headers={'User-Agent': 'CindyAI/1.0'}, timeout=10)
+        if r.status_code == 200:
+            a = r.json().get('address', {})
+            street = (str(a.get('house_number', '')) + ' ' + str(a.get('road', ''))).strip()
+            city = a.get('city', a.get('town', a.get('village', '')))
+            state = a.get('state', '')
+            if street and city and state:
+                return street + ', ' + city + ', ' + state
+        return None
+    except Exception:
+        return None
 # --- CONFIGURE PAGE ICON ---
 st.set_page_config(
     page_title="CND Real Estate Services",
