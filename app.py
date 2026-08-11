@@ -49,6 +49,7 @@ def reverse_geocode_address(lat, lon):
         return None
     except Exception:
         return None
+
 # --- CONFIGURE PAGE ICON ---
 st.set_page_config(
     page_title="CND Real Estate Services",
@@ -226,6 +227,37 @@ if uploaded_files:
                         f.write(uploaded_file.getbuffer())
                     saved_paths.append(file_name)
 
+                # --- DRIVE-BY BRIDGE: GPS -> ADDRESS -> PROPERTY SPECS ---
+                property_line = ""
+                if saved_paths:
+                    lat, lon = get_gps_from_image(saved_paths[0])
+                    if lat and lon:
+                        address_str = reverse_geocode_address(lat, lon)
+                        if address_str:
+                            property_line = "📍 PROPERTY: " + address_str
+                            parts = [p.strip() for p in address_str.split(',')]
+                            rkey = os.getenv("RENTCAST_API_KEY", "")
+                            if len(parts) >= 2 and rkey:
+                                try:
+                                    h = {"accept": "application/json", "X-Api-Key": rkey}
+                                    street = parts[0]
+                                    city = parts[1] if len(parts) > 1 else ""
+                                    state = parts[2] if len(parts) > 2 else ""
+                                    
+                                    u = f"https://api.rentcast.io/v1/properties?address={quote_plus(street)}&city={quote_plus(city)}&state={state}&limit=1"
+                                    rr = requests.get(u, headers=h, timeout=10)
+                                    if rr.status_code == 200 and rr.json():
+                                        pp = rr.json()[0]
+                                        beds = pp.get('bedrooms', 'N/A')
+                                        baths = pp.get('bathrooms', 'N/A')
+                                        sqft = pp.get('sqft', 'N/A')
+                                        val = pp.get('value', 'N/A')
+                                        property_line += f"\n🏠 SPECS: {beds} bed / {baths} bath / {sqft} sqft"
+                                        if val != 'N/A':
+                                            property_line += f" | Est. Value: ${val:,}"
+                                except Exception:
+                                    pass # Fail silently if API fails
+
                 try:
                     from cindy_master import analyze_contractor_photos
                     result_text = analyze_contractor_photos(saved_paths, "23220")
@@ -236,10 +268,14 @@ if uploaded_files:
                     st.error(f"AI Analysis Error: {e}")
                     result_text = "Error analyzing photos."
 
+                # Stamp the property line at the top of the result
+                if property_line:
+                    result_text = property_line + "\n\n---\n\n" + result_text
+
                 st.success(T["success"])
                 st.markdown(result_text)
 
-                               # --- PROFESSIONAL PDF LETTERHEAD ---
+                # --- PROFESSIONAL PDF LETTERHEAD ---
                 pdf = FPDF()
                 pdf.add_page()
                 
