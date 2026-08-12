@@ -7,6 +7,7 @@ import stripe
 import requests
 from urllib.parse import quote_plus
 from PIL import Image
+from streamlit_js_eval import streamlit_js_eval
 
 # --- DRIVE-BY GPS BRIDGE (proven code, ported from Cindy desktop) ---
 def get_gps_from_image(image_path):
@@ -79,6 +80,8 @@ if lang == "es":
     T = {
         "sub": "Con tecnología de Cindy AI",
         "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.",
+        "free_banner": "🎁 ¡BIENVENIDO! Su primer presupuesto es 100% GRATIS. Sin tarjeta.",
+        "upsell": "🔥 ¿Le gustó? Su próximo presupuesto se desbloquea por solo $5.00.",
         "step1": "### 💳 Paso 1 de 2: Pague $5.00 para desbloquear",
         "info1": "💡 Después de pagar, volverá automáticamente a esta página. Luego sube sus fotos UNA sola vez y obtiene su presupuesto.",
         "paylink": "👉 HAGA CLIC AQUÍ PARA PAGAR $5.00 Y DESBLOQUEAR SU PRESUPUESTO",
@@ -100,6 +103,8 @@ else:
     T = {
         "sub": "Powered by Cindy AI Estimator",
         "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.",
+        "free_banner": "🎁 WELCOME! Your first AI estimate is 100% FREE. No card needed.",
+        "upsell": "🔥 Loved it? Your next estimate unlocks for just $5.00.",
         "step1": "### 💳 Step 1 of 2: Pay $5.00 to unlock",
         "info1": "💡 After paying, you'll be brought right back to this page. Then you upload your photos ONE time and get your bid.",
         "paylink": "👉 CLICK HERE TO PAY $5.00 & UNLOCK YOUR ESTIMATE",
@@ -173,32 +178,44 @@ if st.session_state.get("just_paid"):
     st.success(T["paid"])
     st.session_state.just_paid = False
 
-# --- PAY GATE: PAY FIRST, UPLOAD ONCE ---
+# --- DIGITAL STICKER: FIRST ONE FREE, SECOND ONE PAYS ---
+try:
+    _freebie_flag = streamlit_js_eval(js_expression="localStorage.getItem('cnd_freebie') || ''")
+except Exception:
+    _freebie_flag = ""
+has_used_freebie = (_freebie_flag == "1")
+
+# --- PAY GATE ---
 if not st.session_state.get("payment_confirmed"):
-    st.markdown(T["step1"])
-    st.info(T["info1"])
-    try:
-        meta = {'ref': st.session_state.get('ref_code', 'direct'), 'lang': lang}
-        checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {'name': T['product']},
-                    'unit_amount': 500,
-                },
-                'quantity': 1,
-            }],
-            mode='payment',
-            metadata=meta,
-            payment_intent_data={'metadata': meta},
-            success_url='https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url='https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/',
-        )
-        st.markdown(f"[ **{T['paylink']}**]({checkout_session.url})")
-    except Exception as e:
-        st.error(f"{T['payerr']} {e}")
-    st.stop()
+    if has_used_freebie:
+        # Sticker found: this phone already took the freebie. Paywall drops.
+        st.markdown(T["step1"])
+        st.info(T["info1"])
+        try:
+            meta = {'ref': st.session_state.get('ref_code', 'direct'), 'lang': lang}
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'usd',
+                        'product_data': {'name': T['product']},
+                        'unit_amount': 500,
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                metadata=meta,
+                payment_intent_data={'metadata': meta},
+                success_url='https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url='https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/',
+            )
+            st.markdown(f"[ **{T['paylink']}**]({checkout_session.url})")
+        except Exception as e:
+            st.error(f"{T['payerr']} {e}")
+        st.stop()
+    else:
+        # Fresh phone: first one is on the house.
+        st.success(T["free_banner"])
 
 # --- STEP 2: UPLOAD PHOTOS ---
 st.markdown(T["step2"])
@@ -234,7 +251,7 @@ if uploaded_files:
                     if lat and lon:
                         address_str = reverse_geocode_address(lat, lon)
                         if address_str:
-                            property_line = "📍 PROPERTY: " + address_str
+                            property_line = "PROPERTY: " + address_str
                             parts = [p.strip() for p in address_str.split(',')]
                             rkey = os.getenv("RENTCAST_API_KEY", "")
                             if len(parts) >= 2 and rkey:
@@ -243,20 +260,13 @@ if uploaded_files:
                                     street = parts[0]
                                     city = parts[1] if len(parts) > 1 else ""
                                     state = parts[2] if len(parts) > 2 else ""
-                                    
-                                    u = f"https://api.rentcast.io/v1/properties?address={quote_plus(street)}&city={quote_plus(city)}&state={state}&limit=1"
+                                    u = "https://api.rentcast.io/v1/properties?address=" + quote_plus(street) + "&city=" + quote_plus(city) + "&state=" + state + "&limit=1"
                                     rr = requests.get(u, headers=h, timeout=10)
                                     if rr.status_code == 200 and rr.json():
                                         pp = rr.json()[0]
-                                        beds = pp.get('bedrooms', 'N/A')
-                                        baths = pp.get('bathrooms', 'N/A')
-                                        sqft = pp.get('sqft', 'N/A')
-                                        val = pp.get('value', 'N/A')
-                                        property_line += f"\n🏠 SPECS: {beds} bed / {baths} bath / {sqft} sqft"
-                                        if val != 'N/A':
-                                            property_line += f" | Est. Value: ${val:,}"
+                                        property_line += "  |  " + str(pp.get('bedrooms', 0)) + " bed / " + str(pp.get('bathrooms', 0)) + " bath / " + str(pp.get('sqft', 0)) + " sqft / Value $" + str(pp.get('value', 0))
                                 except Exception:
-                                    pass # Fail silently if API fails
+                                    pass
 
                 try:
                     from cindy_master import analyze_contractor_photos
@@ -268,7 +278,6 @@ if uploaded_files:
                     st.error(f"AI Analysis Error: {e}")
                     result_text = "Error analyzing photos."
 
-                # Stamp the property line at the top of the result
                 if property_line:
                     result_text = property_line + "\n\n---\n\n" + result_text
 
@@ -278,29 +287,20 @@ if uploaded_files:
                 # --- PROFESSIONAL PDF LETTERHEAD ---
                 pdf = FPDF()
                 pdf.add_page()
-                
-                # Header
                 pdf.set_font("Arial", 'B', 22)
-                pdf.set_text_color(0, 51, 102)  # Professional dark blue
+                pdf.set_text_color(0, 51, 102)
                 pdf.cell(0, 10, "CND REAL ESTATE SERVICES", ln=True, align='C')
-                
                 pdf.set_font("Arial", 'I', 12)
-                pdf.set_text_color(100, 100, 100)  # Gray
+                pdf.set_text_color(100, 100, 100)
                 pdf.cell(0, 8, "Powered by Cindy AI Estimator", ln=True, align='C')
-                
-                # Thick Divider Line
                 pdf.ln(5)
                 pdf.set_draw_color(0, 51, 102)
-                pdf.set_line_width(1.5)  # Thick line
+                pdf.set_line_width(1.5)
                 pdf.line(15, pdf.get_y(), 195, pdf.get_y())
                 pdf.ln(8)
-                
-                # Body Text (The Estimate)
-                pdf.set_text_color(0, 0, 0)  # Black
+                pdf.set_text_color(0, 0, 0)
                 pdf.set_font("Arial", size=11)
                 pdf.multi_cell(0, 7, result_text)
-                
-                # Footer
                 pdf.ln(10)
                 pdf.set_font("Arial", 'I', 9)
                 pdf.set_text_color(150, 150, 150)
@@ -314,6 +314,14 @@ if uploaded_files:
                     file_name="CND_Bid_Estimate.pdf",
                     mime="application/pdf"
                 )
+
+                # --- SLAP THE STICKER: next time this phone comes, it pays ---
+                if not has_used_freebie:
+                    try:
+                        streamlit_js_eval(js_expression="localStorage.setItem('cnd_freebie','1');")
+                    except Exception:
+                        pass
+                    st.info(T["upsell"])
 
             finally:
                 shutil.rmtree(temp_dir, ignore_errors=True)
