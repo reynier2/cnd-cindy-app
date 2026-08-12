@@ -103,7 +103,7 @@ else:
     T = {
         "sub": "Powered by Cindy AI Estimator",
         "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.",
-        "free_banner": "🎁 WELCOME! Your first AI estimate is 100% FREE. No card needed.",
+        "free_banner": "🎁 WELCOME! Your first AI estimate is 100% FREE. No card needed. After your free one, estimates are just $5.00 each.",
         "upsell": "🔥 Loved it? Your next estimate unlocks for just $5.00.",
         "step1": "### 💳 Step 1 of 2: Pay $5.00 to unlock",
         "info1": "💡 After paying, you'll be brought right back to this page. Then you upload your photos ONE time and get your bid.",
