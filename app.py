@@ -80,7 +80,7 @@ if lang == "es":
     T = {
         "sub": "Con tecnología de Cindy AI",
         "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.",
-        "free_banner": "🎁 ¡BIENVENIDO! Su primer presupuesto es 100% GRATIS. Sin tarjeta.",
+        "free_banner": "🎁 ¡BIENVENIDO! Su primer presupuesto es 100% GRATIS. Sin tarjeta. Después, cada presupuesto cuesta solo $5.00.",
         "upsell": "🔥 ¿Le gustó? Su próximo presupuesto se desbloquea por solo $5.00.",
         "step1": "### 💳 Paso 1 de 2: Pague $5.00 para desbloquear",
         "info1": "💡 Después de pagar, volverá automáticamente a esta página. Luego sube sus fotos UNA sola vez y obtiene su presupuesto.",
@@ -287,20 +287,30 @@ if uploaded_files:
                 # --- PROFESSIONAL PDF LETTERHEAD ---
                 pdf = FPDF()
                 pdf.add_page()
+                
+                # Header
                 pdf.set_font("Arial", 'B', 22)
-                pdf.set_text_color(0, 51, 102)
+                pdf.set_text_color(0, 51, 102)  # Professional dark blue
                 pdf.cell(0, 10, "CND REAL ESTATE SERVICES", ln=True, align='C')
+                
                 pdf.set_font("Arial", 'I', 12)
-                pdf.set_text_color(100, 100, 100)
+                pdf.set_text_color(100, 100, 100)  # Gray
                 pdf.cell(0, 8, "Powered by Cindy AI Estimator", ln=True, align='C')
+                
+                # Thick Divider Line
                 pdf.ln(5)
                 pdf.set_draw_color(0, 51, 102)
-                pdf.set_line_width(1.5)
+                pdf.set_line_width(1.5)  # Thick line
                 pdf.line(15, pdf.get_y(), 195, pdf.get_y())
                 pdf.ln(8)
-                pdf.set_text_color(0, 0, 0)
+                
+                # Body Text (Clean Markdown out of the PDF text)
+                pdf.set_text_color(0, 0, 0)  # Black
                 pdf.set_font("Arial", size=11)
-                pdf.multi_cell(0, 7, result_text)
+                clean_pdf_text = result_text.replace("**", "").replace("*", "").replace("|", " ").replace("---", "")
+                pdf.multi_cell(0, 7, clean_pdf_text)
+                
+                # Footer
                 pdf.ln(10)
                 pdf.set_font("Arial", 'I', 9)
                 pdf.set_text_color(150, 150, 150)
