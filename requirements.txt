@@ -5,3 +5,5 @@ numpy
 Pillow
 requests
 stripe
+Pillow
+streamlit-js-eval
