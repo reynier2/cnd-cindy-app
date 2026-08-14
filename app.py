@@ -68,7 +68,7 @@ if lang_param:
 
 # --- LANGUAGE TOGGLE ---
 tc1, tc2 = st.columns(2)
-if tc1.button("🇺🇸 English"):
+if tc1.button("🇺 English"):
     st.session_state.lang = "en"
     st.rerun()
 if tc2.button("🇪🇸 Español"):
@@ -284,29 +284,38 @@ if uploaded_files:
                 st.success(T["success"])
                 st.markdown(result_text)
 
-                # --- PROFESSIONAL PDF LETTERHEAD ---
-                                pdf = FPDF()
+                # --- PROFESSIONAL PDF LETTERHEAD (BILINGUAL) ---
+                pdf = FPDF()
                 pdf.add_page()
+
+                # Header
                 pdf.set_font("Arial", 'B', 22)
                 pdf.set_text_color(0, 51, 102)
                 pdf.cell(0, 10, "CND REAL ESTATE SERVICES", ln=True, align='C')
+
                 pdf.set_font("Arial", 'I', 12)
                 pdf.set_text_color(100, 100, 100)
                 pdf_sub = "Con tecnologia de Cindy AI" if lang == "es" else "Powered by Cindy AI Estimator"
                 pdf.cell(0, 8, pdf_sub, ln=True, align='C')
+
+                # Thick Divider Line
                 pdf.ln(5)
                 pdf.set_draw_color(0, 51, 102)
                 pdf.set_line_width(1.5)
                 pdf.line(15, pdf.get_y(), 195, pdf.get_y())
                 pdf.ln(8)
+
+                # Body Text (Clean Markdown out of the PDF text)
                 pdf.set_text_color(0, 0, 0)
                 pdf.set_font("Arial", size=11)
                 clean_pdf_text = result_text.replace("**", "").replace("*", "").replace("|", " ").replace("---", "")
                 try:
                     clean_pdf_text = clean_pdf_text.encode('latin-1', 'replace').decode('latin-1')
-                except:
+                except Exception:
                     pass
                 pdf.multi_cell(0, 7, clean_pdf_text)
+
+                # Footer
                 pdf.ln(10)
                 pdf.set_font("Arial", 'I', 9)
                 pdf.set_text_color(150, 150, 150)
