@@ -51,6 +51,31 @@ def reverse_geocode_address(lat, lon):
     except Exception:
         return None
 
+# --- 🇪🇸 AUTO-TRANSLATOR (English -> Spanish) ---
+def translate_to_spanish(text):
+    try:
+        chunks, current = [], ""
+        for line in text.split("\n"):
+            if len(current) + len(line) + 1 > 1800:
+                chunks.append(current)
+                current = line
+            else:
+                current = current + "\n" + line if current else line
+        if current:
+            chunks.append(current)
+        out = []
+        for chunk in chunks:
+            url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=es&dt=t&q=" + quote_plus(chunk)
+            r = requests.get(url, timeout=20)
+            if r.status_code == 200:
+                data = r.json()
+                out.append("".join([seg[0] for seg in data[0] if seg and seg[0]]))
+            else:
+                out.append(chunk)
+        return "\n".join(out)
+    except Exception:
+        return text
+
 # --- CONFIGURE PAGE ICON ---
 st.set_page_config(
     page_title="CND Real Estate Services",
@@ -280,6 +305,10 @@ if uploaded_files:
 
                 if property_line:
                     result_text = property_line + "\n\n---\n\n" + result_text
+
+                # --- 🇪🇸 FLIP THE BRAIN'S WORDS TO SPANISH ---
+                if lang == "es":
+                    result_text = translate_to_spanish(result_text)
 
                 st.success(T["success"])
                 st.markdown(result_text)
