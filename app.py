@@ -318,7 +318,7 @@ if uploaded_files:
                 if store_line: result_text = store_line + "\n\n---\n\n" + result_text
                 if property_line: result_text = property_line + "\n\n---\n\n" + result_text
                 if lang == "es": result_text = translate_to_spanish(result_text)
-                log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang} store={(store_line or 'none')[:40]}")
+                log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang}                 log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang} zip={zip_code}", lat=photo_lat or 0, lon=photo_lon or 0)")
                 st.success(T["success"]); st.markdown(result_text)
                 extra = " | ".join([x for x in [property_line, store_line] if x])
                 pdf_bytes = build_pdf_bytes(result_text, lang, client_name, saved_paths, extra)
