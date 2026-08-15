@@ -101,7 +101,7 @@ def log_trap_event(event, detail=""):
             tz = st.context.timezone or ""
         except Exception: pass
         url = "https://script.google.com/macros/s/AKfycbzP6MvQ0a5kjs5QU0R2NhN7zB45sQvqqYDYWhh-uIDDIChnOssW8qSoto_IBo5zyc5Crw/exec"
-        requests.post(url, json={"event": event, "lat": 0, "lon": 0, "city": f"{tz}||{ip}"}, timeout=5)
+        requests.post(url, json={"event": f"{event} {detail}".strip()[:90], "lat": 0, "lon": 0, "city": f"{tz}||{ip}"}, timeout=5)
     except Exception: pass
 
 # --- 🧠 THE REAL AI BRAIN ---
