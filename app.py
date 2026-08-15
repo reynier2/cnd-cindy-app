@@ -283,7 +283,8 @@ st.subheader(T["sub"])
 st.write(T["intro"])
 st.success(T["free_banner"])
 st.markdown(T["step2"]); st.info(T["tip"])
-log_trap_event("VISIT", f"lang={lang} ref={ref_code or 'direct'}")
+zip_code = st.text_input("📍 ZIP code (local prices + nearest store)", value="23220", key="zip_field")
+log_trap_event("VISIT", f"lang={lang} ref={ref_code or 'direct'} zip={zip_code}")
 client_name = st.text_input(T["client"], value="", key="client_name_field")
 uploaded_files = st.file_uploader(T["uploader"], type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="mobile_camera_fix_v3")
 if uploaded_files:
@@ -313,7 +314,7 @@ if uploaded_files:
                     except Exception: pass
                 if s_lat:
                     store_line = find_nearest_home_depot(s_lat, s_lon) or ""
-                result_text = analyze_photos_with_ai(saved_paths, "23220", client_name)
+                result_text =                 result_text = analyze_photos_with_ai(saved_paths, zip_code, client_name)
                 if store_line: result_text = store_line + "\n\n---\n\n" + result_text
                 if property_line: result_text = property_line + "\n\n---\n\n" + result_text
                 if lang == "es": result_text = translate_to_spanish(result_text)
