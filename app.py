@@ -1,4 +1,4 @@
-# === CND APP FINAL v11 - FREE BETA, NO PAYWALL ===
+# === CND APP FINAL v12 - GOOGLE SHEETS TELEMETRY ===
 import streamlit as st
 import os
 import re
@@ -63,7 +63,7 @@ def reverse_geocode_address(lat, lon):
         return None
     except Exception: return None
 
-# --- 📡 ADOPTION ENGINE (silent pings - rebuilt properly tomorrow) ---
+# --- 📡 ADOPTION ENGINE (GOOGLE SHEETS CHANNEL) ---
 def get_visitor_location():
     if "visitor_loc" not in st.session_state:
         try:
@@ -90,21 +90,6 @@ def log_trap_event(event, detail=""):
             detail = f"{detail} lat={lat:.3f} lon={lon:.3f} city={city}".strip()
         url = "https://script.google.com/macros/s/AKfycbzP6MvQ0a5kjs5QU0R2NhN7zB45sQvqqYDYWhh-uIDDIChnOssW8qSoto_IBo5zyc5Crw/exec"
         requests.post(url, json={"event": event, "lat": lat, "lon": lon, "city": city}, timeout=5)
-    except Exception: pass
-        try:
-            import smtplib
-            from email.mime.text import MIMEText
-            sender = st.secrets.get("GMAIL_EMAIL") or os.getenv("GMAIL_EMAIL")
-            password = st.secrets.get("GMAIL_APP_PASSWORD") or os.getenv("GMAIL_APP_PASSWORD")
-            if sender and password:
-                msg = MIMEText(f"{event} | {detail}")
-                msg["Subject"] = payload
-                msg["From"] = sender
-                msg["To"] = sender
-                with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=8) as s:
-                    s.login(sender, password)
-                    s.send_message(msg)
-        except Exception: pass
     except Exception: pass
 
 # --- 🧠 THE REAL AI BRAIN ---
@@ -268,7 +253,7 @@ st.markdown("---")
 lang_param = st.query_params.get("lang")
 if lang_param: st.session_state.lang = lang_param
 tc1, tc2 = st.columns(2)
-if tc1.button("🇺 English"): st.session_state.lang = "en"; st.rerun()
+if tc1.button("🇺🇸 English"): st.session_state.lang = "en"; st.rerun()
 if tc2.button("🇪🇸 Español"): st.session_state.lang = "es"; st.rerun()
 lang = st.session_state.get("lang", "en")
 ref_code = st.query_params.get("ref")
