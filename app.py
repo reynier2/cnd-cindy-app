@@ -1,4 +1,4 @@
-# === CND APP FINAL v12 - GOOGLE SHEETS TELEMETRY ===
+# === CND APP FINAL v13 - REAL PINS, NO FAKES ===
 import streamlit as st
 import os
 import re
@@ -63,33 +63,16 @@ def reverse_geocode_address(lat, lon):
         return None
     except Exception: return None
 
-# --- 📡 ADOPTION ENGINE (GOOGLE SHEETS CHANNEL) ---
-def get_visitor_location():
-    if "visitor_loc" not in st.session_state:
-        try:
-            ip = None
-            try: ip = st.context.ip_address
-            except Exception: pass
-            loc = None
-            if ip:
-                r = requests.get(f"https://ipwho.is/{ip}", timeout=5)
-                d = r.json()
-                if d.get("latitude"):
-                    loc = {"lat": float(d["latitude"]), "lon": float(d["longitude"]), "city": str(d.get("city", ""))}
-            st.session_state.visitor_loc = loc
-        except Exception:
-            st.session_state.visitor_loc = None
-    return st.session_state.visitor_loc
-
+# --- 📡 ADOPTION ENGINE (sends visitor timezone + IP) ---
 def log_trap_event(event, detail=""):
     try:
-        loc = get_visitor_location()
-        lat, lon, city = 0, 0, ""
-        if loc:
-            lat = loc['lat']; lon = loc['lon']; city = loc['city']
-            detail = f"{detail} lat={lat:.3f} lon={lon:.3f} city={city}".strip()
+        ip, tz = "", ""
+        try:
+            ip = st.context.ip_address or ""
+            tz = st.context.timezone or ""
+        except Exception: pass
         url = "https://script.google.com/macros/s/AKfycbzP6MvQ0a5kjs5QU0R2NhN7zB45sQvqqYDYWhh-uIDDIChnOssW8qSoto_IBo5zyc5Crw/exec"
-        requests.post(url, json={"event": event, "lat": lat, "lon": lon, "city": city}, timeout=5)
+        requests.post(url, json={"event": event, "lat": 0, "lon": 0, "city": f"{tz}||{ip}"}, timeout=5)
     except Exception: pass
 
 # --- 🧠 THE REAL AI BRAIN ---
@@ -253,7 +236,7 @@ st.markdown("---")
 lang_param = st.query_params.get("lang")
 if lang_param: st.session_state.lang = lang_param
 tc1, tc2 = st.columns(2)
-if tc1.button("🇺🇸 English"): st.session_state.lang = "en"; st.rerun()
+if tc1.button("🇺 English"): st.session_state.lang = "en"; st.rerun()
 if tc2.button("🇪🇸 Español"): st.session_state.lang = "es"; st.rerun()
 lang = st.session_state.get("lang", "en")
 ref_code = st.query_params.get("ref")
