@@ -90,19 +90,10 @@ def log_trap_event(event, detail=""):
         loc = get_visitor_location()
         if loc:
             detail = f"{detail} lat={loc['lat']:.3f} lon={loc['lon']:.3f} city={loc['city']}".strip()
-        import smtplib
-        from email.mime.text import MIMEText
-        sender = st.secrets.get("GMAIL_EMAIL") or os.getenv("GMAIL_EMAIL")
-        password = st.secrets.get("GMAIL_APP_PASSWORD") or os.getenv("GMAIL_APP_PASSWORD")
-        if not sender or not password: return
-        msg = MIMEText(f"{event} | {detail}")
-        msg["Subject"] = f"[TRAP] {event} {detail}".strip()[:90]
-        msg["From"] = sender
-        msg["To"] = sender
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
-            s.login(sender, password)
-            s.send_message(msg)
-    except Exception: pass
+        requests.post("https://ntfy.sh/cnd_covenant_trap_8142",
+                      data=f"[TRAP] {event} {detail}".strip()[:90].encode("utf-8"), timeout=5)
+    except Exception:
+        pass
 
 # --- 🧠 THE REAL AI BRAIN (Multi-Photo + Engineering + No Fake Names + Client Name) ---
 def analyze_photos_with_ai(photo_paths, zipcode, client_name=""):
