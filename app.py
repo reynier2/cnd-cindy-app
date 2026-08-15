@@ -306,6 +306,9 @@ if uploaded_files:
                     store_line = find_nearest_home_depot(s_lat, s_lon) or ""
                 if not store_line: store_line = ai_store_lookup(zip_code)
                 result_text = analyze_photos_with_ai(saved_paths, zip_code, client_name)
+                pipe_tag = ""
+                if "CITY PLAN COMPLIANCE CHECK" in result_text:
+                    pipe_tag = "REDFLAG" if "RED FLAG" in result_text.split("CITY PLAN COMPLIANCE CHECK", 1)[1][:200] else "PASS"
                 if store_line: result_text = store_line + "\n\n---\n\n" + result_text
                 if property_line: result_text = property_line + "\n\n---\n\n" + result_text
                 if lang == "es": result_text = translate_to_spanish(result_text)
