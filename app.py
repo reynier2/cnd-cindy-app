@@ -1,4 +1,3 @@
-# === CND APP FINAL v14 - NEAREST HOME DEPOT + BRAND IDENTITY ===
 import streamlit as st
 import os
 import re
@@ -11,12 +10,10 @@ import requests
 from urllib.parse import quote_plus
 from PIL import Image
 
-# --- 🏗️ ENGINEERING COMPLIANCE CORE ---
 class EngineeringComplianceCore:
     def __init__(self):
         self.MANNING_N_CONCRETE = 0.013
         self.ALLOWABLE_SOIL_BEARING_PSI = 30.0
-
     def check_city_utility_pipe(self, pipe_diameter_in, slope_pct, required_flow_cfs=15.0):
         D = pipe_diameter_in / 12.0
         S = slope_pct / 100.0
@@ -29,7 +26,6 @@ class EngineeringComplianceCore:
             return False, f"RED FLAG: Flow {calculated_flow:.1f} CFS < Req {required_flow_cfs} CFS."
         return True, f"PASS: Flow {calculated_flow:.1f} CFS (Req {required_flow_cfs} CFS)."
 
-# --- DRIVE-BY GPS BRIDGE ---
 def get_gps_from_image(image_path):
     try:
         img = Image.open(image_path)
@@ -63,48 +59,41 @@ def reverse_geocode_address(lat, lon):
         return None
     except Exception: return None
 
-# --- 🏬 NEAREST HOME DEPOT FINDER (breadcrumb GPS) ---
 def find_nearest_home_depot(lat, lon):
-    try:
-        url = "https://overpass-api.de/api/interpreter"
-        q = f'[out:json][timeout:10];(node["name"~"Home Depot",i](around:20000,{lat},{lon});way["name"~"Home Depot",i](around:20000,{lat},{lon}););out center 5;'
-        r = requests.post(url, data={"data": q}, timeout=15)
-        els = r.json().get("elements", [])
-        if not els: return None
-        def dist(e):
-            la = e.get("lat") or (e.get("center") or {}).get("lat") or 0
-            lo = e.get("lon") or (e.get("center") or {}).get("lon") or 0
-            return (la - lat) ** 2 + (lo - lon) ** 2
-        els.sort(key=dist)
-        e = els[0]
-        tags = e.get("tags", {})
-        name = tags.get("name", "The Home Depot")
-        street = tags.get("addr:street", "")
-        city = tags.get("addr:city", "")
-        if street:
-            return f"NEAREST SUPPLIER: {name} - {street}, {city} (verify stock at homedepot.com)"
-        la = e.get("lat") or (e.get("center") or {}).get("lat")
-        lo = e.get("lon") or (e.get("center") or {}).get("lon")
-        if la and lo:
-            a = reverse_geocode_address(la, lo)
-            if a: return f"NEAREST SUPPLIER: {name} - {a} (verify stock at homedepot.com)"
-        return None
-    except Exception:
-        return None
-
-# --- 📡 ADOPTION ENGINE (sends visitor timezone + IP) ---
-def log_trap_event(event, detail=""):
-    try:
-        ip, tz = "", ""
+    for ou in ("https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.osm.ch/api/interpreter"):
         try:
-            ip = st.context.ip_address or ""
-            tz = st.context.timezone or ""
-        except Exception: pass
+            q = f'[out:json][timeout:8];(node["name"~"Home Depot",i](around:25000,{lat},{lon});way["name"~"Home Depot",i](around:25000,{lat},{lon}););out center 5;'
+            r = requests.post(ou, data={"data": q}, timeout=12)
+            els = r.json().get("elements", [])
+            if els:
+                def dist(e):
+                    la = e.get("lat") or (e.get("center") or {}).get("lat") or 0
+                    lo = e.get("lon") or (e.get("center") or {}).get("lon") or 0
+                    return (la - lat) ** 2 + (lo - lon) ** 2
+                els.sort(key=dist)
+                e = els[0]
+                tags = e.get("tags", {})
+                name = tags.get("name", "The Home Depot")
+                street = tags.get("addr:street", "")
+                city = tags.get("addr:city", "")
+                if street:
+                    return f"NEAREST SUPPLIER: {name} - {street}, {city}"
+                la = e.get("lat") or (e.get("center") or {}).get("lat")
+                lo = e.get("lon") or (e.get("center") or {}).get("lon")
+                if la and lo:
+                    a = reverse_geocode_address(la, lo)
+                    if a: return f"NEAREST SUPPLIER: {name} - {a}"
+                return None
+        except Exception:
+            continue
+    return None
+
+def log_trap_event(event, detail="", lat=0, lon=0):
+    try:
         url = "https://script.google.com/macros/s/AKfycbzP6MvQ0a5kjs5QU0R2NhN7zB45sQvqqYDYWhh-uIDDIChnOssW8qSoto_IBo5zyc5Crw/exec"
-        requests.post(url, json={"event": f"{event} {detail}".strip()[:90], "lat": 0, "lon": 0, "city": f"{tz}||{ip}"}, timeout=5)
+        requests.post(url, json={"event": f"{event} {detail}".strip()[:90], "lat": lat, "lon": lon, "city": ""}, timeout=5)
     except Exception: pass
 
-# --- 🧠 THE REAL AI BRAIN ---
 def analyze_photos_with_ai(photo_paths, zipcode, client_name=""):
     api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key: return "Error: OpenAI API Key missing in Streamlit Secrets."
@@ -283,7 +272,7 @@ st.subheader(T["sub"])
 st.write(T["intro"])
 st.success(T["free_banner"])
 st.markdown(T["step2"]); st.info(T["tip"])
-zip_code = st.text_input("📍 ZIP code (local prices + nearest store)", value="23220", key="zip_field")
+zip_code = st.text_input("📍 ZIP code (local prices + nearest store)", value="23015", key="zip_field")
 log_trap_event("VISIT", f"lang={lang} ref={ref_code or 'direct'} zip={zip_code}")
 client_name = st.text_input(T["client"], value="", key="client_name_field")
 uploaded_files = st.file_uploader(T["uploader"], type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="mobile_camera_fix_v3")
@@ -309,16 +298,17 @@ if uploaded_files:
                 s_lat, s_lon = photo_lat, photo_lon
                 if not s_lat:
                     try:
-                        zr = requests.get("https://nominatim.openstreetmap.org/search?postalcode=23220&country=US&format=json", headers={'User-Agent': 'CindyAI/1.0'}, timeout=8).json()
-                        if zr: s_lat, s_lon = float(zr[0]["lat"]), float(zr[0]["lon"])
+                        zr = requests.get(f"https://api.zippopotam.us/US/{zip_code}", timeout=5).json()
+                        p = zr.get("places", [{}])[0]
+                        s_lat, s_lon = float(p["latitude"]), float(p["longitude"])
                     except Exception: pass
                 if s_lat:
                     store_line = find_nearest_home_depot(s_lat, s_lon) or ""
-                result_text =                 result_text = analyze_photos_with_ai(saved_paths, zip_code, client_name)
+                result_text = analyze_photos_with_ai(saved_paths, zip_code, client_name)
                 if store_line: result_text = store_line + "\n\n---\n\n" + result_text
                 if property_line: result_text = property_line + "\n\n---\n\n" + result_text
                 if lang == "es": result_text = translate_to_spanish(result_text)
-                log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang}                 log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang} zip={zip_code}", lat=photo_lat or 0, lon=photo_lon or 0)")
+                log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang} zip={zip_code}", lat=s_lat or 0, lon=s_lon or 0)
                 st.success(T["success"]); st.markdown(result_text)
                 extra = " | ".join([x for x in [property_line, store_line] if x])
                 pdf_bytes = build_pdf_bytes(result_text, lang, client_name, saved_paths, extra)
