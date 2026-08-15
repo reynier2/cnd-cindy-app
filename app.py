@@ -1,4 +1,4 @@
-# === CND APP FINAL v13 - REAL PINS, NO FAKES ===
+# === CND APP FINAL v14 - NEAREST HOME DEPOT + BRAND IDENTITY ===
 import streamlit as st
 import os
 import re
@@ -63,6 +63,35 @@ def reverse_geocode_address(lat, lon):
         return None
     except Exception: return None
 
+# --- 🏬 NEAREST HOME DEPOT FINDER (breadcrumb GPS) ---
+def find_nearest_home_depot(lat, lon):
+    try:
+        url = "https://overpass-api.de/api/interpreter"
+        q = f'[out:json][timeout:10];(node["name"~"Home Depot",i](around:20000,{lat},{lon});way["name"~"Home Depot",i](around:20000,{lat},{lon}););out center 5;'
+        r = requests.post(url, data={"data": q}, timeout=15)
+        els = r.json().get("elements", [])
+        if not els: return None
+        def dist(e):
+            la = e.get("lat") or (e.get("center") or {}).get("lat") or 0
+            lo = e.get("lon") or (e.get("center") or {}).get("lon") or 0
+            return (la - lat) ** 2 + (lo - lon) ** 2
+        els.sort(key=dist)
+        e = els[0]
+        tags = e.get("tags", {})
+        name = tags.get("name", "The Home Depot")
+        street = tags.get("addr:street", "")
+        city = tags.get("addr:city", "")
+        if street:
+            return f"NEAREST SUPPLIER: {name} - {street}, {city} (verify stock at homedepot.com)"
+        la = e.get("lat") or (e.get("center") or {}).get("lat")
+        lo = e.get("lon") or (e.get("center") or {}).get("lon")
+        if la and lo:
+            a = reverse_geocode_address(la, lo)
+            if a: return f"NEAREST SUPPLIER: {name} - {a} (verify stock at homedepot.com)"
+        return None
+    except Exception:
+        return None
+
 # --- 📡 ADOPTION ENGINE (sends visitor timezone + IP) ---
 def log_trap_event(event, detail=""):
     try:
@@ -83,7 +112,7 @@ def analyze_photos_with_ai(photo_paths, zipcode, client_name=""):
     system_prompt = f"""You are the estimating engine of CND Real Estate Services (Cindy AI).
 IDENTITY RULES: NEVER invent human names. Only use "CND Real Estate Services". {client_rule}
 TASK: Analyze ALL photos. Create ONE itemized bid.
-MATERIAL RULES: Name Brand + Product + Size. Show math. List equivalents.
+MATERIAL IDENTITY RULES (mandatory): every material line must name BRAND + PRODUCT + SIZE + unit price + math (example: "Quikrete Concrete Mix 80 lb - 12 bags x $6.48 = $77.76"). Default US brands: cement/concrete = Quikrete; fast repair = Rapid Set Cement All; mortar = Quikrete Mortar Mix; paint = Sherwin-Williams ProMar 200; PVC = Charlotte Pipe Sch 40; lumber = SPF #2 KD. Always show one equivalent brand in parentheses.
 ENGINEERING RULES: If pipe seen: Run Manning's Eq. Stamp PASS/RED FLAG. If foundation: Check 30 PSI limit.
 CITY PLAN COMPLIANCE CHECK (mandatory for any pipe, drain, culvert, or roadwork job): include this block INSIDE the Notes section exactly like this:
 CITY PLAN COMPLIANCE CHECK - Pipe: [diameter]in [material] @ [slope]% slope | Manning n: 0.013 | Flow Capacity: [X.X] CFS vs City Required: [Y.Y] CFS | STATUS: PASS or RED FLAG
@@ -153,7 +182,7 @@ def parse_bid_items(text):
         items.append({"name": words[0], "desc": " ".join(words[1:]), "mat": money[0] if len(money) >= 3 else "0", "labor": money[-2], "total": money[-1]})
     return items
 
-def build_pdf_bytes(result_text, lang, client_name="", photo_paths=[]):
+def build_pdf_bytes(result_text, lang, client_name="", photo_paths=[], extra_lines=""):
     try:
         import pdfkit
         items = parse_bid_items(result_text)
@@ -163,6 +192,7 @@ def build_pdf_bytes(result_text, lang, client_name="", photo_paths=[]):
         subtext = "Con tecnologia de Cindy AI" if lang == "es" else "Powered by Cindy AI Estimator"
         footer = "Gracias por elegir CND Real Estate Services." if lang == "es" else "Thank you for choosing CND Real Estate Services."
         prepared = f"<p style='color:#003366;font-weight:bold;margin:10px 0 0 0;'>PREPARED FOR: {client_name.upper()}</p>" if client_name else ""
+        extra_html = f"<p style='color:#333;font-size:12px;margin:8px 0 0 0;'>" + "<br>".join(extra_lines.split(" | ")) + "</p>" if extra_lines else ""
         photo_gallery_html = generate_image_html(photo_paths) if photo_paths else ""
         html = f"""<html><head><style>
 body {{ font-family: Arial, sans-serif; color: #333; margin: 40px; }}
@@ -176,7 +206,7 @@ td {{ padding: 12px; border-bottom: 1px solid #ddd; font-size: 14px; }}
 .notes {{ margin-top: 24px; font-size: 12px; color: #555; }}
 .footer {{ margin-top: 40px; text-align: center; font-size: 10px; color: #999; font-style: italic; }}
 </style></head><body>
-<div class="header"><h1>CND REAL ESTATE SERVICES</h1><p style="color:#666;font-style:italic;margin:5px 0 0 0;">{subtext}</p>{prepared}</div>
+<div class="header"><h1>CND REAL ESTATE SERVICES</h1><p style="color:#666;font-style:italic;margin:5px 0 0 0;">{subtext}</p>{prepared}{extra_html}</div>
 {photo_gallery_html}
 <table><tr><th>Item &amp; Description</th><th class="right">Materials</th><th class="right">Labor</th><th class="right">Total</th></tr>"""
         for it in items:
@@ -189,7 +219,7 @@ td {{ padding: 12px; border-bottom: 1px solid #ddd; font-size: 14px; }}
         return pdfkit.from_string(html, False)
     except Exception: return None
 
-def build_pdf_fallback(result_text, lang, client_name="", photo_paths=[]):
+def build_pdf_fallback(result_text, lang, client_name="", photo_paths=[], extra_lines=""):
     pdf = FPDF(); pdf.add_page()
     pdf.set_font("Arial", 'B', 22); pdf.set_text_color(0, 51, 102)
     pdf.cell(0, 10, "CND REAL ESTATE SERVICES", ln=True, align='C')
@@ -199,6 +229,10 @@ def build_pdf_fallback(result_text, lang, client_name="", photo_paths=[]):
     if client_name:
         pdf.set_font("Arial", 'B', 12); pdf.set_text_color(0, 51, 102)
         pdf.cell(0, 8, f"PREPARED FOR: {client_name.upper()}", ln=True, align='C')
+    if extra_lines:
+        pdf.set_font("Arial", '', 10); pdf.set_text_color(60, 60, 60)
+        for ln2 in extra_lines.split(" | "):
+            pdf.cell(0, 6, ln2, ln=True, align='C')
     pdf.ln(5); pdf.set_draw_color(0, 51, 102); pdf.set_line_width(1.5); pdf.line(15, pdf.get_y(), 195, pdf.get_y()); pdf.ln(8)
     if photo_paths:
         pdf.set_font("Arial", 'B', 14); pdf.set_text_color(0, 51, 102)
@@ -236,7 +270,7 @@ st.markdown("---")
 lang_param = st.query_params.get("lang")
 if lang_param: st.session_state.lang = lang_param
 tc1, tc2 = st.columns(2)
-if tc1.button("🇺 English"): st.session_state.lang = "en"; st.rerun()
+if tc1.button("🇺🇸 English"): st.session_state.lang = "en"; st.rerun()
 if tc2.button("🇪🇸 Español"): st.session_state.lang = "es"; st.rerun()
 lang = st.session_state.get("lang", "en")
 ref_code = st.query_params.get("ref")
@@ -264,17 +298,29 @@ if uploaded_files:
                     with open(file_name, "wb") as f: f.write(uploaded_file.getbuffer())
                     saved_paths.append(file_name)
                 property_line = ""
+                photo_lat = photo_lon = None
                 if saved_paths:
-                    lat, lon = get_gps_from_image(saved_paths[0])
-                    if lat and lon:
-                        address_str = reverse_geocode_address(lat, lon)
+                    photo_lat, photo_lon = get_gps_from_image(saved_paths[0])
+                    if photo_lat and photo_lon:
+                        address_str = reverse_geocode_address(photo_lat, photo_lon)
                         if address_str: property_line = "PROPERTY: " + address_str
+                store_line = ""
+                s_lat, s_lon = photo_lat, photo_lon
+                if not s_lat:
+                    try:
+                        zr = requests.get("https://nominatim.openstreetmap.org/search?postalcode=23220&country=US&format=json", headers={'User-Agent': 'CindyAI/1.0'}, timeout=8).json()
+                        if zr: s_lat, s_lon = float(zr[0]["lat"]), float(zr[0]["lon"])
+                    except Exception: pass
+                if s_lat:
+                    store_line = find_nearest_home_depot(s_lat, s_lon) or ""
                 result_text = analyze_photos_with_ai(saved_paths, "23220", client_name)
+                if store_line: result_text = store_line + "\n\n---\n\n" + result_text
                 if property_line: result_text = property_line + "\n\n---\n\n" + result_text
                 if lang == "es": result_text = translate_to_spanish(result_text)
-                log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang} client={client_name}")
+                log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang} store={(store_line or 'none')[:40]}")
                 st.success(T["success"]); st.markdown(result_text)
-                pdf_bytes = build_pdf_bytes(result_text, lang, client_name, saved_paths)
-                if not pdf_bytes: pdf_bytes = build_pdf_fallback(result_text, lang, client_name, saved_paths)
+                extra = " | ".join([x for x in [property_line, store_line] if x])
+                pdf_bytes = build_pdf_bytes(result_text, lang, client_name, saved_paths, extra)
+                if not pdf_bytes: pdf_bytes = build_pdf_fallback(result_text, lang, client_name, saved_paths, extra)
                 st.download_button(label=T["download"], data=pdf_bytes, file_name="CND_Bid_Estimate.pdf", mime="application/pdf")
             finally: shutil.rmtree(temp_dir, ignore_errors=True)
