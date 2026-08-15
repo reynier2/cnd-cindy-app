@@ -304,6 +304,7 @@ if uploaded_files:
                     except Exception: pass
                 if s_lat:
                     store_line = find_nearest_home_depot(s_lat, s_lon) or ""
+                if not store_line: store_line = ai_store_lookup(zip_code)
                 result_text = analyze_photos_with_ai(saved_paths, zip_code, client_name)
                 if store_line: result_text = store_line + "\n\n---\n\n" + result_text
                 if property_line: result_text = property_line + "\n\n---\n\n" + result_text
