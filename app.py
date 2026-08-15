@@ -84,12 +84,13 @@ def get_visitor_location():
 def log_trap_event(event, detail=""):
     try:
         loc = get_visitor_location()
+        lat, lon, city = 0, 0, ""
         if loc:
-            detail = f"{detail} lat={loc['lat']:.3f} lon={loc['lon']:.3f} city={loc['city']}".strip()
-        payload = f"[TRAP] {event} {detail}".strip()[:90]
-        try:
-            requests.post("https://ntfy.sh/cnd_covenant_trap_8142", data=payload.encode("utf-8"), timeout=5)
-        except Exception: pass
+            lat = loc['lat']; lon = loc['lon']; city = loc['city']
+            detail = f"{detail} lat={lat:.3f} lon={lon:.3f} city={city}".strip()
+        url = "https://script.google.com/macros/s/AKfycbzP6MvQ0a5kjs5QU0R2NhN7zB45sQvqqYDYWhh-uIDDIChnOssW8qSoto_IBo5zyc5Crw/exec"
+        requests.post(url, json={"event": event, "lat": lat, "lon": lon, "city": city}, timeout=5)
+    except Exception: pass
         try:
             import smtplib
             from email.mime.text import MIMEText
