@@ -1,3 +1,4 @@
+# === CND APP FINAL v10 - PHOTOS + CITY PLANS + DUAL PINGS ===
 import streamlit as st
 import os
 import re
@@ -64,7 +65,7 @@ def reverse_geocode_address(lat, lon):
         return None
     except Exception: return None
 
-# --- 📡 ADOPTION ENGINE (DUAL-CHANNEL BULLETPROOF PINGS) ---
+# --- 📡 ADOPTION ENGINE (DUAL-CHANNEL PINGS) ---
 def get_visitor_location():
     if "visitor_loc" not in st.session_state:
         try:
@@ -88,13 +89,9 @@ def log_trap_event(event, detail=""):
         if loc:
             detail = f"{detail} lat={loc['lat']:.3f} lon={loc['lon']:.3f} city={loc['city']}".strip()
         payload = f"[TRAP] {event} {detail}".strip()[:90]
-
-        # Channel 1: ntfy.sh 
         try:
             requests.post("https://ntfy.sh/cnd_covenant_trap_8142", data=payload.encode("utf-8"), timeout=5)
         except Exception: pass
-
-        # Channel 2: Gmail 
         try:
             import smtplib
             from email.mime.text import MIMEText
@@ -121,6 +118,8 @@ IDENTITY RULES: NEVER invent human names. Only use "CND Real Estate Services". {
 TASK: Analyze ALL photos. Create ONE itemized bid.
 MATERIAL RULES: Name Brand + Product + Size. Show math. List equivalents.
 ENGINEERING RULES: If pipe seen: Run Manning's Eq. Stamp PASS/RED FLAG. If foundation: Check 30 PSI limit.
+CITY PLAN COMPLIANCE CHECK (mandatory for any pipe, drain, culvert, or roadwork job): include this block INSIDE the Notes section exactly like this:
+CITY PLAN COMPLIANCE CHECK - Pipe: [diameter]in [material] @ [slope]% slope | Manning n: 0.013 | Flow Capacity: [X.X] CFS vs City Required: [Y.Y] CFS | STATUS: PASS or RED FLAG
 WATER RULES: Mention frost line, PRV if >80psi.
 End with: "Reference prices = US national average retail. Verify stock at homedepot.com."
 Output: Markdown Table + Summary."""
@@ -217,7 +216,7 @@ td {{ padding: 12px; border-bottom: 1px solid #ddd; font-size: 14px; }}
             html += f"""<tr><td><strong>{it['name']}</strong><br><span style="color:#666;font-size:12px;">{it['desc']}</span></td><td class="right">${it['mat']}</td><td class="right">${it['labor']}</td><td class="right"><strong>${it['total']}</strong></td></tr>"""
         html += f"""<tr class="total-row"><td colspan="3" class="right">Grand Total:</td><td class="right" style="color:#111;font-size:16px;">${total}</td></tr></table>"""
         if "Notes" in result_text:
-            note_lines = [l for l in result_text.split("Notes", 1)[1].strip().split("\n") if l.strip()][:6]
+            note_lines = [l for l in result_text.split("Notes", 1)[1].strip().split("\n") if l.strip()][:8]
             html += "<div class='notes'>" + "<br>".join(note_lines) + "</div>"
         html += f"<div class='footer'>{footer}</div></body></html>"
         return pdfkit.from_string(html, False)
@@ -271,7 +270,7 @@ lang_param = st.query_params.get("lang")
 if lang_param: st.session_state.lang = lang_param
 tc1, tc2 = st.columns(2)
 if tc1.button("🇺🇸 English"): st.session_state.lang = "en"; st.rerun()
-if tc2.button("🇪🇸 Español"): st.session_state.lang = "es"; st.rerun()
+if tc2.button("🇪 Español"): st.session_state.lang = "es"; st.rerun()
 lang = st.session_state.get("lang", "en")
 if lang == "es":
     T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": "🎁 ¡BIENVENIDO! Su primer presupuesto es 100% GRATIS. Sin tarjeta. Después, cada presupuesto cuesta solo $5.00.", "upsell": "🔥 ¿Le gustó? Su próximo presupuesto se desbloquea por solo $5.00.", "step1": "### 💳 Paso 1 de 2: Pague $5.00 para desbloquear", "info1": "💡 Después de pagar, volverá automáticamente a esta página. Luego sube sus fotos UNA sola vez y obtiene su presupuesto.", "paylink": "👉 HAGA CLIC AQUÍ PARA PAGAR $5.00 Y DESBLOQUEAR SU PRESUPUESTO", "used": "🎟️ Este ticket de pago ya fue usado. Por favor pague $5.00 para desbloquear su propio presupuesto.", "paid": "✅ ¡Pago confirmado! Ahora suba sus fotos abajo.", "step2": "### 📸 Paso 2 de 2: Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": "📄 Descargar Presupuesto PDF Profesional", "product": "Presupuesto de Reparación Cindy AI", "payerr": "Error al configurar el pago:", "checkerr": "Error al verificar el pago:", "client": "👤 Nombre del cliente (opcional, sale en el reporte)"}
@@ -299,7 +298,7 @@ if session_id:
         checkout = stripe.checkout.Session.retrieve(session_id)
         if checkout.payment_status == "paid":
             if session_id in redeemed or session_id in BURNED_TICKETS: st.warning(T["used"])
-            else: 
+            else:
                 redeemed.add(session_id); st.session_state.payment_confirmed = True; st.session_state.just_paid = True
                 log_trap_event("PAYMENT", f"$5 ref={st.session_state.get('ref_code', 'direct')}")
                 del st.query_params["session_id"]; st.rerun()
@@ -346,7 +345,7 @@ if uploaded_files:
                 log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang} client={client_name}")
                 st.success(T["success"]); st.markdown(result_text)
                 pdf_bytes = build_pdf_bytes(result_text, lang, client_name, saved_paths)
-                if not pdf_bytes: pdf_bytes = build_pdf_fallback(result_text, lang, client_name)
+                if not pdf_bytes: pdf_bytes = build_pdf_fallback(result_text, lang, client_name, saved_paths)
                 st.download_button(label=T["download"], data=pdf_bytes, file_name="CND_Bid_Estimate.pdf", mime="application/pdf")
                 if not has_used_freebie:
                     try: streamlit_js_eval(js_expression="localStorage.setItem('cnd_freebie','1');")
