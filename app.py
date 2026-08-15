@@ -1,4 +1,4 @@
-# === CND APP FINAL v10 - PHOTOS + CITY PLANS + DUAL PINGS ===
+# === CND APP FINAL v11 - FREE BETA, NO PAYWALL ===
 import streamlit as st
 import os
 import re
@@ -7,11 +7,9 @@ import shutil
 import base64
 import math
 from fpdf import FPDF
-import stripe
 import requests
 from urllib.parse import quote_plus
 from PIL import Image
-from streamlit_js_eval import streamlit_js_eval
 
 # --- 🏗️ ENGINEERING COMPLIANCE CORE ---
 class EngineeringComplianceCore:
@@ -65,7 +63,7 @@ def reverse_geocode_address(lat, lon):
         return None
     except Exception: return None
 
-# --- 📡 ADOPTION ENGINE (DUAL-CHANNEL PINGS) ---
+# --- 📡 ADOPTION ENGINE (silent pings - rebuilt properly tomorrow) ---
 def get_visitor_location():
     if "visitor_loc" not in st.session_state:
         try:
@@ -269,57 +267,20 @@ st.markdown("---")
 lang_param = st.query_params.get("lang")
 if lang_param: st.session_state.lang = lang_param
 tc1, tc2 = st.columns(2)
-if tc1.button("🇺🇸 English"): st.session_state.lang = "en"; st.rerun()
-if tc2.button("🇪 Español"): st.session_state.lang = "es"; st.rerun()
+if tc1.button("🇺 English"): st.session_state.lang = "en"; st.rerun()
+if tc2.button("🇪🇸 Español"): st.session_state.lang = "es"; st.rerun()
 lang = st.session_state.get("lang", "en")
-if lang == "es":
-    T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": "🎁 ¡BIENVENIDO! Su primer presupuesto es 100% GRATIS. Sin tarjeta. Después, cada presupuesto cuesta solo $5.00.", "upsell": "🔥 ¿Le gustó? Su próximo presupuesto se desbloquea por solo $5.00.", "step1": "### 💳 Paso 1 de 2: Pague $5.00 para desbloquear", "info1": "💡 Después de pagar, volverá automáticamente a esta página. Luego sube sus fotos UNA sola vez y obtiene su presupuesto.", "paylink": "👉 HAGA CLIC AQUÍ PARA PAGAR $5.00 Y DESBLOQUEAR SU PRESUPUESTO", "used": "🎟️ Este ticket de pago ya fue usado. Por favor pague $5.00 para desbloquear su propio presupuesto.", "paid": "✅ ¡Pago confirmado! Ahora suba sus fotos abajo.", "step2": "### 📸 Paso 2 de 2: Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": "📄 Descargar Presupuesto PDF Profesional", "product": "Presupuesto de Reparación Cindy AI", "payerr": "Error al configurar el pago:", "checkerr": "Error al verificar el pago:", "client": "👤 Nombre del cliente (opcional, sale en el reporte)"}
-else:
-    T = {"sub": "Powered by Cindy AI Estimator", "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.", "free_banner": "🎁 WELCOME! Your first AI estimate is 100% FREE. No card needed. After your free one, estimates are just $5.00 each.", "upsell": "🔥 Loved it? Your next estimate unlocks for just $5.00.", "step1": "### 💳 Step 1 of 2: Pay $5.00 to unlock", "info1": "💡 After paying, you'll be brought right back to this page. Then you upload your photos ONE time and get your bid.", "paylink": "👉 CLICK HERE TO PAY $5.00 & UNLOCK YOUR ESTIMATE", "used": "🎟️ This payment ticket was already used. Please pay $5.00 to unlock your own estimate.", "paid": "✅ Payment confirmed! Now upload your photos below.", "step2": "### 📸 Step 2 of 2: Upload your photos", "tip": "💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!", "uploader": "Choose images", "uploaded": "photo(s) uploaded!", "generate": "🚀 Generate Estimate", "spinner": "Cindy is analyzing the photos... this takes about 15 seconds...", "success": "Estimate Generated!", "download": "📄 Download Professional PDF Bid", "product": "Cindy AI Repair Estimate", "payerr": "Payment setup error:", "checkerr": "Payment check error:", "client": "👤 Client name (optional, printed on the report)"}
-st.subheader(T["sub"])
-st.write(T["intro"])
-stripe_api_key = os.getenv("STRIPE_SECRET_KEY")
-if not stripe_api_key:
-    try: stripe_api_key = st.secrets["STRIPE_SECRET_KEY"]
-    except Exception: st.error("⚠️ ERROR: Stripe Secret Key not found."); st.stop()
-stripe.api_key = stripe_api_key
-master_key = os.getenv("MASTER_KEY", "")
-if master_key and st.query_params.get("key") == master_key:
-    st.session_state.payment_confirmed = True; st.session_state.ref_code = "OWNER"
 ref_code = st.query_params.get("ref")
 if ref_code: st.session_state.ref_code = ref_code
-@st.cache_resource
-def get_redeemed_tickets(): return set()
-BURNED_TICKETS = {"cs_test_a1hA7Yia5vsCoyknw7h5UvTUpiEvchfbREQFHAgkS2zcfQaIYXvsSm1JBU"}
-session_id = st.query_params.get("session_id")
-if session_id:
-    redeemed = get_redeemed_tickets()
-    try:
-        checkout = stripe.checkout.Session.retrieve(session_id)
-        if checkout.payment_status == "paid":
-            if session_id in redeemed or session_id in BURNED_TICKETS: st.warning(T["used"])
-            else:
-                redeemed.add(session_id); st.session_state.payment_confirmed = True; st.session_state.just_paid = True
-                log_trap_event("PAYMENT", f"$5 ref={st.session_state.get('ref_code', 'direct')}")
-                del st.query_params["session_id"]; st.rerun()
-    except Exception as e: st.error(f"{T['checkerr']} {e}")
-if st.session_state.get("just_paid"): st.success(T["paid"]); st.session_state.just_paid = False
-try: _freebie_flag = streamlit_js_eval(js_expression="localStorage.getItem('cnd_freebie') || ''")
-except Exception: _freebie_flag = ""
-has_used_freebie = (_freebie_flag == "1")
-if not st.session_state.get("payment_confirmed"):
-    if has_used_freebie:
-        st.markdown(T["step1"]); st.info(T["info1"])
-        log_trap_event("PAYWALL", f"lang={lang}")
-        try:
-            meta = {'ref': st.session_state.get('ref_code', 'direct'), 'lang': lang}
-            checkout_session = stripe.checkout.Session.create(payment_method_types=['card'], line_items=[{'price_data': {'currency': 'usd', 'product_data': {'name': T['product']}, 'unit_amount': 500}, 'quantity': 1}], mode='payment', metadata=meta, payment_intent_data={'metadata': meta}, success_url='https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?session_id={CHECKOUT_SESSION_ID}', cancel_url='https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/')
-            st.markdown(f"[ **{T['paylink']}**]({checkout_session.url})")
-        except Exception as e: st.error(f"{T['payerr']} {e}")
-        st.stop()
-    else: st.success(T["free_banner"])
+if lang == "es":
+    T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": "🎁 BETA ABIERTA — todos los presupuestos son 100% GRATIS por ahora. Sin tarjeta, sin trampas. Tome fotos y reciba su presupuesto.", "step2": "### 📸 Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": "📄 Descargar Presupuesto PDF Profesional", "client": "👤 Nombre del cliente (opcional, sale en el reporte)"}
+else:
+    T = {"sub": "Powered by Cindy AI Estimator", "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.", "free_banner": "🎁 BETA OPEN — every estimate is 100% FREE right now. No card, no catch. Snap photos, get your bid.", "step2": "### 📸 Upload your photos", "tip": "💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!", "uploader": "Choose images", "uploaded": "photo(s) uploaded!", "generate": "🚀 Generate Estimate", "spinner": "Cindy is analyzing the photos... this takes about 15 seconds...", "success": "Estimate Generated!", "download": "📄 Download Professional PDF Bid", "client": "👤 Client name (optional, printed on the report)"}
+st.subheader(T["sub"])
+st.write(T["intro"])
+st.success(T["free_banner"])
 st.markdown(T["step2"]); st.info(T["tip"])
-log_trap_event("VISIT", f"lang={lang}")
+log_trap_event("VISIT", f"lang={lang} ref={ref_code or 'direct'}")
 client_name = st.text_input(T["client"], value="", key="client_name_field")
 uploaded_files = st.file_uploader(T["uploader"], type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="mobile_camera_fix_v3")
 if uploaded_files:
@@ -347,8 +308,4 @@ if uploaded_files:
                 pdf_bytes = build_pdf_bytes(result_text, lang, client_name, saved_paths)
                 if not pdf_bytes: pdf_bytes = build_pdf_fallback(result_text, lang, client_name, saved_paths)
                 st.download_button(label=T["download"], data=pdf_bytes, file_name="CND_Bid_Estimate.pdf", mime="application/pdf")
-                if not has_used_freebie:
-                    try: streamlit_js_eval(js_expression="localStorage.setItem('cnd_freebie','1');")
-                    except Exception: pass
-                    st.info(T["upsell"])
             finally: shutil.rmtree(temp_dir, ignore_errors=True)
