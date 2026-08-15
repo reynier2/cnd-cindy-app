@@ -91,7 +91,7 @@ def find_nearest_home_depot(lat, lon):
 def log_trap_event(event, detail="", lat=0, lon=0):
     try:
         url = "https://script.google.com/macros/s/AKfycbzP6MvQ0a5kjs5QU0R2NhN7zB45sQvqqYDYWhh-uIDDIChnOssW8qSoto_IBo5zyc5Crw/exec"
-        requests.post(url, json={"event": f"{event} {detail}".strip()[:90], "lat": lat, "lon": lon, "city": ""}, timeout=5)
+        requests.post(url, json={"event": f"{event} {detail}".strip()[:160], "lat": lat, "lon": lon, "city": ""}, timeout=5)
     except Exception: pass
 
 def analyze_photos_with_ai(photo_paths, zipcode, client_name=""):
