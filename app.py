@@ -223,7 +223,7 @@ td {{ padding: 12px; border-bottom: 1px solid #ddd; font-size: 14px; }}
         return pdfkit.from_string(html, False)
     except Exception: return None
 
-def build_pdf_fallback(result_text, lang, client_name=""):
+def build_pdf_fallback(result_text, lang, client_name="", photo_paths=[]):
     pdf = FPDF(); pdf.add_page()
     pdf.set_font("Arial", 'B', 22); pdf.set_text_color(0, 51, 102)
     pdf.cell(0, 10, "CND REAL ESTATE SERVICES", ln=True, align='C')
@@ -234,6 +234,26 @@ def build_pdf_fallback(result_text, lang, client_name=""):
         pdf.set_font("Arial", 'B', 12); pdf.set_text_color(0, 51, 102)
         pdf.cell(0, 8, f"PREPARED FOR: {client_name.upper()}", ln=True, align='C')
     pdf.ln(5); pdf.set_draw_color(0, 51, 102); pdf.set_line_width(1.5); pdf.line(15, pdf.get_y(), 195, pdf.get_y()); pdf.ln(8)
+    if photo_paths:
+        pdf.set_font("Arial", 'B', 14); pdf.set_text_color(0, 51, 102)
+        pdf.cell(0, 8, "SITE PHOTOS", ln=True)
+        pdf.ln(2)
+        count = 0
+        for p in photo_paths:
+            if count >= 6: break
+            try:
+                with Image.open(p) as im:
+                    wpx, hpx = im.size
+                w = 120.0
+                h = w * hpx / float(wpx)
+                if h > 140:
+                    h = 140.0; w = h * wpx / float(hpx)
+                if pdf.get_y() + h > 280: pdf.add_page()
+                pdf.image(p, x=(210.0 - w) / 2.0, y=pdf.get_y(), w=w, h=h)
+                pdf.set_y(pdf.get_y() + h + 6)
+                count += 1
+            except Exception: pass
+        pdf.ln(4); pdf.set_draw_color(200, 200, 200); pdf.set_line_width(0.5); pdf.line(15, pdf.get_y(), 195, pdf.get_y()); pdf.ln(6)
     pdf.set_text_color(0, 0, 0); pdf.set_font("Arial", size=11)
     clean = result_text.replace("**", "").replace("*", "").replace("|", " ").replace("---", "")
     try: clean = clean.encode('latin-1', 'replace').decode('latin-1')
