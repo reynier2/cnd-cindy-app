@@ -1,3 +1,4 @@
+# === CND CLOUD FINAL - PIPES + STORES + 23015 ===
 import streamlit as st
 import os
 import re
@@ -87,6 +88,17 @@ def find_nearest_home_depot(lat, lon):
         except Exception:
             continue
     return None
+
+def ai_store_lookup(zip_code):
+    try:
+        api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+        if not api_key: return ""
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        payload = {"model": "gpt-4o-mini", "max_tokens": 80, "messages": [{"role": "user", "content": f"Name the single nearest The Home Depot store to US ZIP {zip_code}. Reply ONLY: StoreName - StreetAddress, City, State"}]}
+        r = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=20)
+        if r.status_code == 200: return "NEAREST SUPPLIER: " + r.json()["choices"][0]["message"]["content"].strip()
+    except Exception: pass
+    return ""
 
 def log_trap_event(event, detail="", lat=0, lon=0):
     try:
@@ -259,7 +271,7 @@ st.markdown("---")
 lang_param = st.query_params.get("lang")
 if lang_param: st.session_state.lang = lang_param
 tc1, tc2 = st.columns(2)
-if tc1.button("🇺🇸 English"): st.session_state.lang = "en"; st.rerun()
+if tc1.button("🇺 English"): st.session_state.lang = "en"; st.rerun()
 if tc2.button("🇪🇸 Español"): st.session_state.lang = "es"; st.rerun()
 lang = st.session_state.get("lang", "en")
 ref_code = st.query_params.get("ref")
@@ -304,7 +316,8 @@ if uploaded_files:
                     except Exception: pass
                 if s_lat:
                     store_line = find_nearest_home_depot(s_lat, s_lon) or ""
-                if not store_line: store_line = ai_store_lookup(zip_code)
+                if not store_line:
+                    store_line = ai_store_lookup(zip_code)
                 result_text = analyze_photos_with_ai(saved_paths, zip_code, client_name)
                 pipe_tag = ""
                 if "CITY PLAN COMPLIANCE CHECK" in result_text:
@@ -312,7 +325,7 @@ if uploaded_files:
                 if store_line: result_text = store_line + "\n\n---\n\n" + result_text
                 if property_line: result_text = property_line + "\n\n---\n\n" + result_text
                 if lang == "es": result_text = translate_to_spanish(result_text)
-                                log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang} zip={zip_code} store={store_line or 'none'} pipe={pipe_tag or 'none'}", lat=s_lat or 0, lon=s_lon or 0), lat=s_lat or 0, lon=s_lon or 0)
+                log_trap_event("ESTIMATE", f"photos={len(uploaded_files)} lang={lang} zip={zip_code} store={store_line or 'none'} pipe={pipe_tag or 'none'}", lat=s_lat or 0, lon=s_lon or 0)
                 st.success(T["success"]); st.markdown(result_text)
                 extra = " | ".join([x for x in [property_line, store_line] if x])
                 pdf_bytes = build_pdf_bytes(result_text, lang, client_name, saved_paths, extra)
