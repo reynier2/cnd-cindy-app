@@ -310,6 +310,59 @@ if tc2.button("🇪 Español"): st.session_state.lang = "es"; st.rerun()
 lang = st.session_state.get("lang", "en")
 ref_code = st.query_params.get("ref")
 if ref_code: st.session_state.ref_code = ref_code
+if not st.session_state.get("landed"):
+    tp = st.query_params.get("trade")
+    if tp in ("electrical", "plumbing", "siding", "roofing", "concrete", "pipe"):
+        st.session_state.trade_view = tp
+    log_trap_event("LANDING", f"lang={lang} ref={ref_code or 'direct'} trade={st.session_state.get('trade_view') or 'home'}")
+    c1, c2 = st.columns([1, 2])
+    with c1:
+        try: st.image("cindy happy.png", width=230)
+        except Exception: st.markdown("# 🧑‍🔧")
+        st.caption("**Cindy** — your AI estimating partner")
+    with c2:
+        st.markdown("# 🏠 CND REAL ESTATE SERVICES")
+        if lang == "es":
+            st.markdown("### Presupuestos profesionales de reparación en 15 segundos — gratis.")
+            st.markdown("Cindy analiza las fotos de su trabajo, calcula cada material con marca, precio y matemática completa, y le entrega un PDF profesional con sellos de ingeniería y la tienda más cercana. Toque su oficio y Cindy le explica lo que hace por usted.")
+        else:
+            st.markdown("### Professional repair estimates in 15 seconds — free.")
+            st.markdown("Cindy reads your job photos, prices every material with brand, unit price & full math, and hands you a professional PDF with engineering stamps and your nearest store. Tap your trade and Cindy will show you what she does for YOU.")
+    st.markdown("📧 **cndrealestateservices@gmail.com** · [📘 Facebook: CND Real Estate Services](https://www.facebook.com/search/pages/?q=cnd%20real%20estate%20services) · [🎵 TikTok: CND Real Estate Services](https://www.tiktok.com/search?q=cnd%20real%20estate%20services)")
+    st.markdown("---")
+    TRADE_INFO = {
+        "electrical": ("⚡ Electrical", "I spot panels, fixtures and conduit runs in your photos. I price Southwire wire, breaker panels and devices at real unit costs, add licensed electrician labor hours, and flag permit + inspection requirements so your bid passes the first time.", "Sample: Southwire 12/2 Romex 50 ft - 6 rolls x $38.50 = $231.00"),
+        "plumbing": ("🚿 Plumbing", "I trace supply and drain runs, price Charlotte Pipe PVC and fixtures, check water pressure (PRV if over 80 psi), note the frost line, and stamp drain slopes with Manning's Equation.", "Sample: Charlotte Pipe Sch 40 PVC 2in - 40 ft x $1.10/ft = $44.00"),
+        "siding": ("🏠 Siding", "I measure your wall area from the photo, price James Hardie HardiePlank by the square with Tyvek wrap, trim and fasteners, and add crew labor with full math.", "Sample: James Hardie HardiePlank - 8 squares x $412 = $3,296.00"),
+        "roofing": ("🛠️ Roofing", "I count roof planes and stories, price GAF Timberline HDZ by the square with underlayment and drip edge, and include tear-off, haul-off and disposal.", "Sample: GAF Timberline HDZ - 24 sq x $145 = $3,480.00"),
+        "concrete": ("🧱 Concrete", "I measure slabs and footings, price Quikrete bag math or ready-mix yardage with forms and rebar, and run the 30 PSI soil bearing check on foundations.", "Sample: Quikrete Concrete Mix 80 lb - 60 bags x $6.48 = $388.80"),
+        "pipe": ("🚰 Pipe & Drain", "I run Manning's Equation on your pipe photos - diameter, slope, flow capacity - and stamp PASS or RED FLAG against city requirements. Municipal-grade compliance in 15 seconds.", "Sample: CITY PLAN COMPLIANCE CHECK - 12in PVC @ 1.5% | Flow 4.2 CFS vs Req 3.0 | STATUS: PASS"),
+    }
+    keys = list(TRADE_INFO.keys())
+    for row in (0, 1):
+        cols = st.columns(3)
+        for i in range(3):
+            k = keys[row * 3 + i]
+            with cols[i]:
+                if st.button(TRADE_INFO[k][0], key=f"tr_{k}"):
+                    st.session_state.trade_view = k
+                    st.rerun()
+    tv = st.session_state.get("trade_view")
+    if tv in TRADE_INFO:
+        label, pitch, sample = TRADE_INFO[tv]
+        st.markdown("---")
+        st.markdown(f"### {label} — {'Cindy explica:' if lang == 'es' else 'Cindy explains:'}")
+        st.markdown(f"> 💬 **Cindy:** {pitch}")
+        st.code(sample)
+        if st.button("⬅️ Back / Atrás"):
+            st.session_state.trade_view = None
+            st.rerun()
+    st.markdown("---")
+    cta = "🚀 COMENZAR MI PRESUPUESTO GRATIS" if lang == "es" else "🚀 START MY FREE ESTIMATE"
+    if st.button(cta, type="primary"):
+        st.session_state.landed = True
+        st.rerun()
+    st.stop()    
 if lang == "es":
     T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": "🎁 BETA ABIERTA — todos los presupuestos son 100% GRATIS por ahora. Sin tarjeta, sin trampas. Tome fotos y reciba su presupuesto.", "step2": "### 📸 Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": "📄 Descargar Presupuesto PDF Profesional", "client": "👤 Nombre del cliente (opcional, sale en el reporte)"}
 else:
