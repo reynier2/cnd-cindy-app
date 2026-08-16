@@ -1,0 +1,6 @@
+[server]
+toolbarMode = "minimal"
+
+[theme]
+base = "light"
+primaryColor = "#003366"
