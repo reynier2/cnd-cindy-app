@@ -328,7 +328,7 @@ if not st.session_state.get("landed"):
         else:
             st.markdown("### Professional repair estimates in 15 seconds — free.")
             st.markdown("Cindy reads your job photos, prices every material with brand, unit price & full math, and hands you a professional PDF with engineering stamps and your nearest store. Tap your trade and Cindy will show you what she does for YOU.")
-    st.markdown("📧 **cndrealestateservices@gmail.com** · [📘 Facebook: CND Real Estate Services](https://www.facebook.com/search/pages/?q=cnd%20real%20estate%20services) · [🎵 TikTok: CND Real Estate Services](https://www.tiktok.com/search?q=cnd%20real%20estate%20services)")
+        st.markdown("🌐 [**Official website**](https://reynier2.github.io/cnd-cindy-app/) · 📧 **cndrealestateservices@gmail.com** · [📘 Facebook](https://www.facebook.com/search/pages/?q=cnd%20real%20estate%20services) · [🎵 TikTok](https://www.tiktok.com/search?q=cnd%20real%20estate%20services)")
     st.markdown("---")
     TRADE_INFO = {
         "electrical": ("⚡ Electrical", "I spot panels, fixtures and conduit runs in your photos. I price Southwire wire, breaker panels and devices at real unit costs, add licensed electrician labor hours, and flag permit + inspection requirements so your bid passes the first time.", "Sample: Southwire 12/2 Romex 50 ft - 6 rolls x $38.50 = $231.00"),
