@@ -1,4 +1,4 @@
-# === CND CLOUD SUNDAY FINAL ===
+# === CND CLOUD SUNDAY FINAL + SIDING FIX ===
 import streamlit as st
 import os
 import re
@@ -114,6 +114,8 @@ def analyze_photos_with_ai(photo_paths, zipcode, client_name=""):
 IDENTITY RULES: NEVER invent human names. Only use "CND Real Estate Services". {client_rule}
 TASK: Analyze ALL photos. Create ONE itemized bid that reflects REAL contractor economics, not just retail materials:
 - SCOPE RULE: price the COMPLETE job visible in the photos like a general contractor - full framing package for any structure under construction (lumber takeoff from visible footprint and wall height), full pipe runs, full site work. NEVER output a small partial materials list.
+- PROMINENCE RULE: FIRST write a one-line checklist of every trade visibly present (siding, roofing, pipes, concrete, windows, doors, gravel, framing), then price EACH one. The DOMINANT material in the photo (biggest visible surface) MUST be your first and most detailed line item.
+- ANTI-DODGE RULE: NEVER write "cost depends on" or "will vary". Always estimate quantities from visual evidence (two-story wall is approx 24 ft tall x visible width; one siding square = 100 sq ft; count windows and doors) and print a concrete dollar number on EVERY line.
 - QUANTITIES: estimate conservatively from visual evidence (measure visible runs, areas, counts) and SHOW the math. When unsure, assume the LARGER realistic scope and state the assumption.
 - LABOR: price as crew size x hours x hourly rate (VA rates: laborer $35-45/hr, skilled tradesman $55-75/hr). Never price a full day of skilled work under $600.
 - EQUIPMENT: include machine hours (mini-excavator $350-450/day, skid steer $300-400/day) plus mobilization/trailer $150-250.
