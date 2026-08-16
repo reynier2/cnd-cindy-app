@@ -364,5 +364,57 @@ if uploaded_files:
                 extra = " | ".join([x for x in [property_line, store_line] if x])
                 pdf_bytes = build_pdf_bytes(result_text, lang, client_name, saved_paths, extra)
                 if not pdf_bytes: pdf_bytes = build_pdf_fallback(result_text, lang, client_name, saved_paths, extra)
-                st.download_button(label=T["download"], data=pdf_bytes, file_name="CND_Bid_Estimate.pdf", mime="application/pdf")
+                st.download_button(label=T["download"], data=pdf_bytes, file_name="CND_Bid_Estimate.pdf", mime="application/pdf")                if lang == "es":
+                    share_title = "🔗 ¡Comparte Cindy con tu equipo!"
+                    share_desc = "¿Conoces a otro contratista o handyman? Envíale el enlace para que también tenga presupuestos gratis."
+                    share_btn = "📱 Compartir App"
+                    copy_btn = "📋 Copiar Enlace"
+                    copy_msg = "✅ ¡Enlace copiado!"
+                    share_text_js = "Mira Cindy AI - Presupuestos de contratista gratis en 15 segundos. ¡Solo toma una foto! "
+                else:
+                    share_title = "🔗 Share Cindy with your crew!"
+                    share_desc = "Know a contractor or handyman? Send them the link so they can get free bids too."
+                    share_btn = "📱 Share App"
+                    copy_btn = "📋 Copy Link"
+                    copy_msg = "✅ Link copied!"
+                    share_text_js = "Check out Cindy AI - Free 15-second contractor estimates. Just snap a photo! "
+                
+                share_html = f"""
+                <div style="background-color: #f0f2f6; padding: 15px; border-radius: 10px; text-align: center; margin-top: 20px; border: 2px solid #003366;">
+                    <h3 style="color: #003366; margin-top: 0;">{share_title}</h3>
+                    <p style="margin-bottom: 15px;">{share_desc}</p>
+                    <button onclick="shareApp()" style="background-color: #003366; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-right: 10px; font-weight: bold;">{share_btn}</button>
+                    <button onclick="copyLink()" style="background-color: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold;">{copy_btn}</button>
+                    <p id="copyMsg" style="color: green; font-size: 14px; margin-top: 10px; display: none; font-weight: bold;">{copy_msg}</p>
+                </div>
+                <script>
+                    const appUrl = "https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/";
+                    const shareText = "{share_text_js}" + appUrl;
+
+                    function shareApp() {{
+                        if (navigator.share) {{
+                            navigator.share({{
+                                title: 'Cindy AI Estimator',
+                                text: shareText,
+                                url: appUrl
+                            }}).catch(err => console.log('Share cancelled'));
+                        }} else {{
+                            copyLink();
+                        }}
+                    }}
+
+                    function copyLink() {{
+                        navigator.clipboard.writeText(shareText).then(() => {{
+                            const msg = document.getElementById('copyMsg');
+                            msg.style.display = 'block';
+                            setTimeout(() => {{ msg.style.display = 'none'; }}, 2000);
+                        }}).catch(err => {{
+                            alert('Copy this link: ' + appUrl);
+                        }});
+                    }}
+                </script>
+                """
+                import streamlit.components.v1 as components
+                components.html(share_html, height=200)
+                
             finally: shutil.rmtree(temp_dir, ignore_errors=True)
