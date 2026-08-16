@@ -96,7 +96,10 @@ def ai_store_lookup(zip_code):
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         payload = {"model": "gpt-4o-mini", "max_tokens": 80, "messages": [{"role": "user", "content": f"Name the single nearest The Home Depot store to US ZIP {zip_code}. Reply ONLY: StoreName - StreetAddress, City, State"}]}
         r = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=20)
-        if r.status_code == 200: return "NEAREST SUPPLIER: " + r.json()["choices"][0]["message"]["content"].strip()
+        if r.status_code == 200:
+            txt = r.json()["choices"][0]["message"]["content"].strip()
+            if "sorry" in txt.lower() or "can't" in txt.lower() or "cannot" in txt.lower(): return ""
+            return "NEAREST SUPPLIER: " + txt
     except Exception: pass
     return ""
 
