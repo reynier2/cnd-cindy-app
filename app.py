@@ -1,4 +1,4 @@
-# === CND CLOUD FINAL - PIPES + STORES + 23015 ===
+# === CND CLOUD SUNDAY FINAL ===
 import streamlit as st
 import os
 import re
@@ -112,14 +112,25 @@ def analyze_photos_with_ai(photo_paths, zipcode, client_name=""):
     client_rule = f"- This report is PREPARED FOR: {client_name.upper()}. Start with this line." if client_name else "- No client name provided."
     system_prompt = f"""You are the estimating engine of CND Real Estate Services (Cindy AI).
 IDENTITY RULES: NEVER invent human names. Only use "CND Real Estate Services". {client_rule}
-TASK: Analyze ALL photos. Create ONE itemized bid.
-MATERIAL IDENTITY RULES (mandatory): every material line must name BRAND + PRODUCT + SIZE + unit price + math (example: "Quikrete Concrete Mix 80 lb - 12 bags x $6.48 = $77.76"). Default US brands: cement/concrete = Quikrete; fast repair = Rapid Set Cement All; mortar = Quikrete Mortar Mix; paint = Sherwin-Williams ProMar 200; PVC = Charlotte Pipe Sch 40; lumber = SPF #2 KD. Always show one equivalent brand in parentheses.
+TASK: Analyze ALL photos. Create ONE itemized bid that reflects REAL contractor economics, not just retail materials:
+- SCOPE RULE: price the COMPLETE job visible in the photos like a general contractor - full framing package for any structure under construction (lumber takeoff from visible footprint and wall height), full pipe runs, full site work. NEVER output a small partial materials list.
+- QUANTITIES: estimate conservatively from visual evidence (measure visible runs, areas, counts) and SHOW the math. When unsure, assume the LARGER realistic scope and state the assumption.
+- LABOR: price as crew size x hours x hourly rate (VA rates: laborer $35-45/hr, skilled tradesman $55-75/hr). Never price a full day of skilled work under $600.
+- EQUIPMENT: include machine hours (mini-excavator $350-450/day, skid steer $300-400/day) plus mobilization/trailer $150-250.
+- ADD LINES: permits/inspection allowance, site prep, haul-off/disposal, 10% contingency.
+- PROFIT: add an OVERHEAD & PROFIT line of 15-20% after subtotal.
+- MANNING MATH: compute step by step and show every number: A = pi x D x D / 4, R = D / 4, V = (1.486 / n) x R^(2/3) x S^(1/2), Q = V x A.
+- End with a BALLPARK RANGE line: "Ballpark range: Low $X - High $Y" so the client sees a realistic band, not one cheap number.
+MATERIAL IDENTITY RULES (mandatory): every material line must name BRAND + PRODUCT + SIZE + unit price + math (example: "Quikrete Concrete Mix 80 lb - 12 bags x $6.48 = $77.76"). Default US brands: cement/concrete = Quikrete; fast repair = Rapid Set Cement All; mortar = Quikrete Mortar Mix; paint = Sherwin-Williams ProMar 200; PVC = Charlotte Pipe Sch 40; lumber = SPF #2 KD; siding = James Hardie HardiePlank fiber cement (eq: CertainTeed CedarBoards); vinyl siding = CertainTeed Monogram (eq: Alside); housewrap = Tyvek HomeWrap; roofing = GAF Timberline HDZ (eq: Owens Corning Duration); windows = Andersen 100 Series (eq: Jeld-Wen); doors = Masonite (eq: Therma-Tru); decking = Trex Transcend (eq: TimberTech); insulation = Owens Corning R-13 (eq: Johns Manville); drywall = USG Sheetrock 1/2in; gravel = CR-6 or #57 stone per ton. Always show one equivalent brand in parentheses. NEVER skip a visible trade - if siding, roofing, or any material is in the photo, price it.
 ENGINEERING RULES: If pipe seen: Run Manning's Eq. Stamp PASS/RED FLAG. If foundation: Check 30 PSI limit.
 CITY PLAN COMPLIANCE CHECK (mandatory for any pipe, drain, culvert, or roadwork job): include this block INSIDE the Notes section exactly like this:
 CITY PLAN COMPLIANCE CHECK - Pipe: [diameter]in [material] @ [slope]% slope | Manning n: 0.013 | Flow Capacity: [X.X] CFS vs City Required: [Y.Y] CFS | STATUS: PASS or RED FLAG
 WATER RULES: Mention frost line, PRV if >80psi.
 End with: "Reference prices = US national average retail. Verify stock at homedepot.com."
-Output: Markdown Table + Summary."""
+OUTPUT FORMAT RULES (mandatory):
+- Items MUST be a pipe-separated markdown table with columns | Item | Details | Qty | Unit Price | Total | - never use code fences.
+- ALWAYS add two extra rows at the bottom of the table: "OVERHEAD & PROFIT (18%)" and "GRAND TOTAL".
+- ALSO put these two lines inside the Notes section: "OVERHEAD & PROFIT (18%): $X" and "Ballpark range: Low $A - High $B"."""
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": []}]
     messages[1]["content"].append({"type": "text", "text": f"Analyze {len(photo_paths)} photos. Zip: {zipcode}."})
     for path in photo_paths:
@@ -128,7 +139,7 @@ Output: Markdown Table + Summary."""
             messages[1]["content"].append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}})
         except Exception: pass
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    payload = {"model": "gpt-4o", "messages": messages, "max_tokens": 4000}
+    payload = {"model": "gpt-4o", "messages": messages, "max_tokens": 4000, "temperature": 0.2}
     try:
         response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=90)
         if response.status_code == 200: return response.json()["choices"][0]["message"]["content"]
@@ -183,13 +194,25 @@ def parse_bid_items(text):
         items.append({"name": words[0], "desc": " ".join(words[1:]), "mat": money[0] if len(money) >= 3 else "0", "labor": money[-2], "total": money[-1]})
     return items
 
+def extract_total(result_text, items):
+    m = re.search(r"(?i)grand total[^0-9$]*\$?([\d,.]+)", result_text) or re.search(r"(?i)total estimate[^0-9$]*\$?([\d,.]+)", result_text)
+    if m: return m.group(1)
+    try:
+        s = sum(float(it["total"]) for it in items if not any(w in it["name"].upper() for w in ("OVERHEAD", "GRAND")))
+        if s > 0: return f"{s:,.2f}"
+    except Exception: pass
+    try:
+        vals = [float(v.replace(",", "")) for v in re.findall(r"=\s*\$?([\d,]+\.\d{2})\b", result_text)]
+        if vals: return f"{sum(vals):,.2f}"
+    except Exception: pass
+    return "-"
+
 def build_pdf_bytes(result_text, lang, client_name="", photo_paths=[], extra_lines=""):
     try:
         import pdfkit
         items = parse_bid_items(result_text)
         if not items: return None
-        m = re.search(r"Grand Total:?\s*\$?([\d,.]+)", result_text)
-        total = m.group(1) if m else "-"
+        total = extract_total(result_text, items)
         subtext = "Con tecnologia de Cindy AI" if lang == "es" else "Powered by Cindy AI Estimator"
         footer = "Gracias por elegir CND Real Estate Services." if lang == "es" else "Thank you for choosing CND Real Estate Services."
         prepared = f"<p style='color:#003366;font-weight:bold;margin:10px 0 0 0;'>PREPARED FOR: {client_name.upper()}</p>" if client_name else ""
@@ -260,6 +283,11 @@ def build_pdf_fallback(result_text, lang, client_name="", photo_paths=[], extra_
     try: clean = clean.encode('latin-1', 'replace').decode('latin-1')
     except Exception: pass
     pdf.multi_cell(0, 7, clean)
+    tot2 = extract_total(result_text, parse_bid_items(result_text))
+    if tot2 != "-":
+        pdf.ln(2); pdf.set_font("Arial", 'B', 13); pdf.set_text_color(0, 51, 102)
+        pdf.cell(0, 9, f"GRAND TOTAL: ${tot2}", ln=True, align='R')
+        pdf.set_font("Arial", size=11); pdf.set_text_color(0, 0, 0)
     pdf.ln(10); pdf.set_font("Arial", 'I', 9); pdf.set_text_color(150, 150, 150)
     pdf_footer = "Gracias por elegir CND Real Estate Services." if lang == "es" else "Thank you for choosing CND Real Estate Services."
     pdf.cell(0, 5, pdf_footer, ln=True, align='C')
@@ -284,6 +312,10 @@ st.subheader(T["sub"])
 st.write(T["intro"])
 st.success(T["free_banner"])
 st.markdown(T["step2"]); st.info(T["tip"])
+if lang == "es":
+    st.warning("📶 **¿Señal mala en la obra?** No pasa nada. 1) Tome las fotos con su cámara normal (quedan guardadas en su teléfono). 2) Cuando tenga buena señal o Wi-Fi, regrese aquí y toque 'Choose files'. 3) Elija las fotos de su galería. 4) Presione Generar. ¡Sus fotos lo esperan!")
+else:
+    st.warning("📶 **Bad signal out here?** No problem. 1) Take your photos with your regular camera app (they save on your phone). 2) When you're back at good signal or Wi-Fi, come back and tap 'Choose files'. 3) Pick your photos from the gallery. 4) Hit Generate. Your photos wait for you!")
 zip_code = st.text_input("📍 ZIP code (local prices + nearest store)", value="23015", key="zip_field")
 log_trap_event("VISIT", f"lang={lang} ref={ref_code or 'direct'} zip={zip_code}")
 client_name = st.text_input(T["client"], value="", key="client_name_field")
