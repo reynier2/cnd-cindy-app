@@ -1,6 +1,6 @@
-[server]
-toolbarMode = "minimal"
-
 [theme]
-base = "light"
-primaryColor = "#003366"
+base = "dark"
+primaryColor = "#ff6a00"
+backgroundColor = "#05060a"
+secondaryBackgroundColor = "#0b0f1a"
+textColor = "#cfe3ff"
