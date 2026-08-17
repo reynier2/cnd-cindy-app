@@ -13,6 +13,24 @@ import requests
 from urllib.parse import quote_plus
 from PIL import Image
 
+try:
+    from streamlit_geolocation import geolocation
+    HAS_GEO = True
+except Exception:
+    HAS_GEO = False
+
+def extract_coords(c):
+    try:
+        if not c: return None
+        if isinstance(c, (list, tuple)) and len(c) >= 2 and c[0]:
+            return float(c[0]), float(c[1])
+        if isinstance(c, dict):
+            la = c.get('latitude'); lo = c.get('longitude')
+            if la and lo: return float(la), float(lo)
+    except Exception:
+        pass
+    return None
+
 # === ENTERPRISE VAULT (locked features for big-company tier - DO NOT DELETE) ===
 MANAGER_PASSCODE = "CND-BOSS"
 
@@ -151,16 +169,22 @@ def analyze_photos_with_ai(photo_paths, zipcode, client_name=""):
 IDENTITY RULES: NEVER invent human names. Only use "CND Real Estate Services". {client_rule}
 TASK: Analyze ALL photos. Create ONE itemized bid that reflects REAL contractor economics, not just retail materials:
 - SCOPE RULE: price the COMPLETE job visible in the photos like a general contractor - full framing package for any structure under construction (lumber takeoff from visible footprint and wall height), full pipe runs, full site work. NEVER output a small partial materials list.
-- PROMINENCE RULE: FIRST write a one-line checklist of every trade visibly present (siding, roofing, pipes, concrete, windows, doors, gravel, framing), then price EACH one. The DOMINANT material in the photo (biggest visible surface) MUST be your first and most detailed line item.
-- ANTI-DODGE RULE: NEVER write "cost depends on" or "will vary". Always estimate quantities from visual evidence (two-story wall is approx 24 ft tall x visible width; one siding square = 100 sq ft; count windows and doors) and print a concrete dollar number on EVERY line.
+- PROMINENCE RULE: FIRST write a one-line checklist of every trade visibly present (siding, roofing, pipes, concrete, windows, doors, gravel, framing, masonry), then price EACH one. The DOMINANT material in the photo (biggest visible surface) MUST be your first and most detailed line item.
+- ANTI-DODGE RULE: NEVER write "cost depends on" or "will vary". Always estimate quantities from visual evidence (two-story wall is approx 24 ft tall x visible width; one siding square = 100 sq ft; count windows and doors; count brick courses and estimate bricks per sq ft at approx 7 per sq ft for standard run) and print a concrete dollar number on EVERY line.
 - QUANTITIES: estimate conservatively from visual evidence (measure visible runs, areas, counts) and SHOW the math. When unsure, assume the LARGER realistic scope and state the assumption.
-- LABOR: price as crew size x hours x hourly rate (VA rates: laborer $35-45/hr, skilled tradesman $55-75/hr). Never price a full day of skilled work under $600.
+- LABOR: price as crew size x hours x hourly rate (VA rates: laborer $35-45/hr, skilled tradesman $55-75/hr, master mason $75-95/hr). Never price a full day of skilled work under $600.
 - EQUIPMENT: include machine hours (mini-excavator $350-450/day, skid steer $300-400/day) plus mobilization/trailer $150-250.
 - ADD LINES: permits/inspection allowance, site prep, haul-off/disposal, 10% contingency.
 - PROFIT: add an OVERHEAD & PROFIT line of 15-20% after subtotal.
 - MANNING MATH: compute step by step and show every number: A = pi x D x D / 4, R = D / 4, V = (1.486 / n) x R^(2/3) x S^(1/2), Q = V x A.
 - End with a BALLPARK RANGE line: "Ballpark range: Low $X - High $Y" so the client sees a realistic band, not one cheap number.
-MATERIAL IDENTITY RULES (mandatory): every material line must name BRAND + PRODUCT + SIZE + unit price + math (example: "Quikrete Concrete Mix 80 lb - 12 bags x $6.48 = $77.76"). Default US brands: cement/concrete = Quikrete; fast repair = Rapid Set Cement All; mortar = Quikrete Mortar Mix; paint = Sherwin-Williams ProMar 200; PVC = Charlotte Pipe Sch 40; lumber = SPF #2 KD; siding = James Hardie HardiePlank fiber cement (eq: CertainTeed CedarBoards); vinyl siding = CertainTeed Monogram (eq: Alside); housewrap = Tyvek HomeWrap; roofing = GAF Timberline HDZ (eq: Owens Corning Duration); windows = Andersen 100 Series (eq: Jeld-Wen); doors = Masonite (eq: Therma-Tru); decking = Trex Transcend (eq: TimberTech); insulation = Owens Corning R-13 (eq: Johns Manville); drywall = USG Sheetrock 1/2in; gravel = CR-6 or #57 stone per ton. Always show one equivalent brand in parentheses. NEVER skip a visible trade - if siding, roofing, or any material is in the photo, price it.
+MATERIAL IDENTITY RULES (mandatory): every material line must name BRAND + PRODUCT + SIZE + unit price + math (example: "Quikrete Concrete Mix 80 lb - 12 bags x $6.48 = $77.76"). Default US brands: cement/concrete = Quikrete; fast repair = Rapid Set Cement All; mortar = Quikrete Mortar Mix; paint = Sherwin-Williams ProMar 200; PVC = Charlotte Pipe Sch 40; lumber = SPF #2 KD; siding = James Hardie HardiePlank fiber cement (eq: CertainTeed CedarBoards); vinyl siding = CertainTeed Monogram (eq: Alside); housewrap = Tyvek HomeWrap; roofing = GAF Timberline HDZ (eq: Owens Corning Duration); windows = Andersen 100 Series (eq: Jeld-Wen); doors = Masonite (eq: Therma-Tru); decking = Trex Transcend (eq: TimberTech); insulation = Owens Corning R-13 (eq: Johns Manville); drywall = USG Sheetrock 1/2in; gravel = CR-6 or #57 stone per ton; brick = standard clay modular brick at approx $1.20-1.60 each; block = 8in CMU at approx $2.50-3.50 each. Always show one equivalent brand in parentheses. NEVER skip a visible trade - if siding, roofing, masonry, or any material is in the photo, price it.
+MASONRY MASTER RULES (mandatory for any brick, block, stone, or mortar job - think like a master mason):
+- IRA / SUCTION TEST: judge brick porosity from the photo. If brick looks bone-dry and porous, print a warning: dampen the bricks before laying or the suction will starve the mortar of cure water and kill the bond.
+- BLEED & CREEP: scan lower courses for squeezed mortar bulges and compression. If the wall is climbing too fast for the weather (cold or humid), warn: let the bottom courses set before adding height or the layout sinks and heights go off.
+- CROW'S FOOT / LEAD LAYOUT: evaluate corner (lead) vertical alignment. Flag any twist or spiral in the corner pyramid and warn to re-center the plumb line over the crow's foot before the lead climbs too high to fix.
+- BOND PATTERN LOGIC: for Flemish, English, or running bond, track the stretcher/header rhythm row by row. Flag any single pattern break that throws the vertical alignment of the wall.
+- MORTAR GRADE MATCH: footings and below-grade = Type M (2,500 PSI); exterior load-bearing walls = Type S (1,800 PSI); interior above-grade partitions = Type N (750 PSI); veneer and historic tuckpointing = Type O (350 PSI). Flag any mismatch between the structure and the mortar grade.
 ENGINEERING RULES: If pipe seen: Run Manning's Eq. Stamp PASS/RED FLAG. If foundation: Check 30 PSI limit.
 CITY PLAN COMPLIANCE CHECK (mandatory for any pipe, drain, culvert, or roadwork job): include this block INSIDE the Notes section exactly like this:
 CITY PLAN COMPLIANCE CHECK - Pipe: [diameter]in [material] @ [slope]% slope | Manning n: 0.013 | Flow Capacity: [X.X] CFS vs City Required: [Y.Y] CFS | STATUS: PASS or RED FLAG
@@ -405,7 +429,7 @@ ref_code = st.query_params.get("ref")
 if ref_code: st.session_state.ref_code = ref_code
 if not st.session_state.get("landed"):
     tp = st.query_params.get("trade")
-    if tp in ("electrical", "plumbing", "siding", "roofing", "concrete", "pipe"):
+    if tp in ("electrical", "plumbing", "siding", "roofing", "concrete", "pipe", "masonry"):
         st.session_state.trade_view = tp
     log_trap_event("LANDING", f"lang={lang} ref={ref_code or 'direct'} trade={st.session_state.get('trade_view') or 'home'}")
     c1, c2 = st.columns([1, 2])
@@ -430,12 +454,12 @@ if not st.session_state.get("landed"):
         "roofing": ("🛠️ Roofing", "I count roof planes and stories, price GAF Timberline HDZ by the square with underlayment and drip edge, and include tear-off, haul-off and disposal.", "Sample: GAF Timberline HDZ - 24 sq x $145 = $3,480.00"),
         "concrete": ("🧱 Concrete", "I measure slabs and footings, price Quikrete bag math or ready-mix yardage with forms and rebar, and run the 30 PSI soil bearing check on foundations.", "Sample: Quikrete Concrete Mix 80 lb - 60 bags x $6.48 = $388.80"),
         "pipe": ("🚰 Pipe & Drain", "I run Manning's Equation on your pipe photos - diameter, slope, flow capacity - and stamp PASS or RED FLAG against city requirements. Municipal-grade compliance in 15 seconds.", "Sample: CITY PLAN COMPLIANCE CHECK - 12in PVC @ 1.5% | Flow 4.2 CFS vs Req 3.0 | STATUS: PASS"),
+        "masonry": ("🧱 Masonry", "I read brick like a master mason - IRA suction test, mortar bleed and creep, crow's-foot lead layout, and Flemish/English bond logic. I match mortar grade to the structure (Type M, S, N, O) and flag weak bonds before they crack.", "Sample: Standard Clay Modular Brick - 500 bricks x $1.35 = $675.00"),
     }
     keys = list(TRADE_INFO.keys())
-    for row in (0, 1):
+    for row_start in range(0, len(keys), 3):
         cols = st.columns(3)
-        for i in range(3):
-            k = keys[row * 3 + i]
+        for i, k in enumerate(keys[row_start:row_start + 3]):
             with cols[i]:
                 if st.button(TRADE_INFO[k][0], key=f"tr_{k}"):
                     st.session_state.trade_view = k
@@ -452,21 +476,13 @@ if not st.session_state.get("landed"):
             st.rerun()
     st.markdown("---")
     cta = "🚀 COMENZAR MI PRESUPUESTO GRATIS" if lang == "es" else "🚀 START MY FREE ESTIMATE"
-    cta2 = "🧪 PROBAR MI OBRA" if lang == "es" else "🧪 TEST YOUR JOB SITE"
-    cc1, cc2 = st.columns(2)
-    with cc1:
-        if st.button(cta, type="primary"):
-            st.session_state.landed = True
-            st.session_state.safety_mode = False
-            st.rerun()
-    with cc2:
-        if st.button(cta2):
-            st.session_state.landed = True
-            st.session_state.safety_mode = True
-            st.rerun()
+    if st.button(cta, type="primary"):
+        st.session_state.landed = True
+        st.session_state.safety_mode = False
+        st.rerun()
     st.stop()
 
-# === JOB SITE CHECKUP MODE (free friendly tier) ===
+# === VAULT: JOB SITE CHECKUP MODE (hidden for now - flip the button back on when ready to charge) ===
 if st.session_state.get("safety_mode"):
     st.subheader("🧪 Job Site Checkup — Smart Inspector")
     st.info("Cindy is the inspector. Your phone is the eyes. Snap the site and get an instant read on what's good and what needs fixing.")
@@ -501,9 +517,9 @@ if st.session_state.get("safety_mode"):
     st.stop()
 
 if lang == "es":
-    T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": "🎁 BETA ABIERTA — todos los presupuestos son 100% GRATIS por ahora. Sin tarjeta, sin trampas. Tome fotos y reciba su presupuesto.", "step2": "### 📸 Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": "📄 Descargar Presupuesto PDF Profesional", "client": "👤 Nombre del cliente (opcional, sale en el reporte)"}
+    T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": "🎁 BETA ABIERTA — todos los presupuestos son 100% GRATIS por ahora. Sin tarjeta, sin trampas. Tome fotos y reciba su presupuesto.", "step2": "### 📸 Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": "📄 Descargar Presupuesto PDF Profesional", "client": "👤 Nombre del cliente (opcional, sale en el reporte)", "geo_hint": "📍 Toca el botón para usar tu ubicación y fijar precios locales.", "geo_ok": "📍 Ubicación fijada — precios locales listos."}
 else:
-    T = {"sub": "Powered by Cindy AI Estimator", "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.", "free_banner": "🎁 BETA OPEN — every estimate is 100% FREE right now. No card, no catch. Snap photos, get your bid.", "step2": "### 📸 Upload your photos", "tip": "💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!", "uploader": "Choose images", "uploaded": "photo(s) uploaded!", "generate": "🚀 Generate Estimate", "spinner": "Cindy is analyzing the photos... this takes about 15 seconds...", "success": "Estimate Generated!", "download": "📄 Download Professional PDF Bid", "client": "👤 Client name (optional, printed on the report)"}
+    T = {"sub": "Powered by Cindy AI Estimator", "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.", "free_banner": "🎁 BETA OPEN — every estimate is 100% FREE right now. No card, no catch. Snap photos, get your bid.", "step2": "### 📸 Upload your photos", "tip": "💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!", "uploader": "Choose images", "uploaded": "photo(s) uploaded!", "generate": "🚀 Generate Estimate", "spinner": "Cindy is analyzing the photos... this takes about 15 seconds...", "success": "Estimate Generated!", "download": "📄 Download Professional PDF Bid", "client": "👤 Client name (optional, printed on the report)", "geo_hint": "📍 Tap the button to use your location and lock in local prices.", "geo_ok": "📍 Location locked — local prices set."}
 st.subheader(T["sub"])
 st.write(T["intro"])
 st.success(T["free_banner"])
@@ -512,6 +528,21 @@ if lang == "es":
     st.warning("📶 **¿Señal mala en la obra?** No pasa nada. 1) Tome las fotos con su cámara normal (quedan guardadas en su teléfono). 2) Cuando tenga buena señal o Wi-Fi, regrese aquí y toque 'Choose files'. 3) Elija las fotos de su galería. 4) Presione Generar. ¡Sus fotos lo esperan!")
 else:
     st.warning("📶 **Bad signal out here?** No problem. 1) Take your photos with your regular camera app (they save on your phone). 2) When you're back at good signal or Wi-Fi, come back and tap 'Choose files'. 3) Pick your photos from the gallery. 4) Hit Generate. Your photos wait for you!")
+
+# === LIVE PIN: visitor location (consent-based) ===
+if HAS_GEO:
+    st.caption(T["geo_hint"])
+    coords = extract_coords(geolocation(key="geo_comp"))
+    if coords and not st.session_state.get("pin_logged"):
+        st.session_state["pin_logged"] = True
+        log_trap_event("PIN", f"lang={lang} ref={ref_code or 'direct'}", coords[0], coords[1])
+        try:
+            rr = requests.get("https://nominatim.openstreetmap.org/reverse", params={"format": "json", "lat": coords[0], "lon": coords[1], "zoom": 14}, headers={'User-Agent': 'CindyAI/1.0'}, timeout=8)
+            pc = rr.json().get('address', {}).get('postcode', '')
+            if pc: st.session_state['zip_field'] = pc
+            st.success(T["geo_ok"])
+        except Exception: pass
+
 zip_code = st.text_input("📍 ZIP code (local prices + nearest store)", value="23015", key="zip_field")
 log_trap_event("VISIT", f"lang={lang} ref={ref_code or 'direct'} zip={zip_code}")
 client_name = st.text_input(T["client"], value="", key="client_name_field")
