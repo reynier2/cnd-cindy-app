@@ -44,6 +44,7 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .feature-card p{color:#ccc;line-height:1.6;margin-bottom:20px}
 .feature-card .cta{display:inline-block;background:#e8590c;color:#fff;padding:10px 24px;border-radius:20px;text-decoration:none;font-weight:bold;font-size:14px;transition:all .2s}
 .feature-card .cta:hover{background:#fff;color:#003366}
+.feature-card .locked{display:inline-block;background:#333;color:#999;padding:10px 24px;border-radius:20px;font-weight:bold;font-size:14px}
 .flex{background:linear-gradient(135deg,#003366,#001a33);padding:60px 24px;margin:60px 0;border-radius:20px;text-align:center;position:relative;overflow:hidden}
 .flex::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(232,89,12,.2),transparent);animation:spin 8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -70,8 +71,6 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .closing-buttons a{padding:14px 28px;border-radius:30px;text-decoration:none;font-weight:bold;font-size:16px;transition:all .2s}
 .btn-primary{background:#e8590c;color:#fff}
 .btn-primary:hover{background:#fff;color:#e8590c}
-.btn-ghost{background:transparent;color:#fff;border:2px solid #fff}
-.btn-ghost:hover{background:#fff;color:#003366}
 footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px solid #fff1;margin-top:40px}
 @media(max-width:600px){
   .speech-bubble{font-size:15px;padding:16px 20px}
@@ -123,8 +122,8 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
       <div class="icon">🧪</div>
       <div class="tagline" id="safe-tag">YOUR EYES ON THE JOB</div>
       <h3 id="safe-title">The Site Checkup</h3>
-      <p id="safe-desc">Before you start work, let me walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what's GOOD, what to WATCH, and what to FIX first. No scary talk. Just a friendly pro read.</p>
-      <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?safety=1" id="safe-cta">🧪 TEST YOUR SITE</a>
+      <p id="safe-desc">Before you start work, Cindy walks the site with you. She spots the risks — unguarded edges, missing PPE, bad ladders. She tells you what's GOOD, what to WATCH, and what to FIX first. Launching soon for Pro members.</p>
+      <span class="locked" id="safe-cta">🔒 COMING SOON</span>
     </div>
   </div>
 
@@ -142,7 +141,7 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
       <div class="tagline" id="code-tag">YOUR CODE EXPERT</div>
       <h3 id="code-title">The Code Check</h3>
       <p id="code-desc">Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix before the inspector shows up.</p>
-      <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="code-cta">🏛️ RUN A CODE CHECK</a>
+      <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="code-cta">🏛️ ASK CINDY IN THE APP</a>
     </div>
     <div class="feature-card">
       <div class="icon">🚿</div>
@@ -217,7 +216,6 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
     </div>
     <div class="closing-buttons">
       <a class="btn-primary" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/">🚀 <span id="close-btn1">START MY FREE ESTIMATE</span></a>
-      <a class="btn-ghost" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?safety=1">🧪 <span id="close-btn2">TEST MY JOB SITE</span></a>
     </div>
   </div>
 
@@ -289,9 +287,9 @@ const translations = {
     'welcome-text':'Hola, soy Cindy. Bienvenido a mi showroom. No soy una IA básica — soy la socia más inteligente que un contratista haya contratado. ¿Quieres que te muestre todo?',
     'start-btn':'🎬 EMPEZAR EL RECORRIDO','intro-text':'Bien, entra. Aquí están los cerebros que te hacen ganar dinero. Te voy a mostrar cada uno. Mira esto...',
     'est-tag':'TU GANADOR DE DINERO','est-title':'El Presupuestador','est-desc':'Toma una foto del trabajo. Lo leo como un contratista pro — veo la madera, el tubo, el siding. Precifico cada material con marca, costo y matemática. Agrego mano de obra, ganancia y permisos. PDF limpio en 15 segundos. Entrégalo y gana el trabajo.','est-cta':'🚀 PROBAR GRATIS',
-    'safe-tag':'TUS OJOS EN LA OBRA','safe-title':'El Chequeo de Obra','safe-desc':'Antes de empezar, recorro la obra contigo. Detecto riesgos — bordes sin protección, falta de equipo, escaleras malas. Te digo qué está BIEN, qué VIGILAR y qué ARREGLAR primero.','safe-cta':'🧪 PROBAR MI OBRA',
+    'safe-tag':'TUS OJOS EN LA OBRA','safe-title':'El Chequeo de Obra','safe-desc':'Antes de empezar, Cindy recorre la obra contigo. Detecta riesgos — bordes sin protección, falta de equipo, escaleras malas. Te dice qué está BIEN, qué VIGILAR y qué ARREGLAR primero. Lanzándose pronto para miembros Pro.','safe-cta':'🔒 PRONTO',
     'mid-text':'Ahora mira este — aquí me pongo seria para los contratistas comerciales...',
-    'code-tag':'TU EXPERTA EN CÓDIGO','code-title':'El Chequeo de Código','code-desc':'Reviso espacios comerciales contra códigos — salidas, escaleras, rociadores. Marco lo FALLIDO y te digo qué arreglar antes que llegue el inspector.','code-cta':'🏛️ CHEQUEAR CÓDIGO',
+    'code-tag':'TU EXPERTA EN CÓDIGO','code-title':'El Chequeo de Código','code-desc':'Reviso espacios comerciales contra códigos — salidas, escaleras, rociadores. Marco lo FALLIDO y te digo qué arreglar antes que llegue el inspector.','code-cta':'🏛️ PREGÚNTALE EN LA APP',
     'trade-tag':'HECHO PARA CADA OFICIO','trade-title':'Siete Oficios, Una Cindy','trade-desc':'Eléctrico. Plomería. Siding. Techos. Concreto. Tubería. Y ahora Albañilería. Conozco cada marca y cada chequeo. Elige tu oficio — yo hago el resto.','trade-cta':'🛠️ ELIGE TU OFICIO',
     'flex-title':'💪 Por Qué No Soy Como Las Otras IAs',
     'flex1-b':'Ellas ADIVINAN. Yo CALCULO.','flex1-p':'Otras dicen "depende..." Yo imprimo marca, precio, matemática y total. Cada línea.',
@@ -315,16 +313,16 @@ const translations = {
     'ls-masonry-b':'Escucha a Cindy enseñarlo',
     'school-coming':'🎓 PRONTO: Cursos completos de la Escuela de Cindy con certificados',
     'close-text':'Ese fue el recorrido. Soy tuya. Gratis durante la beta. Vamos a ganar dinero.',
-    'close-btn1':'PRESUPUESTO GRATIS','close-btn2':'PROBAR MI OBRA','follow-title':'Sigue a CND Real Estate Services'
+    'close-btn1':'PRESUPUESTO GRATIS','follow-title':'Sigue a CND Real Estate Services'
   },
   en: {
     'lang-label':'🇪 Español','audio-btn':'🔇 Sound Off','audio-hint':'💡 Tap 🔊 up top to hear Cindy talk.',
     'welcome-text':'Hey, I\'m Cindy. Welcome to my showroom. I\'m not some basic AI — I\'m the smartest partner a contractor ever hired. Want me to show you around?',
     'start-btn':'🎬 START THE TOUR','intro-text':'Alright, step inside. Over here we\'ve got the brains that make you money. I\'ll walk you through each one. Watch this...',
     'est-tag':'YOUR MONEY-MAKER','est-title':'The Estimator','est-desc':'Snap a photo of the job. I read it like a pro contractor — I see the lumber, the pipe, the siding. I price every material with brand, unit cost, and full math. Add labor, profit, and permits. You get a clean PDF in 15 seconds. Hand it to the client. Win the job.','est-cta':'🚀 TRY IT FREE',
-    'safe-tag':'YOUR EYES ON THE JOB','safe-title':'The Site Checkup','safe-desc':'Before you start work, let me walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what\'s GOOD, what to WATCH, and what to FIX first.','safe-cta':'🧪 TEST YOUR SITE',
+    'safe-tag':'YOUR EYES ON THE JOB','safe-title':'The Site Checkup','safe-desc':'Before you start work, Cindy walks the site with you. She spots the risks — unguarded edges, missing PPE, bad ladders. She tells you what\'s GOOD, what to WATCH, and what to FIX first. Launching soon for Pro members.','safe-cta':'🔒 COMING SOON',
     'mid-text':'Now watch this one — this is where I get serious for the commercial contractors...',
-    'code-tag':'YOUR CODE EXPERT','code-title':'The Code Check','code-desc':'Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix.','code-cta':'🏛️ RUN A CODE CHECK',
+    'code-tag':'YOUR CODE EXPERT','code-title':'The Code Check','code-desc':'Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix.','code-cta':'🏛️ ASK CINDY IN THE APP',
     'trade-tag':'BUILT FOR EVERY TRADE','trade-title':'Seven Trades, One Cindy','trade-desc':'Electrical. Plumbing. Siding. Roofing. Concrete. Pipe & Drain. And now Masonry. I know every brand, every unit price, every engineering check for each one. You just pick your trade — I do the rest.','trade-cta':'🛠️ PICK YOUR TRADE',
     'flex-title':'💪 Why I\'m Not Like the Other AIs',
     'flex1-b':'They GUESS. I CALCULATE.','flex1-p':'Other AIs say "cost depends on..." and wave their hands. I print the brand, the unit price, the math, and the total. Every. Single. Line.',
@@ -348,7 +346,7 @@ const translations = {
     'ls-masonry-b':'Hear Cindy teach it',
     'school-coming':'🎓 COMING SOON: Full Cindy Trade School courses with certificates',
     'close-text':'That\'s the tour. I\'m yours. Free during beta. Let\'s go make some money.',
-    'close-btn1':'START MY FREE ESTIMATE','close-btn2':'TEST MY JOB SITE','follow-title':'Follow CND Real Estate Services'
+    'close-btn1':'START MY FREE ESTIMATE','follow-title':'Follow CND Real Estate Services'
   }
 };
 function toggleLang(){
