@@ -98,7 +98,7 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
     <span id="welcome-text">Hey, I'm Cindy. Welcome to my showroom. I'm not some basic AI — I'm the smartest partner a contractor ever hired. Want me to show you around?</span>
   </div>
   <button class="start-tour" onclick="startTour()" id="start-btn">🎬 START THE TOUR</button>
-  <p style="margin-top:16px;color:#99a;font-size:14px" id="audio-hint">💡 Tap Cindy's face or hit START — she talks now.</p>
+  <p style="margin-top:16px;color:#99a;font-size:14px" id="audio-hint">💡 Tap Cindy's face or hit START — she talks the whole tour now.</p>
 </section>
 
 <section class="showroom" id="showroom">
@@ -106,7 +106,7 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
     <div class="cindy-host"><img src="cindy%20happy.png" alt="Cindy AI"></div>
     <div class="speech-bubble">
       <div class="name">💬 CINDY:</div>
-      <span id="intro-text">Alright, step inside. Over here we've got the brains that make you money. I'll walk you through each one. Watch this...</span>
+      <span id="intro-text" class="vo">Alright, step inside. Over here we've got the brains that make you money. I'll walk you through each one. Watch this...</span>
     </div>
   </div>
 
@@ -115,14 +115,14 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
       <div class="icon">💰</div>
       <div class="tagline" id="est-tag">YOUR MONEY-MAKER</div>
       <h3 id="est-title">The Estimator</h3>
-      <p id="est-desc">Snap a photo of the job. I read it like a pro contractor — I see the lumber, the pipe, the siding. I price every material with brand, unit cost, and full math. Add labor, profit, and permits. You get a clean PDF in 15 seconds. Hand it to the client. Win the job.</p>
+      <p id="est-desc" class="vo">Snap a photo of the job. I read it like a pro contractor — I see the lumber, the pipe, the siding. I price every material with brand, unit cost, and full math. Add labor, profit, and permits. You get a clean PDF in 15 seconds. Hand it to the client. Win the job.</p>
       <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="est-cta">🚀 TRY IT FREE</a>
     </div>
     <div class="feature-card">
       <div class="icon">🧪</div>
       <div class="tagline" id="safe-tag">YOUR EYES ON THE JOB</div>
       <h3 id="safe-title">The Site Checkup</h3>
-      <p id="safe-desc">Before you start work, Cindy walks the site with you. She spots the risks — unguarded edges, missing PPE, bad ladders. She tells you what's GOOD, what to WATCH, and what to FIX first. Launching soon for Pro members.</p>
+      <p id="safe-desc" class="vo">Before you start work, I walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what's GOOD, what to WATCH, and what to FIX first. Launching soon for Pro members.</p>
       <span class="locked" id="safe-cta">🔒 COMING SOON</span>
     </div>
   </div>
@@ -131,7 +131,7 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
     <div class="cindy-host"><img src="cindy%20happy.png" alt="Cindy AI"></div>
     <div class="speech-bubble">
       <div class="name">💬 CINDY:</div>
-      <span id="mid-text">Now watch this one — this is where I get serious for the commercial contractors...</span>
+      <span id="mid-text" class="vo">Now watch this one — this is where I get serious for the commercial contractors...</span>
     </div>
   </div>
 
@@ -140,14 +140,14 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
       <div class="icon">🏛️</div>
       <div class="tagline" id="code-tag">YOUR CODE EXPERT</div>
       <h3 id="code-title">The Code Check</h3>
-      <p id="code-desc">Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix before the inspector shows up.</p>
+      <p id="code-desc" class="vo">Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix before the inspector shows up.</p>
       <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="code-cta">🏛️ ASK CINDY IN THE APP</a>
     </div>
     <div class="feature-card">
       <div class="icon">🚿</div>
       <div class="tagline" id="trade-tag">BUILT FOR EVERY TRADE</div>
       <h3 id="trade-title">Seven Trades, One Cindy</h3>
-      <p id="trade-desc">Electrical. Plumbing. Siding. Roofing. Concrete. Pipe & Drain. And now Masonry. I know every brand, every unit price, every engineering check for each one. You just pick your trade — I do the rest.</p>
+      <p id="trade-desc" class="vo">Electrical. Plumbing. Siding. Roofing. Concrete. Pipe & Drain. And now Masonry. I know every brand, every unit price, every engineering check for each one. You just pick your trade — I do the rest.</p>
       <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="trade-cta">🛠️ PICK YOUR TRADE</a>
     </div>
   </div>
@@ -156,10 +156,10 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
     <div class="flex-inner">
       <h2 id="flex-title">💪 Why I'm Not Like the Other AIs</h2>
       <div class="flex-list">
-        <div class="flex-item"><b id="flex1-b">They GUESS. I CALCULATE.</b><p id="flex1-p">Other AIs say "cost depends on..." and wave their hands. I print the brand, the unit price, the math, and the total. Every. Single. Line.</p></div>
-        <div class="flex-item"><b id="flex2-b">They CHAT. I ENGINEER.</b><p id="flex2-p">I run Manning's Equation on pipe. I check 30 PSI soil bearing on foundations. Real engineering, stamped into your bid.</p></div>
-        <div class="flex-item"><b id="flex3-b">They GIVE YOU RAW TEXT. I GIVE YOU A PDF.</b><p id="flex3-p">No copy-paste. No formatting headaches. A clean, branded PDF ready to hand your client.</p></div>
-        <div class="flex-item"><b id="flex4-b">They WORK ALONE. I'M YOUR PARTNER.</b><p id="flex4-p">I estimate the job, check the site, AND review the code. Three brains. One app. Your whole workflow in my hands.</p></div>
+        <div class="flex-item"><b id="flex1-b">They GUESS. I CALCULATE.</b><p id="flex1-p" class="vo">Other AIs say "cost depends on..." and wave their hands. I print the brand, the unit price, the math, and the total. Every. Single. Line.</p></div>
+        <div class="flex-item"><b id="flex2-b">They CHAT. I ENGINEER.</b><p id="flex2-p" class="vo">I run Manning's Equation on pipe. I check 30 PSI soil bearing on foundations. Real engineering, stamped into your bid.</p></div>
+        <div class="flex-item"><b id="flex3-b">They GIVE YOU RAW TEXT. I GIVE YOU A PDF.</b><p id="flex3-p" class="vo">No copy-paste. No formatting headaches. A clean, branded PDF ready to hand your client.</p></div>
+        <div class="flex-item"><b id="flex4-b">They WORK ALONE. I'M YOUR PARTNER.</b><p id="flex4-p" class="vo">I estimate the job, check the site, AND review the code. Three brains. One app. Your whole workflow in my hands.</p></div>
       </div>
     </div>
   </div>
@@ -212,7 +212,7 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
     <div class="cindy-host"><img src="cindy%20happy.png" alt="Cindy AI"></div>
     <div class="speech-bubble">
       <div class="name">💬 CINDY:</div>
-      <span id="close-text">That's the tour. I'm yours. Free during beta. Let's go make some money.</span>
+      <span id="close-text" class="vo">That's the tour. I'm yours. Free during beta. Let's go make some money.</span>
     </div>
     <div class="closing-buttons">
       <a class="btn-primary" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/">🚀 <span id="close-btn1">START MY FREE ESTIMATE</span></a>
@@ -275,28 +275,30 @@ const spoken = new Set();
 if('IntersectionObserver' in window){
   const obs = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
-      if(e.isIntersecting && !spoken.has(e.target.id)){ spoken.add(e.target.id); if(audioOn) doSpeak(e.target.textContent); }
+      if(e.isIntersecting && !spoken.has(e.target)){
+        spoken.add(e.target);
+        if(audioOn) doSpeak(e.target.textContent);
+      }
     });
-  }, {threshold: 0.7});
-  ['intro-text','mid-text','close-text'].forEach(function(id){
-    const el = document.getElementById(id); if(el) obs.observe(el);
-  });
+  }, {threshold: 0.4});
+  document.querySelectorAll('.vo').forEach(function(el){ obs.observe(el); });
 }
 function startTour(){
   document.getElementById('landing').style.display = 'none';
   document.getElementById('showroom').classList.add('active');
   window.scrollTo({top:0, behavior:'smooth'});
-  spoken.add('intro-text');
+  const introEl = document.getElementById('intro-text');
+  spoken.add(introEl);
   setAudio(true);
-  doSpeak(document.getElementById('intro-text').textContent);
+  doSpeak(introEl.textContent);
 }
 const translations = {
   es: {
-    'lang-label':'🇺 English','audio-btn':'🔇 Sin Sonido','audio-hint':'💡 Toca la cara de Cindy o EMPEZAR — ella ya habla.',
+    'lang-label':'🇺 English','audio-btn':'🔇 Sin Sonido','audio-hint':'💡 Toca la cara de Cindy o EMPEZAR — ella habla todo el recorrido.',
     'welcome-text':'Hola, soy Cindy. Bienvenido a mi showroom. No soy una IA básica — soy la socia más inteligente que un contratista haya contratado. ¿Quieres que te muestre todo?',
     'start-btn':'🎬 EMPEZAR EL RECORRIDO','intro-text':'Bien, entra. Aquí están los cerebros que te hacen ganar dinero. Te voy a mostrar cada uno. Mira esto...',
     'est-tag':'TU GANADOR DE DINERO','est-title':'El Presupuestador','est-desc':'Toma una foto del trabajo. Lo leo como un contratista pro — veo la madera, el tubo, el siding. Precifico cada material con marca, costo y matemática. Agrego mano de obra, ganancia y permisos. PDF limpio en 15 segundos. Entrégalo y gana el trabajo.','est-cta':'🚀 PROBAR GRATIS',
-    'safe-tag':'TUS OJOS EN LA OBRA','safe-title':'El Chequeo de Obra','safe-desc':'Antes de empezar, Cindy recorre la obra contigo. Detecta riesgos — bordes sin protección, falta de equipo, escaleras malas. Te dice qué está BIEN, qué VIGILAR y qué ARREGLAR primero. Lanzándose pronto para miembros Pro.','safe-cta':'🔒 PRONTO',
+    'safe-tag':'TUS OJOS EN LA OBRA','safe-title':'El Chequeo de Obra','safe-desc':'Antes de empezar, recorro la obra contigo. Detecto riesgos — bordes sin protección, falta de equipo, escaleras malas. Te digo qué está BIEN, qué VIGILAR y qué ARREGLAR primero. Lanzándose pronto para miembros Pro.','safe-cta':'🔒 PRONTO',
     'mid-text':'Ahora mira este — aquí me pongo seria para los contratistas comerciales...',
     'code-tag':'TU EXPERTA EN CÓDIGO','code-title':'El Chequeo de Código','code-desc':'Reviso espacios comerciales contra códigos — salidas, escaleras, rociadores. Marco lo FALLIDO y te digo qué arreglar antes que llegue el inspector.','code-cta':'🏛️ PREGÚNTALE EN LA APP',
     'trade-tag':'HECHO PARA CADA OFICIO','trade-title':'Siete Oficios, Una Cindy','trade-desc':'Eléctrico. Plomería. Siding. Techos. Concreto. Tubería. Y ahora Albañilería. Conozco cada marca y cada chequeo. Elige tu oficio — yo hago el resto.','trade-cta':'🛠️ ELIGE TU OFICIO',
@@ -325,11 +327,11 @@ const translations = {
     'close-btn1':'PRESUPUESTO GRATIS','follow-title':'Sigue a CND Real Estate Services'
   },
   en: {
-    'lang-label':'🇪 Español','audio-btn':'🔇 Sound Off','audio-hint':'💡 Tap Cindy\'s face or hit START — she talks now.',
+    'lang-label':'🇪 Español','audio-btn':'🔇 Sound Off','audio-hint':'💡 Tap Cindy\'s face or hit START — she talks the whole tour now.',
     'welcome-text':'Hey, I\'m Cindy. Welcome to my showroom. I\'m not some basic AI — I\'m the smartest partner a contractor ever hired. Want me to show you around?',
     'start-btn':'🎬 START THE TOUR','intro-text':'Alright, step inside. Over here we\'ve got the brains that make you money. I\'ll walk you through each one. Watch this...',
     'est-tag':'YOUR MONEY-MAKER','est-title':'The Estimator','est-desc':'Snap a photo of the job. I read it like a pro contractor — I see the lumber, the pipe, the siding. I price every material with brand, unit cost, and full math. Add labor, profit, and permits. You get a clean PDF in 15 seconds. Hand it to the client. Win the job.','est-cta':'🚀 TRY IT FREE',
-    'safe-tag':'YOUR EYES ON THE JOB','safe-title':'The Site Checkup','safe-desc':'Before you start work, Cindy walks the site with you. She spots the risks — unguarded edges, missing PPE, bad ladders. She tells you what\'s GOOD, what to WATCH, and what to FIX first. Launching soon for Pro members.','safe-cta':'🔒 COMING SOON',
+    'safe-tag':'YOUR EYES ON THE JOB','safe-title':'The Site Checkup','safe-desc':'Before you start work, I walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what\'s GOOD, what to WATCH, and what to FIX first. Launching soon for Pro members.','safe-cta':'🔒 COMING SOON',
     'mid-text':'Now watch this one — this is where I get serious for the commercial contractors...',
     'code-tag':'YOUR CODE EXPERT','code-title':'The Code Check','code-desc':'Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix.','code-cta':'🏛️ ASK CINDY IN THE APP',
     'trade-tag':'BUILT FOR EVERY TRADE','trade-title':'Seven Trades, One Cindy','trade-desc':'Electrical. Plumbing. Siding. Roofing. Concrete. Pipe & Drain. And now Masonry. I know every brand, every unit price, every engineering check for each one. You just pick your trade — I do the rest.','trade-cta':'🛠️ PICK YOUR TRADE',
