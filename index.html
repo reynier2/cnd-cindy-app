@@ -92,13 +92,13 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
 </div>
 
 <section class="landing" id="landing">
-  <div class="cindy-host"><img src="cindy%20happy.png" alt="Cindy AI"></div>
+  <div class="cindy-host"><img src="cindy%20happy.png" alt="Cindy AI" style="cursor:pointer" onclick="tapCindy()"></div>
   <div class="speech-bubble">
     <div class="name">💬 CINDY:</div>
     <span id="welcome-text">Hey, I'm Cindy. Welcome to my showroom. I'm not some basic AI — I'm the smartest partner a contractor ever hired. Want me to show you around?</span>
   </div>
   <button class="start-tour" onclick="startTour()" id="start-btn">🎬 START THE TOUR</button>
-  <p style="margin-top:16px;color:#99a;font-size:14px" id="audio-hint">💡 Tap 🔊 up top to hear Cindy talk.</p>
+  <p style="margin-top:16px;color:#99a;font-size:14px" id="audio-hint">💡 Tap Cindy's face or hit START — she talks now.</p>
 </section>
 
 <section class="showroom" id="showroom">
@@ -167,7 +167,7 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
   <!-- === CINDY'S TRADE SCHOOL === -->
   <div class="school">
     <h2 id="school-title">🎓 CINDY'S TRADE SCHOOL</h2>
-    <p class="sub" id="school-sub">Free lessons while in beta. Tap 🔊 and let Cindy teach you the real job specifics — the deep stuff.</p>
+    <p class="sub" id="school-sub">Free lessons while in beta. Tap 🔊 on any lesson and let Cindy teach you the real job specifics — the deep stuff.</p>
     <div class="school-grid">
       <div class="lesson-card">
         <h4>⚡ <span id="ls-electrical-t">Electrical — Panels & Protection</span></h4>
@@ -252,24 +252,30 @@ function doSpeak(text){
   u.onend = u.onerror = function(){ document.querySelectorAll('.cindy-host img').forEach(i => i.classList.remove('talking')); };
   window.speechSynthesis.speak(u);
 }
-function speak(text){ if(audioOn) doSpeak(text); }
-function speakLesson(id){ const el = document.getElementById(id); if(el) doSpeak(el.textContent); }
-function toggleAudio(){
-  audioOn = !audioOn;
-  document.getElementById('audio-btn').textContent = audioOn ? '🔊 Cindy Talking' : '🔇 Sound Off';
-  if(audioOn){
-    const inTour = document.getElementById('showroom').classList.contains('active');
-    speak(document.getElementById(inTour ? 'intro-text' : 'welcome-text').textContent);
-  } else if('speechSynthesis' in window){
+function setAudio(on){
+  audioOn = on;
+  document.getElementById('audio-btn').textContent = on ? '🔊 Cindy Talking' : '🔇 Sound Off';
+  if(!on && 'speechSynthesis' in window){
     window.speechSynthesis.cancel();
     document.querySelectorAll('.cindy-host img').forEach(i => i.classList.remove('talking'));
   }
+}
+function toggleAudio(){
+  setAudio(!audioOn);
+  if(audioOn){
+    const inTour = document.getElementById('showroom').classList.contains('active');
+    doSpeak(document.getElementById(inTour ? 'intro-text' : 'welcome-text').textContent);
+  }
+}
+function tapCindy(){
+  setAudio(true);
+  doSpeak(document.getElementById('welcome-text').textContent);
 }
 const spoken = new Set();
 if('IntersectionObserver' in window){
   const obs = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
-      if(e.isIntersecting && !spoken.has(e.target.id)){ spoken.add(e.target.id); speak(e.target.textContent); }
+      if(e.isIntersecting && !spoken.has(e.target.id)){ spoken.add(e.target.id); if(audioOn) doSpeak(e.target.textContent); }
     });
   }, {threshold: 0.7});
   ['intro-text','mid-text','close-text'].forEach(function(id){
@@ -280,10 +286,13 @@ function startTour(){
   document.getElementById('landing').style.display = 'none';
   document.getElementById('showroom').classList.add('active');
   window.scrollTo({top:0, behavior:'smooth'});
+  spoken.add('intro-text');
+  setAudio(true);
+  doSpeak(document.getElementById('intro-text').textContent);
 }
 const translations = {
   es: {
-    'lang-label':'🇺 English','audio-btn':'🔇 Sin Sonido','audio-hint':'💡 Toca 🔊 arriba para escuchar a Cindy.',
+    'lang-label':'🇺 English','audio-btn':'🔇 Sin Sonido','audio-hint':'💡 Toca la cara de Cindy o EMPEZAR — ella ya habla.',
     'welcome-text':'Hola, soy Cindy. Bienvenido a mi showroom. No soy una IA básica — soy la socia más inteligente que un contratista haya contratado. ¿Quieres que te muestre todo?',
     'start-btn':'🎬 EMPEZAR EL RECORRIDO','intro-text':'Bien, entra. Aquí están los cerebros que te hacen ganar dinero. Te voy a mostrar cada uno. Mira esto...',
     'est-tag':'TU GANADOR DE DINERO','est-title':'El Presupuestador','est-desc':'Toma una foto del trabajo. Lo leo como un contratista pro — veo la madera, el tubo, el siding. Precifico cada material con marca, costo y matemática. Agrego mano de obra, ganancia y permisos. PDF limpio en 15 segundos. Entrégalo y gana el trabajo.','est-cta':'🚀 PROBAR GRATIS',
@@ -296,7 +305,7 @@ const translations = {
     'flex2-b':'Ellas CHAT. Yo INGENIERÍA.','flex2-p':'Corro Manning en tubería y 30 PSI en cimientos. Ingeniería real en tu presupuesto.',
     'flex3-b':'Ellas TEXTO. Yo PDF.','flex3-p':'Un PDF limpio y con marca, listo para tu cliente.',
     'flex4-b':'Ellas SOLAS. Yo TU SOCIA.','flex4-p':'Presupuesto, obra y código. Tres cerebros, una app.',
-    'school-title':'🎓 LA ESCUELA DE OFICIOS DE CINDY','school-sub':'Lecciones gratis durante la beta. Toca 🔊 y deja que Cindy te enseñe lo profundo del oficio.',
+    'school-title':'🎓 LA ESCUELA DE OFICIOS DE CINDY','school-sub':'Lecciones gratis durante la beta. Toca 🔊 en cualquier lección y deja que Cindy te enseñe lo profundo del oficio.',
     'ls-electrical-t':'Eléctrico — Paneles y Protección','ls-electrical':'Hablemos de eléctrico. Reviso el amperaje del panel — una casa moderna necesita 200 amperios; un panel de 100 alimentando una adición es un trabajo de upgrade. Busco GFCI faltantes en cocina, baño y garaje porque el código lo exige. Precifico Romex 12/2 de Southwire y siempre marco el permiso, porque el trabajo sin permiso mata la venta de la casa.',
     'ls-electrical-b':'Escucha a Cindy enseñarlo',
     'ls-plumbing-t':'Plomería — Presión y Pendiente','ls-plumbing':'Plomería es flujo y presión. Presión arriba de 80 PSI exige válvula reductora o los accesorios revientan. Pendiente de drenaje: un cuarto de pulgada por pie — muy plano se tapa, muy empinado el agua deja los sólidos. Precifico PVC Charlotte Pipe Sch 40 y marco la línea de congelación en grifos exteriores.',
@@ -316,7 +325,7 @@ const translations = {
     'close-btn1':'PRESUPUESTO GRATIS','follow-title':'Sigue a CND Real Estate Services'
   },
   en: {
-    'lang-label':'🇪 Español','audio-btn':'🔇 Sound Off','audio-hint':'💡 Tap 🔊 up top to hear Cindy talk.',
+    'lang-label':'🇪 Español','audio-btn':'🔇 Sound Off','audio-hint':'💡 Tap Cindy\'s face or hit START — she talks now.',
     'welcome-text':'Hey, I\'m Cindy. Welcome to my showroom. I\'m not some basic AI — I\'m the smartest partner a contractor ever hired. Want me to show you around?',
     'start-btn':'🎬 START THE TOUR','intro-text':'Alright, step inside. Over here we\'ve got the brains that make you money. I\'ll walk you through each one. Watch this...',
     'est-tag':'YOUR MONEY-MAKER','est-title':'The Estimator','est-desc':'Snap a photo of the job. I read it like a pro contractor — I see the lumber, the pipe, the siding. I price every material with brand, unit cost, and full math. Add labor, profit, and permits. You get a clean PDF in 15 seconds. Hand it to the client. Win the job.','est-cta':'🚀 TRY IT FREE',
@@ -329,7 +338,7 @@ const translations = {
     'flex2-b':'They CHAT. I ENGINEER.','flex2-p':'I run Manning\'s Equation on pipe. I check 30 PSI soil bearing on foundations. Real engineering, stamped into your bid.',
     'flex3-b':'They GIVE YOU RAW TEXT. I GIVE YOU A PDF.','flex3-p':'No copy-paste. No formatting headaches. A clean, branded PDF ready to hand your client.',
     'flex4-b':'They WORK ALONE. I\'M YOUR PARTNER.','flex4-p':'I estimate the job, check the site, AND review the code. Three brains. One app. Your whole workflow in my hands.',
-    'school-title':'🎓 CINDY\'S TRADE SCHOOL','school-sub':'Free lessons while in beta. Tap 🔊 and let Cindy teach you the real job specifics — the deep stuff.',
+    'school-title':'🎓 CINDY\'S TRADE SCHOOL','school-sub':'Free lessons while in beta. Tap 🔊 on any lesson and let Cindy teach you the real job specifics — the deep stuff.',
     'ls-electrical-t':'Electrical — Panels & Protection','ls-electrical':'Let us talk electrical. When I look at a panel I check the amperage — a modern house needs 200 amp service; a 100 amp panel feeding a new addition is an upgrade job right there. I hunt for missing GFCI protection in kitchens, baths and garages because code demands it. I price Southwire 12/2 Romex and I always flag the permit, because unpermitted work kills home sales.',
     'ls-electrical-b':'Hear Cindy teach it',
     'ls-plumbing-t':'Plumbing — Pressure & Slope','ls-plumbing':'Plumbing is flow and pressure. I check pressure first — above 80 PSI and code demands a pressure reducing valve or fixtures blow out. Drain slope is a quarter inch per foot: too flat clogs, too steep and water outruns the solids. I price Charlotte Pipe PVC Schedule 40 and I flag the frost line on outside spigots, because a frozen pipe is a burst pipe.',
