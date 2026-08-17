@@ -54,6 +54,34 @@ class EngineeringComplianceCore:
             return False, f"RED FLAG: Flow {calculated_flow:.1f} CFS < Req {required_flow_cfs} CFS."
         return True, f"PASS: Flow {calculated_flow:.1f} CFS (Req {required_flow_cfs} CFS)."
 
+MANNING_CORE = EngineeringComplianceCore()
+
+def lock_manning_math(text):
+    try:
+        pattern = re.compile(
+            r"CITY PLAN COMPLIANCE CHECK[^\n]*?Pipe:\s*([\d.]+)\s*in\s*([^@|\n]*?)\s*@\s*([\d.]+)\s*%[^\n]*?City Required:\s*([\d.]+)\s*CFS",
+            re.IGNORECASE)
+        m = pattern.search(text)
+        if not m:
+            return text
+        d = float(m.group(1)); mat = m.group(2).strip() or "pipe"; s = float(m.group(3)); req = float(m.group(4))
+        D = d / 12.0; S = s / 100.0
+        if S <= 0:
+            return text
+        area = (math.pi * (D ** 2)) / 4.0
+        rh = D / 4.0
+        vel = (1.486 / MANNING_CORE.MANNING_N_CONCRETE) * (rh ** (2.0 / 3.0)) * (S ** 0.5)
+        q = vel * area
+        status = "PASS" if q >= req else "RED FLAG"
+        new_line = (f"CITY PLAN COMPLIANCE CHECK - Pipe: {d:g}in {mat} @ {s:g}% slope | Manning n: 0.013 | "
+                    f"Flow Capacity: {q:.1f} CFS vs City Required: {req:.1f} CFS | STATUS: {status} (machine-verified)")
+        start = m.start()
+        end = text.find("\n", start)
+        if end == -1: end = len(text)
+        return text[:start] + new_line + text[end:]
+    except Exception:
+        return text
+
 def get_gps_from_image(image_path):
     try:
         img = Image.open(image_path)
@@ -700,6 +728,7 @@ if uploaded_files:
                 if not store_line:
                     store_line = ai_store_lookup(zip_code)
                 result_text = analyze_photos_with_ai(saved_paths, zip_code, client_name)
+                result_text = lock_manning_math(result_text)
                 pipe_tag = ""
                 if "CITY PLAN COMPLIANCE CHECK" in result_text:
                     pipe_tag = "REDFLAG" if "RED FLAG" in result_text.split("CITY PLAN COMPLIANCE CHECK", 1)[1][:200] else "PASS"
