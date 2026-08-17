@@ -7,4 +7,4 @@ requests
 stripe
 Pillow
 streamlit-js-eval
-streamlit-geolocation
+
