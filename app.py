@@ -6,7 +6,7 @@ import re
 import tempfile
 import shutil
 import base64
-import mathF
+import math
 import hashlib
 from fpdf import FPDF
 import requests
