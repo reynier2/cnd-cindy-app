@@ -13,6 +13,22 @@ import requests
 from urllib.parse import quote_plus
 from PIL import Image
 
+# === MUNICIPAL CODE INSPECTION DATABASES ===
+INSPECTION_CRITERIA_MANUAL = {
+    "Structural Masonry (IBC Chapter 21)": {
+        "Plumb & Alignment": "Maximum deviation of 1/4 inch per 10 feet horizontally; 1/8 inch per 10 feet vertically.",
+        "Mortar Joint Fill": "All bed and head joints must be completely filled with mortar. No voids or deep tracking permitted.",
+        "Rebar & Grout Placement": "Clearance around reinforcement must be at least 1/4 inch for fine grout, 1/2 inch for coarse grout.",
+        "Wall Bracing (OSHA 1926.706)": "Walls exceeding 8 feet in height must be physically braced until permanent structural ties are integrated."
+    },
+    "HVAC & Mechanical (IMC / NFPA Codes)": {
+        "Equipment Clearance": "Minimum 30 inches of service clearance depth in front of control panels and equipment switches.",
+        "Rooftop Support / Curb Stability": "Equipment must be securely anchored to structural roof curbs or sleeper rails to handle wind and vibration loads.",
+        "Condensate Drainage": "Trapped drain lines must slope downward at a minimum pitch of 1/4 inch per foot toward an approved disposal area.",
+        "Electrical LOTO / Disconnect": "A legible, liquid-tight electrical safety disconnect switch must be accessible within sight of the outdoor unit."
+    }
+}
+
 # === ENTERPRISE VAULT (locked features for big-company tier - DO NOT DELETE) ===
 MANAGER_PASSCODE = "CND-BOSS"
 
@@ -119,6 +135,49 @@ def log_trap_event(event, detail="", lat=0, lon=0):
         url = "https://script.google.com/macros/s/AKfycbzP6MvQ0a5kjs5QU0R2NhN7zB45sQvqqYDYWhh-uIDDIChnOssW8qSoto_IBo5zyc5Crw/exec"
         requests.post(url, json={"event": f"{event} {detail}".strip()[:160], "lat": lat, "lon": lon, "city": ""}, timeout=5)
     except Exception: pass
+
+# === CLOUD CODE INSPECTOR ENGINE (GPT-4o Vision) ===
+def execute_building_inspection(photo_paths, trade_domain, inspector_notes):
+    api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    if not api_key: return "Error: OpenAI API Key missing in Streamlit Secrets."
+    
+    domain_guidelines = INSPECTION_CRITERIA_MANUAL.get(trade_domain, {})
+    
+    system_instruction = (
+        "You are an authorized Municipal Building Code Inspector and Quality Control Auditor for CND Real Estate Services.\n"
+        f"Perform a professional code-compliance inspection of the provided field photos for the **{trade_domain}** trade.\n\n"
+        "1. COMPLIANCE STANDARDS TO FORCE:\n"
+        f"   - Enforce these strict regulatory guidelines: {domain_guidelines}\n"
+        "   - Scan the image for structural defects, installation shortcuts, code violations, or mechanical weaknesses.\n\n"
+        "2. PASS / FAIL DETERMINATION:\n"
+        "   - If you observe ANY clear code violations, structural damage, or installation errors, you MUST print "
+        "'INSPECTION STATUS: FAILED - CODE VIOLATION' at the very top of your report.\n"
+        "   - If no obvious structural or regulatory failure is visible, print 'INSPECTION STATUS: PASSED - COMPLIANT' at the very top.\n\n"
+        "3. FIELD DEFICIENCY BREAKDOWN & CORRECTION WALKTHROUGH:\n"
+        "   - List all observed deficiencies using code references.\n"
+        "   - Detail the exact step-by-step correction instructions that the contractor must perform to clear the violation.\n\n"
+        "Format your output report precisely using bold headers: '📋 Official Inspection Status', '🔍 Observed Deficiencies & Code References', and '🛠️ Required Remediation Walkthrough Guidelines'."
+    )
+    
+    user_prompt = f"Field Inspector Observations: {inspector_notes}" if inspector_notes else "Conduct full visual audit against code guidelines."
+
+    messages = [{"role": "system", "content": system_instruction}, {"role": "user", "content": []}]
+    messages[1]["content"].append({"type": "text", "text": user_prompt})
+    
+    for path in photo_paths:
+        try:
+            with open(path, "rb") as f: b64 = base64.b64encode(f.read()).decode('utf-8')
+            messages[1]["content"].append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}})
+        except Exception: pass
+        
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    payload = {"model": "gpt-4o", "messages": messages, "max_tokens": 2000, "temperature": 0.1}
+    
+    try:
+        response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=90)
+        if response.status_code == 200: return response.json()["choices"][0]["message"]["content"]
+        else: return f"AI Error: {response.text}"
+    except Exception as e: return f"AI Error: {str(e)}"
 
 def analyze_site_safety(photo_paths, tech_name):
     api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
@@ -409,6 +468,47 @@ if tc2.button("🇪 Español"): st.session_state.lang = "es"; st.rerun()
 lang = st.session_state.get("lang", "en")
 ref_code = st.query_params.get("ref")
 if ref_code: st.session_state.ref_code = ref_code
+
+# === B2B CODE INSPECTOR MODE ===
+if st.session_state.get("inspector_mode"):
+    st.subheader("🏛️ Municipal Code Inspector (B2B Demo)")
+    st.info("Authorized AI Building Code Auditor. Select the trade discipline, upload the field evidence, and execute the structural audit.")
+    
+    selected_trade = st.selectbox("Select Inspection Discipline:", list(INSPECTION_CRITERIA_MANUAL.keys()))
+    domain_guidelines = INSPECTION_CRITERIA_MANUAL.get(selected_trade, {})
+    st.info(f"📚 **Active Code Checklists:**\n" + "\n".join([f"- **{k}**: {v}" for k, v in domain_guidelines.items()]))
+    
+    inspector_field_notes = st.text_area("Inspector On-Site Observations (Optional):", placeholder="e.g., Checking mortar joint filling on northwest corner lead...")
+    
+    insp_files = st.file_uploader("Capture or upload audit field photo:", type=["jpg", "jpeg", "png"], accept_multiple_files=True, key="insp_photos")
+    
+    if insp_files:
+        if st.button("⚖️ Execute Structural Code Audit"):
+            with st.spinner("AI parsing pixel attributes against municipal code guidelines..."):
+                temp_dir = tempfile.mkdtemp()
+                paths = []
+                try:
+                    for i, uf in enumerate(insp_files):
+                        p = os.path.join(temp_dir, f"insp_{i}_{uf.name}")
+                        with open(p, "wb") as fh: fh.write(uf.getbuffer())
+                        paths.append(p)
+                    
+                    audit_report = execute_building_inspection(paths, selected_trade, inspector_field_notes)
+                    
+                    if "FAILED" in audit_report:
+                        st.error("🚨 INSPECTION CRITERIA FAILS CODE COMPLIANCE")
+                    else:
+                        st.success("✅ DISCIPLINE PASSES VISUAL CODE COMPLIANCE AUDIT")
+                        
+                    st.markdown(audit_report)
+                finally: shutil.rmtree(temp_dir, ignore_errors=True)
+                
+    st.markdown("---")
+    if st.button("⬅️ Back to Home"):
+        st.session_state["inspector_mode"] = False
+        st.rerun()
+    st.stop()
+
 if not st.session_state.get("landed"):
     tp = st.query_params.get("trade")
     if tp in ("electrical", "plumbing", "siding", "roofing", "concrete", "pipe", "masonry"):
@@ -417,7 +517,7 @@ if not st.session_state.get("landed"):
     c1, c2 = st.columns([1, 2])
     with c1:
         try: st.image("cindy happy.png", width=230)
-        except Exception: st.markdown("# 🧑‍")
+        except Exception: st.markdown("# 🧑‍🔧")
         st.caption("**Cindy** — your AI estimating partner")
     with c2:
         st.markdown("# 🏠 CND REAL ESTATE SERVICES")
@@ -458,10 +558,16 @@ if not st.session_state.get("landed"):
             st.rerun()
     st.markdown("---")
     cta = "🚀 COMENZAR MI PRESUPUESTO GRATIS" if lang == "es" else "🚀 START MY FREE ESTIMATE"
-    if st.button(cta, type="primary"):
-        st.session_state.landed = True
-        st.session_state.safety_mode = False
-        st.rerun()
+    cc1, cc2 = st.columns(2)
+    with cc1:
+        if st.button(cta, type="primary"):
+            st.session_state.landed = True
+            st.session_state.safety_mode = False
+            st.rerun()
+    with cc2:
+        if st.button("🏛️ CODE INSPECTOR (B2B DEMO)"):
+            st.session_state.inspector_mode = True
+            st.rerun()
     st.stop()
 
 # === VAULT: JOB SITE CHECKUP MODE (hidden for now - flip the button back on when ready to charge) ===
@@ -511,7 +617,6 @@ if lang == "es":
 else:
     st.warning("📶 **Bad signal out here?** No problem. 1) Take your photos with your regular camera app (they save on your phone). 2) When you're back at good signal or Wi-Fi, come back and tap 'Choose files'. 3) Pick your photos from the gallery. 4) Hit Generate. Your photos wait for you!")
 
-# === LIVE PIN: visitor phone sends GPS straight to the Sheet (no extra packages) ===
 st.caption(T["geo_hint"])
 pin_html = f"""
 <div style="margin:4px 0 10px 0;">
@@ -544,6 +649,26 @@ zip_code = st.text_input("📍 ZIP code (local prices + nearest store)", value="
 log_trap_event("VISIT", f"lang={lang} ref={ref_code or 'direct'} zip={zip_code}")
 client_name = st.text_input(T["client"], value="", key="client_name_field")
 uploaded_files = st.file_uploader(T["uploader"], type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="mobile_camera_fix_v3")
+
+# === AUTO PIN: drop a dot the moment a GPS photo is uploaded (no button needed) ===
+if uploaded_files and not st.session_state.get("photo_pin_logged"):
+    try:
+        ap_dir = tempfile.mkdtemp()
+        try:
+            for uf in uploaded_files:
+                ap_path = os.path.join(ap_dir, f"pin_{uf.name}")
+                with open(ap_path, "wb") as fh:
+                    fh.write(uf.getbuffer())
+                pla, plo = get_gps_from_image(ap_path)
+                if pla and plo:
+                    st.session_state["photo_pin_logged"] = True
+                    log_trap_event("PIN", f"photo lang={lang} ref={ref_code or 'direct'}", pla, plo)
+                    break
+        finally:
+            shutil.rmtree(ap_dir, ignore_errors=True)
+    except Exception:
+        pass
+
 if uploaded_files:
     st.write(f"✅ {len(uploaded_files)} {T['uploaded']}")
     if st.button(T["generate"]):
