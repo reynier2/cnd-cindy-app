@@ -7,10 +7,20 @@ import tempfile
 import shutil
 import base64
 import math
+import hashlib
 from fpdf import FPDF
 import requests
 from urllib.parse import quote_plus
 from PIL import Image
+
+# === OSHA SAFETY LOCKOUT CORE ===
+MANAGER_PASSCODE = "CND-BOSS"
+
+def job_code_for(tech):
+    return hashlib.md5(tech.upper().strip().encode()).hexdigest()[:6].upper()
+
+def clearance_code_for(job_id):
+    return str(int(hashlib.md5(job_id.encode()).hexdigest(), 16) % 9000 + 1000)
 
 class EngineeringComplianceCore:
     def __init__(self):
@@ -109,6 +119,29 @@ def log_trap_event(event, detail="", lat=0, lon=0):
         url = "https://script.google.com/macros/s/AKfycbzP6MvQ0a5kjs5QU0R2NhN7zB45sQvqqYDYWhh-uIDDIChnOssW8qSoto_IBo5zyc5Crw/exec"
         requests.post(url, json={"event": f"{event} {detail}".strip()[:160], "lat": lat, "lon": lon, "city": ""}, timeout=5)
     except Exception: pass
+
+def analyze_site_safety(photo_paths, tech_name):
+    api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
+    if not api_key: return "Error: OpenAI API Key missing in Streamlit Secrets."
+    system_prompt = f"""You are an OSHA-certified site safety inspector AI working for CND Real Estate Services. The technician on site is {tech_name.upper()}.
+Scan ALL photos for: missing fall protection or harness at height, unguarded edges or openings, missing hard hats or eye protection, exposed live wiring or missing GFCI, unshored trenches deeper than 5 ft, scaffold violations, missing lockout/tagout, fire and housekeeping hazards, ladder violations.
+OUTPUT FORMAT: bold header '🦺 OSHA SITE WALK', then a bullet list of findings, each tagged PASS / ATTENTION / VIOLATION with a one-line fix.
+If ANY finding is an immediate danger to life (fall risk, live wire, trench collapse), you MUST print this exact line on its own: CRITICAL SAFETY HAZARD DETECTED
+End with either 'OVERALL: SAFE TO PROCEED' or 'OVERALL: STOP WORK AUTHORITY INVOKED'."""
+    messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": []}]
+    messages[1]["content"].append({"type": "text", "text": f"Inspect {len(photo_paths)} site photos for OSHA compliance."})
+    for path in photo_paths:
+        try:
+            with open(path, "rb") as f: b64 = base64.b64encode(f.read()).decode('utf-8')
+            messages[1]["content"].append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}})
+        except Exception: pass
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    payload = {"model": "gpt-4o", "messages": messages, "max_tokens": 2000, "temperature": 0.1}
+    try:
+        response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload, timeout=90)
+        if response.status_code == 200: return response.json()["choices"][0]["message"]["content"]
+        else: return f"AI Error: {response.text}"
+    except Exception as e: return f"AI Error: {str(e)}"
 
 def analyze_photos_with_ai(photo_paths, zipcode, client_name=""):
     api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
@@ -311,7 +344,6 @@ def build_pdf_fallback(result_text, lang, client_name="", photo_paths=[], extra_
             except Exception: pass
         pdf.ln(4); pdf.set_draw_color(200, 200, 200); pdf.set_line_width(0.5); pdf.line(15, pdf.get_y(), 195, pdf.get_y()); pdf.ln(6)
 
-    # CUSTOMER SAFE TABLE INSTEAD OF RAW TEXT DUMP
     items = parse_bid_items(result_text)
     clean_items, clean_notes = clean_for_customer(result_text, items)
     
@@ -420,10 +452,81 @@ if not st.session_state.get("landed"):
             st.rerun()
     st.markdown("---")
     cta = "🚀 COMENZAR MI PRESUPUESTO GRATIS" if lang == "es" else "🚀 START MY FREE ESTIMATE"
-    if st.button(cta, type="primary"):
-        st.session_state.landed = True
+    cta2 = "🦺 INICIAR CAMINATA DE SEGURIDAD OSHA" if lang == "es" else "🦺 START OSHA SAFETY WALK"
+    cc1, cc2 = st.columns(2)
+    with cc1:
+        if st.button(cta, type="primary"):
+            st.session_state.landed = True
+            st.session_state.safety_mode = False
+            st.rerun()
+    with cc2:
+        if st.button(cta2):
+            st.session_state.landed = True
+            st.session_state.safety_mode = True
+            st.rerun()
+    with st.expander("🔐 Manager Mode"):
+        pw = st.text_input("Manager passcode:", type="password", key="mgr_pw")
+        if pw:
+            if pw == MANAGER_PASSCODE:
+                jid = st.text_input("Enter Job ID from the tech's screen:", key="mgr_job")
+                if jid.strip() and st.button("🔓 Issue clearance code"):
+                    jidc = jid.strip().upper()
+                    st.success(f"Clearance code for {jidc}: **{clearance_code_for(jidc)}** — read it to your tech after you review the site.")
+                    log_trap_event("MANAGER_CLEAR_ISSUED", f"job={jidc}")
+            else:
+                st.warning("Wrong passcode.")
+    st.stop()
+
+# === OSHA SAFETY WALK MODE ===
+if st.session_state.get("safety_mode"):
+    st.subheader("🦺 OSHA Safety Walk — Stop-Work Authority Engine")
+    st.info("Cindy is the inspector. Your phone is the eyes. A critical hazard LOCKS the workflow until a manager clears it.")
+    tech_name = st.text_input("Technician on site:", value="", key="tech_name")
+    s_files = st.file_uploader("Snap the site (wide shot + close-ups):", type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="safety_photos")
+    if s_files and tech_name.strip():
+        if st.button("🦺 Run OSHA Site Walk"):
+            with st.spinner("Cindy is walking the site..."):
+                temp_dir = tempfile.mkdtemp()
+                paths = []
+                try:
+                    for i, uf in enumerate(s_files):
+                        p = os.path.join(temp_dir, f"s_{i}_{uf.name}")
+                        with open(p, "wb") as fh: fh.write(uf.getbuffer())
+                        paths.append(p)
+                    lat, lon = get_gps_from_image(paths[0]) if paths else (None, None)
+                    report = analyze_site_safety(paths, tech_name)
+                    st.session_state["safety_report"] = report
+                    st.session_state["safety_meta"] = {"tech": tech_name.strip(), "lat": lat, "lon": lon}
+                finally: shutil.rmtree(temp_dir, ignore_errors=True)
+    if st.session_state.get("safety_report"):
+        rep = st.session_state["safety_report"]
+        meta = st.session_state.get("safety_meta", {})
+        st.markdown(rep)
+        job_id = job_code_for(meta.get("tech", "UNKNOWN"))
+        if "CRITICAL SAFETY HAZARD DETECTED" in rep and st.session_state.get("hazard_cleared_for") != job_id:
+            st.session_state["hazard_flagged"] = True
+            log_trap_event("HAZARD_LOCK", f"tech={meta.get('tech')} job={job_id}", meta.get("lat") or 0, meta.get("lon") or 0)
+        if st.session_state.get("hazard_flagged"):
+            st.error(f"🔒 STOP-WORK LOCK ACTIVE — Job ID: **{job_id}**. Call your manager. The workflow stays locked until a clearance code is entered.")
+            st.markdown(f"Manager: open **🔐 Manager Mode** on the home screen, enter Job ID **{job_id}**, and read you the 4-digit code.")
+            code = st.text_input("Enter 4-digit clearance code:", key="clear_input")
+            if st.button("🔓 Unlock Workflow"):
+                if code.strip() == clearance_code_for(job_id):
+                    st.session_state["hazard_flagged"] = False
+                    st.session_state["hazard_cleared_for"] = job_id
+                    log_trap_event("HAZARD_CLEARED", f"tech={meta.get('tech')} job={job_id}", meta.get("lat") or 0, meta.get("lon") or 0)
+                    st.balloons()
+                    st.success("✅ Cleared. Safety log written. Proceed with the work.")
+                else:
+                    st.warning("Wrong code. Your manager must review the site first.")
+        else:
+            st.success("✅ No active lock on this device.")
+    st.markdown("---")
+    if st.button("⬅️ Back to Estimator"):
+        st.session_state["safety_mode"] = False
         st.rerun()
-    st.stop()    
+    st.stop()
+
 if lang == "es":
     T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": "🎁 BETA ABIERTA — todos los presupuestos son 100% GRATIS por ahora. Sin tarjeta, sin trampas. Tome fotos y reciba su presupuesto.", "step2": "### 📸 Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": "📄 Descargar Presupuesto PDF Profesional", "client": "👤 Nombre del cliente (opcional, sale en el reporte)"}
 else:
@@ -442,7 +545,9 @@ client_name = st.text_input(T["client"], value="", key="client_name_field")
 uploaded_files = st.file_uploader(T["uploader"], type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="mobile_camera_fix_v3")
 if uploaded_files:
     st.write(f"✅ {len(uploaded_files)} {T['uploaded']}")
-    if st.button(T["generate"]):
+    if st.session_state.get("hazard_flagged"):
+        st.error("🔒 ESTIMATE LOCKED — an uncleared OSHA hazard is active on this device. Finish the Safety Walk clearance first.")
+    if st.button(T["generate"]) and not st.session_state.get("hazard_flagged"):
         with st.spinner(T["spinner"]):
             temp_dir = tempfile.mkdtemp()
             saved_paths = []
