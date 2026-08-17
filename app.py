@@ -659,7 +659,8 @@ else:
     T = {"sub": "Powered by Cindy AI Estimator", "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.", "free_banner": "🎁 BETA OPEN — every estimate is 100% FREE right now. No card, no catch. Snap photos, get your bid.", "step2": "### 📸 Upload your photos", "tip": "💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!", "uploader": "Choose images", "uploaded": "photo(s) uploaded!", "generate": "🚀 Generate Estimate", "spinner": "Cindy is analyzing the photos... this takes about 15 seconds...", "success": "Estimate Generated!", "download": "📄 Download Professional PDF Bid", "client": "👤 Client name (optional, printed on the report)", "geo_hint": "📍 Tap the button to use your location and lock in local prices."}
 st.subheader(T["sub"])
 st.write(T["intro"])
-st.success(T["free_banner"])st.markdown("---")
+st.success(T["free_banner"])
+st.markdown("---")
 st.markdown("### ⚡ THE ENGINE UNDER CINDY'S HOOD")
 st.markdown("🚀 **15-SECOND TURNAROUND** — Photo in, professional PDF bid out. Fast is reliable when the math is locked.")
 st.markdown("🔒 **MACHINE-VERIFIED MATH** — Every pipe stamp runs the real Manning equation on the server. Cindy never freestyles a number.")
