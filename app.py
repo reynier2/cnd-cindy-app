@@ -487,6 +487,27 @@ def build_pdf_fallback(result_text, lang, client_name="", photo_paths=[], extra_
 
 st.set_page_config(page_title="CND Real Estate Services", page_icon="cindy happy.png", layout="wide")
 st.title("CND Real Estate Services")
+# === NEON SHOWROOM SKIN (matches the website) ===
+NEON_SKIN = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+html, body, [class*="css"] { font-family: 'Rajdhani', sans-serif; }
+#MainMenu, footer { visibility: hidden; }
+.stApp { background: radial-gradient(ellipse at 50% -20%, #101a35 0%, #05060a 60%) fixed #05060a; }
+body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.20;
+background: repeating-linear-gradient(0deg,#00e5ff44 0 2px,transparent 2px 70px), repeating-linear-gradient(90deg,#00e5ff33 0 2px,transparent 2px 90px);
+transform: perspective(500px) rotateX(60deg); transform-origin: bottom; }
+h1, h2, h3, h4 { font-family: 'Orbitron', sans-serif !important; color: #ffffff !important; letter-spacing: 1px; }
+p, span, label, .stMarkdown, .stCaption, div[data-testid="stMarkdownContainer"] { color: #cfe3ff !important; }
+.stButton>button { background: linear-gradient(90deg,#ff6a00,#ff8c00) !important; color: #fff !important; border: none !important; border-radius: 8px !important; font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 1px; box-shadow: 0 0 18px #ff6a0066; }
+.stButton>button:hover { box-shadow: 0 0 32px #ff6a00cc; }
+.stButton>button[kind="secondary"] { background: #0b0f1a !important; border: 1px solid #00e5ff44 !important; color: #9ff !important; }
+.stTextInput input, .stTextArea textarea { background: #0b0f1a !important; color: #cfe3ff !important; border: 1px solid #00e5ff33 !important; border-radius: 8px; }
+.stInfo, .stSuccess, .stWarning, .stError { background: #0b0f1a !important; border: 1px solid #00e5ff33; border-radius: 10px; }
+div[data-testid="stMarkdownContainer"] code { background: #0b0f1a !important; color: #7ff !important; }
+</style>
+"""
+st.markdown(NEON_SKIN, unsafe_allow_html=True)
 st.markdown("---")
 lang_param = st.query_params.get("lang")
 if lang_param: st.session_state.lang = lang_param
