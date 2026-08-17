@@ -137,6 +137,7 @@ OUTPUT FORMAT RULES (mandatory):
 - Items MUST be a pipe-separated markdown table with columns | Item | Details | Qty | Unit Price | Total | - never use code fences.
 - ALWAYS add two extra rows at the bottom of the table: "OVERHEAD & PROFIT (18%)" and "GRAND TOTAL".
 - ALSO put these two lines inside the Notes section: "OVERHEAD & PROFIT (18%): $X" and "Ballpark range: Low $A - High $B"."""
+   - CITY CODE INSPECTOR MODE (JSON ONLY): If asked for a code check, DO NOT output markdown. Output ONLY a valid JSON object with these exact keys: 'building_type', 'compliance_status' ('PASSED' or 'FAILED'), 'failed_rules_count', and 'evaluations' (array of objects with 'rule_id', 'description', 'status', 'details'). 
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": []}]
     messages[1]["content"].append({"type": "text", "text": f"Analyze {len(photo_paths)} photos. Zip: {zipcode}."})
     for path in photo_paths:
