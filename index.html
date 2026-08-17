@@ -7,62 +7,242 @@
 <meta name="description" content="Professional repair estimates in 15 seconds. Free AI bids for contractors and handymen. Se habla español.">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-body{background:#f4f8fb;color:#222}
-.top{background:#003366;color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+body{background:#f4f8fb;color:#222;line-height:1.6}
+.top{background:#003366;color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
 .top b{font-size:18px;letter-spacing:1px}
+.lang-btn{background:#ffffff20;color:#fff;border:1px solid #fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px}
 .hero{max-width:1000px;margin:0 auto;padding:48px 24px;display:flex;gap:32px;align-items:center;flex-wrap:wrap}
 .hero img{width:280px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.15)}
 .hero h1{font-size:34px;color:#003366;margin-bottom:12px}
 .hero p{font-size:17px;line-height:1.5;margin-bottom:20px}
-.cta{display:inline-block;background:#e8590c;color:#fff;font-size:18px;font-weight:bold;padding:14px 28px;border-radius:10px;text-decoration:none}
+.cta{display:inline-block;background:#e8590c;color:#fff;font-size:18px;font-weight:bold;padding:14px 28px;border-radius:10px;text-decoration:none;margin-right:10px}
 .cta:hover{background:#d1480a}
-.trades{max-width:1000px;margin:0 auto;padding:12px 24px 36px}
-.trades h2{color:#003366;margin-bottom:16px}
+.cta-secondary{background:#003366}
+.cta-secondary:hover{background:#001a33}
+.brains{max-width:1000px;margin:0 auto;padding:48px 24px;text-align:center}
+.brains h2{color:#003366;margin-bottom:12px;font-size:28px}
+.brains p{margin-bottom:32px;color:#555}
+.brain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.brain-card{background:#fff;border-radius:16px;padding:28px;box-shadow:0 4px 20px rgba(0,0,0,.08);text-align:left;border-top:4px solid #003366}
+.brain-card h3{color:#003366;margin-bottom:12px;font-size:22px}
+.brain-card p{margin-bottom:18px;color:#555}
+.brain-icon{font-size:48px;margin-bottom:12px}
+.walkthrough{background:#003366;color:#fff;padding:48px 24px}
+.walkthrough h2{text-align:center;margin-bottom:32px;font-size:28px}
+.tabs{display:flex;justify-content:center;gap:12px;margin-bottom:32px;flex-wrap:wrap}
+.tab{background:#ffffff20;color:#fff;border:2px solid transparent;padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:bold;transition:all .2s}
+.tab.active{background:#fff;color:#003366;border-color:#fff}
+.tab-content{display:none;max-width:800px;margin:0 auto}
+.tab-content.active{display:block}
+.tab-content h3{margin-bottom:20px;text-align:center;font-size:24px}
+.step-list{list-style:none;counter-reset:step}
+.step-list li{counter-increment:step;background:#ffffff15;margin-bottom:16px;padding:20px;border-radius:12px;position:relative;padding-left:70px}
+.step-list li::before{content:counter(step);position:absolute;left:20px;top:20px;background:#fff;color:#003366;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px}
+.step-list li b{display:block;font-size:18px;margin-bottom:6px}
+.visual-flow{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap;margin-top:32px;font-size:18px;font-weight:bold}
+.flow-arrow{color:#fff;opacity:.6}
+.trades{max-width:1000px;margin:0 auto;padding:48px 24px}
+.trades h2{color:#003366;margin-bottom:16px;text-align:center;font-size:28px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
-.card{background:#fff;border:2px solid #003366;border-radius:12px;padding:18px;text-align:center;font-weight:bold;color:#003366;text-decoration:none}
-.card:hover{background:#003366;color:#fff}
-.how{background:#003366;color:#fff;padding:36px 24px;text-align:center}
-.how h2{margin-bottom:18px}
-.steps{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
-.step{background:#ffffff15;border-radius:12px;padding:18px;max-width:260px}
-footer{text-align:center;padding:24px;color:#667;font-size:13px}
+.card{background:#fff;border:2px solid #003366;border-radius:12px;padding:18px;text-align:center;font-weight:bold;color:#003366;text-decoration:none;transition:all .2s}
+.card:hover{background:#003366;color:#fff;transform:translateY(-2px)}
+.sample{background:#fff;padding:48px 24px;text-align:center}
+.sample h2{color:#003366;margin-bottom:12px;font-size:28px}
+.sample p{margin-bottom:24px;color:#555}
+.sample-img{max-width:600px;width:100%;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.15);margin:24px auto;display:block}
+footer{text-align:center;padding:24px;color:#667;font-size:13px;background:#fff}
+footer a{color:#003366;text-decoration:none;margin:0 8px}
+@media (max-width:768px){
+  .hero{flex-direction:column;text-align:center}
+  .hero h1{font-size:28px}
+  .step-list li{padding-left:60px}
+  .visual-flow{font-size:16px}
+}
 </style>
 </head>
 <body>
-<div class="top"><b>🏠 CND REAL ESTATE SERVICES</b><span>Se habla español 🇪🇸</span></div>
+
+<div class="top">
+  <b>🏠 CND REAL ESTATE SERVICES</b>
+  <button class="lang-btn" onclick="toggleLang()">🇺🇸 English / 🇪🇸 Español</button>
+</div>
+
 <div class="hero">
-<img src="cindy%20happy.png" alt="Cindy AI">
-<div>
-<h1>Meet Cindy. She prices the whole job in 15 seconds.</h1>
-<p>Snap photos of the job. Cindy AI prices every material with brand, unit price and full math, runs the engineering checks, and hands you a professional PDF — free during beta.</p>
-<a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/">🚀 START MY FREE ESTIMATE</a>
+  <img src="cindy%20happy.png" alt="Cindy AI">
+  <div>
+    <h1 id="hero-title">Meet Cindy. She prices the whole job in 15 seconds.</h1>
+    <p id="hero-desc">Snap photos of the job. Cindy AI prices every material with brand, unit price and full math, runs the engineering checks, and hands you a professional PDF — free during beta.</p>
+    <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/">🚀 <span class="t-free-estimate">START MY FREE ESTIMATE</span></a>
+    <a class="cta cta-secondary" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?safety=1">🧪 <span class="t-test-site">TEST YOUR JOB SITE</span></a>
+  </div>
 </div>
+
+<div class="brains">
+  <h2 id="brains-title">Cindy has 3 brains. Pick the one you need today.</h2>
+  <p id="brains-desc">Whether you're bidding a job, checking a site, or running a code review — Cindy's got you covered.</p>
+  
+  <div class="brain-grid">
+    <div class="brain-card">
+      <div class="brain-icon">💰</div>
+      <h3 class="t-estimator-title">The Estimator</h3>
+      <p class="t-estimator-desc">Snap photos → Cindy prices every material with brand, unit price, and full math → download a professional PDF to hand your client.</p>
+      <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/">🚀 Try it free</a>
+    </div>
+    
+    <div class="brain-card">
+      <div class="brain-icon">🧪</div>
+      <h3 class="t-checkup-title">The Site Checkup</h3>
+      <p class="t-checkup-desc">Snap the site → Cindy walks it like an inspector → tells you what's GOOD, what to WATCH, and what to FIX before you start work.</p>
+      <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?safety=1">🧪 Test your site</a>
+    </div>
+    
+    <div class="brain-card">
+      <div class="brain-icon">🏛️</div>
+      <h3 class="t-code-title">The Code Check</h3>
+      <p class="t-code-desc">Snap a commercial space or floorplan → Cindy checks it against city codes → flags FAILED items and suggests fixes. Perfect for commercial bids.</p>
+      <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/">🏛️ Run a code check</a>
+    </div>
+  </div>
 </div>
+
+<div class="walkthrough">
+  <h2 id="walk-title">See it in action (3 ways to learn)</h2>
+  
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('visual')">👀 Watcher</button>
+    <button class="tab" onclick="showTab('reader')">📖 Reader</button>
+    <button class="tab" onclick="showTab('doer')">🖐️ Doer</button>
+  </div>
+  
+  <div id="visual" class="tab-content active">
+    <h3>👀 For the Watcher</h3>
+    <div class="visual-flow">
+      <div>📸<br>Snap the job</div>
+      <div class="flow-arrow">→</div>
+      <div>🧠<br>Cindy thinks</div>
+      <div class="flow-arrow">→</div>
+      <div>📄<br>PDF in hand</div>
+    </div>
+    <p style="text-align:center;margin-top:24px;font-size:18px;">Your phone is the eyes. Cindy does everything else. 15 seconds start to finish.</p>
+  </div>
+  
+  <div id="reader" class="tab-content">
+    <h3>📖 For the Reader</h3>
+    <ol class="step-list">
+      <li><b>Open Cindy and tap your trade.</b> Choose Electrical, Plumbing, Siding, Roofing, Concrete, or Pipe & Drain.</li>
+      <li><b>Take photos of the job.</b> Use your phone camera directly in the app. Take a wide shot plus close-ups of the main materials.</li>
+      <li><b>Cindy prices every material.</b> She names the brand, shows the unit price, does the math, and adds labor hours.</li>
+      <li><b>Download your professional PDF.</b> One clean document with your company name. Hand it to your client and win the job.</li>
+    </ol>
+  </div>
+  
+  <div id="doer" class="tab-content">
+    <h3>🖐️ For the Doer</h3>
+    <p style="text-align:center;margin-bottom:24px;font-size:18px;">Don't read about it. Just try it. Pick one below:</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/">🚀 Try an estimate</a>
+      <a class="cta cta-secondary" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?safety=1">🧪 Try a site checkup</a>
+    </div>
+    <p style="text-align:center;margin-top:32px;font-size:16px;opacity:.8;">Free. No credit card. No sign-up. Just photos and answers.</p>
+  </div>
+</div>
+
 <div class="trades">
-<h2>Built for every trade</h2>
-<div class="grid">
-<a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=electrical">⚡ Electrical</a>
-<a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=plumbing">🚿 Plumbing</a>
-<a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=siding">🏠 Siding</a>
-<a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=roofing">🛠️ Roofing</a>
-<a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=concrete">🧱 Concrete</a>
-<a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=pipe">🚰 Pipe &amp; Drain</a>
+  <h2 id="trades-title">Built for every trade</h2>
+  <div class="grid">
+    <a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=electrical">⚡ Electrical</a>
+    <a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=plumbing">🚿 Plumbing</a>
+    <a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=siding">🏠 Siding</a>
+    <a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=roofing">🛠️ Roofing</a>
+    <a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=concrete">🧱 Concrete</a>
+    <a class="card" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?trade=pipe">🚰 Pipe & Drain</a>
+  </div>
 </div>
+
+<div class="sample">
+  <h2 id="sample-title">See what Cindy produces</h2>
+  <p id="sample-desc">A real sample estimate. This is what your clients see.</p>
+  <p style="margin-top:24px;"><em>(Replace this image with a screenshot of a real Cindy estimate — host it in your GitHub repo and link it here.)</em></p>
+  <div style="background:#f0f0f0;padding:48px;border-radius:12px;max-width:600px;margin:24px auto;border:2px dashed #ccc;">
+    <p style="color:#666;">📄 Sample PDF preview goes here</p>
+  </div>
 </div>
-<div class="how">
-<h2>How it works</h2>
-<div class="steps">
-<div class="step">📸<br><b>1. Snap photos</b><br>Any phone. Any job site.</div>
-<div class="step">🤖<br><b>2. Cindy does the math</b><br>Brands, unit prices, labor, engineering stamps.</div>
-<div class="step">📄<br><b>3. Get your PDF</b><br>Hand it to your client. Win the job.</div>
+
+<div style="text-align:center;padding:24px;background:#fff;">
+  <h2 style="color:#003366;margin-bottom:12px;" id="follow-title">Follow CND Real Estate Services</h2>
+  <a class="card" style="display:inline-block;margin:6px;" href="mailto:cndrealestateservices@gmail.com">📧 Email us</a>
+  <a class="card" style="display:inline-block;margin:6px;" href="https://www.facebook.com/search/pages/?q=cnd%20real%20estate%20services">📘 Facebook</a>
+  <a class="card" style="display:inline-block;margin:6px;" href="https://www.tiktok.com/search?q=cnd%20real%20estate%20services">🎵 TikTok</a>
 </div>
-</div>
-<div style="text-align:center;padding:24px;">
-<h2 style="color:#003366;margin-bottom:12px;">Follow CND Real Estate Services</h2>
-<a class="card" style="display:inline-block;margin:6px;" href="mailto:cndrealestateservices@gmail.com">📧 Email us</a>
-<a class="card" style="display:inline-block;margin:6px;" href="https://www.facebook.com/search/pages/?q=cnd%20real%20estate%20services">📘 Facebook</a>
-<a class="card" style="display:inline-block;margin:6px;" href="https://www.tiktok.com/search?q=cnd%20real%20estate%20services">🎵 TikTok</a>
-</div>
-<footer>© 2026 CND Real Estate Services · Powered by Cindy AI · Beaverdam, VA</footer>
+
+<footer>
+  © 2026 CND Real Estate Services · Powered by Cindy AI · Beaverdam, VA
+</footer>
+
+<script>
+function showTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.target.classList.add('active');
+}
+
+let isSpanish = false;
+const translations = {
+  es: {
+    'hero-title': 'Conoce a Cindy. Precifica el trabajo entero en 15 segundos.',
+    'hero-desc': 'Toma fotos del trabajo. Cindy AI precifica cada material con marca, precio y matemática completa, corre los chequeos de ingeniería, y te entrega un PDF profesional — gratis durante la beta.',
+    't-free-estimate': 'COMENZAR PRESUPUESTO GRATIS',
+    't-test-site': 'PROBAR MI OBRA',
+    'brains-title': 'Cindy tiene 3 cerebros. Elige el que necesitas hoy.',
+    'brains-desc': 'Ya sea que estés presupuestando, chequeando una obra, o revisando códigos — Cindy te cubre.',
+    't-estimator-title': 'El Presupuestador',
+    't-estimator-desc': 'Toma fotos → Cindy precifica cada material con marca, precio y matemática → descarga un PDF profesional para tu cliente.',
+    't-checkup-title': 'El Chequeo de Obra',
+    't-checkup-desc': 'Toma fotos de la obra → Cindy la recorre como un inspector → te dice qué está BIEN, qué VIGILAR, y qué ARREGLAR antes de empezar.',
+    't-code-title': 'El Chequeo de Código',
+    't-code-desc': 'Toma fotos de un espacio comercial → Cindy lo revisa contra códigos de la ciudad → marca lo FALLIDO y sugiere arreglos.',
+    'walk-title': 'Míralo en acción (3 formas de aprender)',
+    'trades-title': 'Construido para cada oficio',
+    'sample-title': 'Mira lo que Cindy produce',
+    'sample-desc': 'Un presupuesto real de muestra. Esto es lo que ven tus clientes.',
+    'follow-title': 'Sigue a CND Real Estate Services'
+  },
+  en: {
+    'hero-title': 'Meet Cindy. She prices the whole job in 15 seconds.',
+    'hero-desc': 'Snap photos of the job. Cindy AI prices every material with brand, unit price and full math, runs the engineering checks, and hands you a professional PDF — free during beta.',
+    't-free-estimate': 'START MY FREE ESTIMATE',
+    't-test-site': 'TEST YOUR JOB SITE',
+    'brains-title': 'Cindy has 3 brains. Pick the one you need today.',
+    'brains-desc': 'Whether you\'re bidding a job, checking a site, or running a code review — Cindy\'s got you covered.',
+    't-estimator-title': 'The Estimator',
+    't-estimator-desc': 'Snap photos → Cindy prices every material with brand, unit price, and full math → download a professional PDF to hand your client.',
+    't-checkup-title': 'The Site Checkup',
+    't-checkup-desc': 'Snap the site → Cindy walks it like an inspector → tells you what\'s GOOD, what to WATCH, and what to FIX before you start work.',
+    't-code-title': 'The Code Check',
+    't-code-desc': 'Snap a commercial space or floorplan → Cindy checks it against city codes → flags FAILED items and suggests fixes. Perfect for commercial bids.',
+    'walk-title': 'See it in action (3 ways to learn)',
+    'trades-title': 'Built for every trade',
+    'sample-title': 'See what Cindy produces',
+    'sample-desc': 'A real sample estimate. This is what your clients see.',
+    'follow-title': 'Follow CND Real Estate Services'
+  }
+};
+
+function toggleLang() {
+  isSpanish = !isSpanish;
+  const lang = isSpanish ? 'es' : 'en';
+  const trans = translations[lang];
+  
+  document.querySelectorAll('[id]').forEach(el => {
+    if (trans[el.id]) el.textContent = trans[el.id];
+  });
+  document.querySelectorAll('[class^="t-"]').forEach(el => {
+    const key = el.className.split(' ')[0];
+    if (trans[key]) el.textContent = trans[key];
+  });
+}
+</script>
+
 </body>
 </html>
