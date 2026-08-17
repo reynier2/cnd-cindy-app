@@ -13,7 +13,7 @@ import requests
 from urllib.parse import quote_plus
 from PIL import Image
 
-# === OSHA SAFETY LOCKOUT CORE ===
+# === ENTERPRISE VAULT (locked features for big-company tier - DO NOT DELETE) ===
 MANAGER_PASSCODE = "CND-BOSS"
 
 def job_code_for(tech):
@@ -123,13 +123,13 @@ def log_trap_event(event, detail="", lat=0, lon=0):
 def analyze_site_safety(photo_paths, tech_name):
     api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key: return "Error: OpenAI API Key missing in Streamlit Secrets."
-    system_prompt = f"""You are an OSHA-certified site safety inspector AI working for CND Real Estate Services. The technician on site is {tech_name.upper()}.
+    system_prompt = f"""You are a friendly but sharp job-site safety inspector AI working for CND Real Estate Services. The person on site is {tech_name.upper()}.
 Scan ALL photos for: missing fall protection or harness at height, unguarded edges or openings, missing hard hats or eye protection, exposed live wiring or missing GFCI, unshored trenches deeper than 5 ft, scaffold violations, missing lockout/tagout, fire and housekeeping hazards, ladder violations.
-OUTPUT FORMAT: bold header '🦺 OSHA SITE WALK', then a bullet list of findings, each tagged PASS / ATTENTION / VIOLATION with a one-line fix.
+OUTPUT FORMAT: bold header '🧪 SITE CHECKUP REPORT', then a bullet list of findings, each tagged GOOD / WATCH IT / FIX IT with a one-line friendly fix.
 If ANY finding is an immediate danger to life (fall risk, live wire, trench collapse), you MUST print this exact line on its own: CRITICAL SAFETY HAZARD DETECTED
-End with either 'OVERALL: SAFE TO PROCEED' or 'OVERALL: STOP WORK AUTHORITY INVOKED'."""
+End with either 'OVERALL: GOOD TO GO' or 'OVERALL: SLOW DOWN - FIX THE FLAGGED ITEMS FIRST'."""
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": []}]
-    messages[1]["content"].append({"type": "text", "text": f"Inspect {len(photo_paths)} site photos for OSHA compliance."})
+    messages[1]["content"].append({"type": "text", "text": f"Inspect {len(photo_paths)} site photos."})
     for path in photo_paths:
         try:
             with open(path, "rb") as f: b64 = base64.b64encode(f.read()).decode('utf-8')
@@ -452,7 +452,7 @@ if not st.session_state.get("landed"):
             st.rerun()
     st.markdown("---")
     cta = "🚀 COMENZAR MI PRESUPUESTO GRATIS" if lang == "es" else "🚀 START MY FREE ESTIMATE"
-    cta2 = "🦺 INICIAR CAMINATA DE SEGURIDAD OSHA" if lang == "es" else "🦺 START OSHA SAFETY WALK"
+    cta2 = "🧪 PROBAR MI OBRA" if lang == "es" else "🧪 TEST YOUR JOB SITE"
     cc1, cc2 = st.columns(2)
     with cc1:
         if st.button(cta, type="primary"):
@@ -464,27 +464,16 @@ if not st.session_state.get("landed"):
             st.session_state.landed = True
             st.session_state.safety_mode = True
             st.rerun()
-    with st.expander("🔐 Manager Mode"):
-        pw = st.text_input("Manager passcode:", type="password", key="mgr_pw")
-        if pw:
-            if pw == MANAGER_PASSCODE:
-                jid = st.text_input("Enter Job ID from the tech's screen:", key="mgr_job")
-                if jid.strip() and st.button("🔓 Issue clearance code"):
-                    jidc = jid.strip().upper()
-                    st.success(f"Clearance code for {jidc}: **{clearance_code_for(jidc)}** — read it to your tech after you review the site.")
-                    log_trap_event("MANAGER_CLEAR_ISSUED", f"job={jidc}")
-            else:
-                st.warning("Wrong passcode.")
     st.stop()
 
-# === OSHA SAFETY WALK MODE ===
+# === JOB SITE CHECKUP MODE (free friendly tier) ===
 if st.session_state.get("safety_mode"):
-    st.subheader("🦺 OSHA Safety Walk — Stop-Work Authority Engine")
-    st.info("Cindy is the inspector. Your phone is the eyes. A critical hazard LOCKS the workflow until a manager clears it.")
-    tech_name = st.text_input("Technician on site:", value="", key="tech_name")
+    st.subheader("🧪 Job Site Checkup — Smart Inspector")
+    st.info("Cindy is the inspector. Your phone is the eyes. Snap the site and get an instant read on what's good and what needs fixing.")
+    tech_name = st.text_input("Who's on site? (optional):", value="", key="tech_name")
     s_files = st.file_uploader("Snap the site (wide shot + close-ups):", type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="safety_photos")
-    if s_files and tech_name.strip():
-        if st.button("🦺 Run OSHA Site Walk"):
+    if s_files:
+        if st.button("🧪 Run Site Checkup"):
             with st.spinner("Cindy is walking the site..."):
                 temp_dir = tempfile.mkdtemp()
                 paths = []
@@ -494,33 +483,17 @@ if st.session_state.get("safety_mode"):
                         with open(p, "wb") as fh: fh.write(uf.getbuffer())
                         paths.append(p)
                     lat, lon = get_gps_from_image(paths[0]) if paths else (None, None)
-                    report = analyze_site_safety(paths, tech_name)
+                    report = analyze_site_safety(paths, tech_name or "the crew")
                     st.session_state["safety_report"] = report
-                    st.session_state["safety_meta"] = {"tech": tech_name.strip(), "lat": lat, "lon": lon}
+                    if "CRITICAL SAFETY HAZARD DETECTED" in report:
+                        log_trap_event("HAZARD_FLAG", f"tech={tech_name or 'crew'} job={job_code_for(tech_name or 'crew')}", lat or 0, lon or 0)
                 finally: shutil.rmtree(temp_dir, ignore_errors=True)
     if st.session_state.get("safety_report"):
-        rep = st.session_state["safety_report"]
-        meta = st.session_state.get("safety_meta", {})
-        st.markdown(rep)
-        job_id = job_code_for(meta.get("tech", "UNKNOWN"))
-        if "CRITICAL SAFETY HAZARD DETECTED" in rep and st.session_state.get("hazard_cleared_for") != job_id:
-            st.session_state["hazard_flagged"] = True
-            log_trap_event("HAZARD_LOCK", f"tech={meta.get('tech')} job={job_id}", meta.get("lat") or 0, meta.get("lon") or 0)
-        if st.session_state.get("hazard_flagged"):
-            st.error(f"🔒 STOP-WORK LOCK ACTIVE — Job ID: **{job_id}**. Call your manager. The workflow stays locked until a clearance code is entered.")
-            st.markdown(f"Manager: open **🔐 Manager Mode** on the home screen, enter Job ID **{job_id}**, and read you the 4-digit code.")
-            code = st.text_input("Enter 4-digit clearance code:", key="clear_input")
-            if st.button("🔓 Unlock Workflow"):
-                if code.strip() == clearance_code_for(job_id):
-                    st.session_state["hazard_flagged"] = False
-                    st.session_state["hazard_cleared_for"] = job_id
-                    log_trap_event("HAZARD_CLEARED", f"tech={meta.get('tech')} job={job_id}", meta.get("lat") or 0, meta.get("lon") or 0)
-                    st.balloons()
-                    st.success("✅ Cleared. Safety log written. Proceed with the work.")
-                else:
-                    st.warning("Wrong code. Your manager must review the site first.")
+        st.markdown(st.session_state["safety_report"])
+        if "CRITICAL SAFETY HAZARD DETECTED" in st.session_state["safety_report"]:
+            st.warning("🛑 Heads up — something serious was spotted. Fix the flagged item before work continues. Catching it early is what pros do.")
         else:
-            st.success("✅ No active lock on this device.")
+            st.success("✅ Site looks good to keep moving.")
     st.markdown("---")
     if st.button("⬅️ Back to Estimator"):
         st.session_state["safety_mode"] = False
@@ -545,9 +518,7 @@ client_name = st.text_input(T["client"], value="", key="client_name_field")
 uploaded_files = st.file_uploader(T["uploader"], type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="mobile_camera_fix_v3")
 if uploaded_files:
     st.write(f"✅ {len(uploaded_files)} {T['uploaded']}")
-    if st.session_state.get("hazard_flagged"):
-        st.error("🔒 ESTIMATE LOCKED — an uncleared OSHA hazard is active on this device. Finish the Safety Walk clearance first.")
-    if st.button(T["generate"]) and not st.session_state.get("hazard_flagged"):
+    if st.button(T["generate"]):
         with st.spinner(T["spinner"]):
             temp_dir = tempfile.mkdtemp()
             saved_paths = []
