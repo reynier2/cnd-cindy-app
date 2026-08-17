@@ -13,24 +13,6 @@ import requests
 from urllib.parse import quote_plus
 from PIL import Image
 
-try:
-    from streamlit_geolocation import geolocation
-    HAS_GEO = True
-except Exception:
-    HAS_GEO = False
-
-def extract_coords(c):
-    try:
-        if not c: return None
-        if isinstance(c, (list, tuple)) and len(c) >= 2 and c[0]:
-            return float(c[0]), float(c[1])
-        if isinstance(c, dict):
-            la = c.get('latitude'); lo = c.get('longitude')
-            if la and lo: return float(la), float(lo)
-    except Exception:
-        pass
-    return None
-
 # === ENTERPRISE VAULT (locked features for big-company tier - DO NOT DELETE) ===
 MANAGER_PASSCODE = "CND-BOSS"
 
@@ -435,7 +417,7 @@ if not st.session_state.get("landed"):
     c1, c2 = st.columns([1, 2])
     with c1:
         try: st.image("cindy happy.png", width=230)
-        except Exception: st.markdown("# 🧑‍🔧")
+        except Exception: st.markdown("# 🧑‍")
         st.caption("**Cindy** — your AI estimating partner")
     with c2:
         st.markdown("# 🏠 CND REAL ESTATE SERVICES")
@@ -517,9 +499,9 @@ if st.session_state.get("safety_mode"):
     st.stop()
 
 if lang == "es":
-    T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": "🎁 BETA ABIERTA — todos los presupuestos son 100% GRATIS por ahora. Sin tarjeta, sin trampas. Tome fotos y reciba su presupuesto.", "step2": "### 📸 Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": "📄 Descargar Presupuesto PDF Profesional", "client": "👤 Nombre del cliente (opcional, sale en el reporte)", "geo_hint": "📍 Toca el botón para usar tu ubicación y fijar precios locales.", "geo_ok": "📍 Ubicación fijada — precios locales listos."}
+    T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": "🎁 BETA ABIERTA — todos los presupuestos son 100% GRATIS por ahora. Sin tarjeta, sin trampas. Tome fotos y reciba su presupuesto.", "step2": "### 📸 Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": "📄 Descargar Presupuesto PDF Profesional", "client": "👤 Nombre del cliente (opcional, sale en el reporte)", "geo_hint": "📍 Toca el botón para usar tu ubicación y fijar precios locales."}
 else:
-    T = {"sub": "Powered by Cindy AI Estimator", "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.", "free_banner": "🎁 BETA OPEN — every estimate is 100% FREE right now. No card, no catch. Snap photos, get your bid.", "step2": "### 📸 Upload your photos", "tip": "💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!", "uploader": "Choose images", "uploaded": "photo(s) uploaded!", "generate": "🚀 Generate Estimate", "spinner": "Cindy is analyzing the photos... this takes about 15 seconds...", "success": "Estimate Generated!", "download": "📄 Download Professional PDF Bid", "client": "👤 Client name (optional, printed on the report)", "geo_hint": "📍 Tap the button to use your location and lock in local prices.", "geo_ok": "📍 Location locked — local prices set."}
+    T = {"sub": "Powered by Cindy AI Estimator", "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.", "free_banner": "🎁 BETA OPEN — every estimate is 100% FREE right now. No card, no catch. Snap photos, get your bid.", "step2": "### 📸 Upload your photos", "tip": "💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!", "uploader": "Choose images", "uploaded": "photo(s) uploaded!", "generate": "🚀 Generate Estimate", "spinner": "Cindy is analyzing the photos... this takes about 15 seconds...", "success": "Estimate Generated!", "download": "📄 Download Professional PDF Bid", "client": "👤 Client name (optional, printed on the report)", "geo_hint": "📍 Tap the button to use your location and lock in local prices."}
 st.subheader(T["sub"])
 st.write(T["intro"])
 st.success(T["free_banner"])
@@ -529,19 +511,34 @@ if lang == "es":
 else:
     st.warning("📶 **Bad signal out here?** No problem. 1) Take your photos with your regular camera app (they save on your phone). 2) When you're back at good signal or Wi-Fi, come back and tap 'Choose files'. 3) Pick your photos from the gallery. 4) Hit Generate. Your photos wait for you!")
 
-# === LIVE PIN: visitor location (consent-based) ===
-if HAS_GEO:
-    st.caption(T["geo_hint"])
-    coords = extract_coords(geolocation(key="geo_comp"))
-    if coords and not st.session_state.get("pin_logged"):
-        st.session_state["pin_logged"] = True
-        log_trap_event("PIN", f"lang={lang} ref={ref_code or 'direct'}", coords[0], coords[1])
-        try:
-            rr = requests.get("https://nominatim.openstreetmap.org/reverse", params={"format": "json", "lat": coords[0], "lon": coords[1], "zoom": 14}, headers={'User-Agent': 'CindyAI/1.0'}, timeout=8)
-            pc = rr.json().get('address', {}).get('postcode', '')
-            if pc: st.session_state['zip_field'] = pc
-            st.success(T["geo_ok"])
-        except Exception: pass
+# === LIVE PIN: visitor phone sends GPS straight to the Sheet (no extra packages) ===
+st.caption(T["geo_hint"])
+pin_html = f"""
+<div style="margin:4px 0 10px 0;">
+<button onclick="grabPin()" style="background:#003366;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;">📍 USE MY LOCATION</button>
+<p id="pinmsg" style="color:#28a745;font-size:13px;font-weight:bold;margin-top:6px;display:none;"></p>
+</div>
+<script>
+function grabPin() {{
+  var msg = document.getElementById('pinmsg');
+  if (!navigator.geolocation) {{ msg.style.display='block'; msg.style.color='#c00'; msg.textContent='No GPS on this device.'; return; }}
+  navigator.geolocation.getCurrentPosition(function(pos) {{
+    fetch('https://script.google.com/macros/s/AKfycbzP6MvQ0a5kjs5QU0R2NhN7zB45sQvqqYDYWhh-uIDDIChnOssW8qSoto_IBo5zyc5Crw/exec', {{
+      method: 'POST',
+      headers: {{'Content-Type': 'text/plain;charset=utf-8'}},
+      body: JSON.stringify({{event: 'PIN lang={lang} ref={ref_code or 'direct'}', lat: pos.coords.latitude, lon: pos.coords.longitude, city: ''}})
+    }}).then(function() {{
+      msg.style.display='block'; msg.textContent='📍 Location locked — you are on the map!';
+    }}).catch(function() {{
+      msg.style.display='block'; msg.style.color='#c00'; msg.textContent='Could not send the pin. Try again.';
+    }});
+  }}, function() {{
+    msg.style.display='block'; msg.style.color='#c00'; msg.textContent='Location permission denied.';
+  }});
+}}
+</script>
+"""
+components.html(pin_html, height=90)
 
 zip_code = st.text_input("📍 ZIP code (local prices + nearest store)", value="23015", key="zip_field")
 log_trap_event("VISIT", f"lang={lang} ref={ref_code or 'direct'} zip={zip_code}")
