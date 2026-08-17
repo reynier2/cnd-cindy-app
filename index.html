@@ -4,20 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CND Real Estate Services — Cindy AI Showroom</title>
-<meta name="description" content="Meet Cindy AI. Your personal tour guide through the smartest estimating, safety, and code-compliance showroom on the web.">
+<meta name="description" content="Meet Cindy AI. Estimator, inspector, and teacher. The smartest partner a contractor ever hired.">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
 body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .stars{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at bottom,#1a1a2e 0%,#0a0a14 100%);z-index:-2}
 .stars::before{content:'';position:absolute;width:100%;height:100%;background-image:radial-gradient(2px 2px at 20% 30%,white,transparent),radial-gradient(1px 1px at 60% 70%,white,transparent),radial-gradient(1px 1px at 80% 10%,white,transparent),radial-gradient(2px 2px at 30% 80%,white,transparent);background-size:200px 200px;opacity:.3;animation:twinkle 5s infinite}
 @keyframes twinkle{0%,100%{opacity:.3}50%{opacity:.5}}
-
 .top{position:fixed;top:0;left:0;right:0;background:rgba(0,51,102,.95);backdrop-filter:blur(10px);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;z-index:100;flex-wrap:wrap;gap:8px}
 .top b{font-size:18px;letter-spacing:2px;color:#fff}
 .top-btns{display:flex;gap:8px}
 .lang-btn{background:#fff1;color:#fff;border:1px solid #fff4;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:13px;transition:all .2s}
 .lang-btn:hover{background:#fff2}
-
 .landing{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:100px 24px 40px;text-align:center;position:relative}
 .cindy-host{position:relative;margin-bottom:30px}
 .cindy-host img{width:220px;height:220px;border-radius:50%;object-fit:cover;border:4px solid #e8590c;box-shadow:0 0 60px rgba(232,89,12,.5);animation:breathe 3s ease-in-out infinite}
@@ -31,7 +29,6 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .start-tour{background:#e8590c;color:#fff;border:none;font-size:20px;font-weight:bold;padding:18px 40px;border-radius:30px;cursor:pointer;box-shadow:0 8px 24px rgba(232,89,12,.5);transition:all .2s;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 .start-tour:hover{background:#d1480a;transform:scale(1.08)}
-
 .showroom{display:none;padding:100px 24px 80px;max-width:1200px;margin:0 auto}
 .showroom.active{display:block;animation:fadeInUp .8s ease-out}
 .stage{display:flex;align-items:flex-start;gap:30px;flex-wrap:wrap;margin-bottom:50px}
@@ -39,7 +36,6 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .stage .speech-bubble{margin:0;flex:1;min-width:280px}
 .feature-row{display:grid;grid-template-columns:1fr;gap:30px;margin-top:30px}
 @media(min-width:900px){.feature-row{grid-template-columns:1fr 1fr}}
-
 .feature-card{background:linear-gradient(135deg,#1a1a2e,#2a2a4e);border-radius:20px;padding:30px;position:relative;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.5);transition:all .3s;border:2px solid transparent}
 .feature-card:hover{transform:translateY(-5px);border-color:#e8590c;box-shadow:0 15px 50px rgba(232,89,12,.3)}
 .feature-card .icon{font-size:60px;margin-bottom:15px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.3))}
@@ -48,7 +44,6 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .feature-card p{color:#ccc;line-height:1.6;margin-bottom:20px}
 .feature-card .cta{display:inline-block;background:#e8590c;color:#fff;padding:10px 24px;border-radius:20px;text-decoration:none;font-weight:bold;font-size:14px;transition:all .2s}
 .feature-card .cta:hover{background:#fff;color:#003366}
-
 .flex{background:linear-gradient(135deg,#003366,#001a33);padding:60px 24px;margin:60px 0;border-radius:20px;text-align:center;position:relative;overflow:hidden}
 .flex::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(232,89,12,.2),transparent);animation:spin 8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -58,7 +53,17 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .flex-item{background:rgba(255,255,255,.1);padding:20px;border-radius:12px;border-left:4px solid #e8590c}
 .flex-item b{color:#e8590c;display:block;margin-bottom:6px}
 .flex-item p{color:#ddd;font-size:14px;line-height:1.5}
-
+.school{padding:60px 24px;max-width:1200px;margin:0 auto}
+.school h2{text-align:center;font-size:32px;margin-bottom:8px}
+.school .sub{text-align:center;color:#99a;margin-bottom:40px;font-size:16px}
+.school-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+.lesson-card{background:#12121f;border:2px solid #2a2a4e;border-radius:16px;padding:24px;transition:all .3s}
+.lesson-card:hover{border-color:#e8590c}
+.lesson-card h4{color:#e8590c;font-size:20px;margin-bottom:12px}
+.lesson-card p{color:#bbb;font-size:14px;line-height:1.7;margin-bottom:16px}
+.lesson-btn{background:#003366;color:#fff;border:none;padding:10px 20px;border-radius:20px;cursor:pointer;font-weight:bold;font-size:13px;transition:all .2s}
+.lesson-btn:hover{background:#e8590c}
+.coming{background:#e8590c;color:#fff;text-align:center;padding:14px 24px;border-radius:30px;display:inline-block;margin-top:36px;font-weight:bold;box-shadow:0 8px 24px rgba(232,89,12,.4)}
 .closing{text-align:center;padding:60px 24px;max-width:800px;margin:0 auto}
 .closing .cindy-host img{width:200px;height:200px}
 .closing-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:30px}
@@ -67,33 +72,28 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .btn-primary:hover{background:#fff;color:#e8590c}
 .btn-ghost{background:transparent;color:#fff;border:2px solid #fff}
 .btn-ghost:hover{background:#fff;color:#003366}
-
 footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px solid #fff1;margin-top:40px}
-
 @media(max-width:600px){
   .speech-bubble{font-size:15px;padding:16px 20px}
   .cindy-host img{width:160px;height:160px}
   .flex h2{font-size:24px}
   .feature-card h3{font-size:20px}
+  .school h2{font-size:24px}
 }
 </style>
 </head>
 <body>
-
 <div class="stars"></div>
-
 <div class="top">
   <b>🏠 CND REAL ESTATE SERVICES</b>
   <div class="top-btns">
     <button class="lang-btn" id="audio-btn" onclick="toggleAudio()">🔇 Sound Off</button>
-    <button class="lang-btn" onclick="toggleLang()"><span id="lang-label">🇪🇸 Español</span></button>
+    <button class="lang-btn" onclick="toggleLang()"><span id="lang-label">🇪 Español</span></button>
   </div>
 </div>
 
 <section class="landing" id="landing">
-  <div class="cindy-host">
-    <img src="cindy%20happy.png" alt="Cindy AI">
-  </div>
+  <div class="cindy-host"><img src="cindy%20happy.png" alt="Cindy AI"></div>
   <div class="speech-bubble">
     <div class="name">💬 CINDY:</div>
     <span id="welcome-text">Hey, I'm Cindy. Welcome to my showroom. I'm not some basic AI — I'm the smartest partner a contractor ever hired. Want me to show you around?</span>
@@ -103,11 +103,8 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
 </section>
 
 <section class="showroom" id="showroom">
-  
   <div class="stage">
-    <div class="cindy-host">
-      <img src="cindy%20happy.png" alt="Cindy AI">
-    </div>
+    <div class="cindy-host"><img src="cindy%20happy.png" alt="Cindy AI"></div>
     <div class="speech-bubble">
       <div class="name">💬 CINDY:</div>
       <span id="intro-text">Alright, step inside. Over here we've got the brains that make you money. I'll walk you through each one. Watch this...</span>
@@ -122,7 +119,6 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
       <p id="est-desc">Snap a photo of the job. I read it like a pro contractor — I see the lumber, the pipe, the siding. I price every material with brand, unit cost, and full math. Add labor, profit, and permits. You get a clean PDF in 15 seconds. Hand it to the client. Win the job.</p>
       <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="est-cta">🚀 TRY IT FREE</a>
     </div>
-    
     <div class="feature-card">
       <div class="icon">🧪</div>
       <div class="tagline" id="safe-tag">YOUR EYES ON THE JOB</div>
@@ -133,9 +129,7 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
   </div>
 
   <div class="stage" style="margin-top:60px">
-    <div class="cindy-host">
-      <img src="cindy%20happy.png" alt="Cindy AI">
-    </div>
+    <div class="cindy-host"><img src="cindy%20happy.png" alt="Cindy AI"></div>
     <div class="speech-bubble">
       <div class="name">💬 CINDY:</div>
       <span id="mid-text">Now watch this one — this is where I get serious for the commercial contractors...</span>
@@ -150,12 +144,11 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
       <p id="code-desc">Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix before the inspector shows up.</p>
       <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="code-cta">🏛️ RUN A CODE CHECK</a>
     </div>
-    
     <div class="feature-card">
       <div class="icon">🚿</div>
       <div class="tagline" id="trade-tag">BUILT FOR EVERY TRADE</div>
-      <h3 id="trade-title">Six Trades, One Cindy</h3>
-      <p id="trade-desc">Electrical. Plumbing. Siding. Roofing. Concrete. Pipe & Drain. I know every brand, every unit price, every engineering check for each one. You just pick your trade — I do the rest.</p>
+      <h3 id="trade-title">Seven Trades, One Cindy</h3>
+      <p id="trade-desc">Electrical. Plumbing. Siding. Roofing. Concrete. Pipe & Drain. And now Masonry. I know every brand, every unit price, every engineering check for each one. You just pick your trade — I do the rest.</p>
       <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="trade-cta">🛠️ PICK YOUR TRADE</a>
     </div>
   </div>
@@ -164,30 +157,60 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
     <div class="flex-inner">
       <h2 id="flex-title">💪 Why I'm Not Like the Other AIs</h2>
       <div class="flex-list">
-        <div class="flex-item">
-          <b id="flex1-b">They GUESS. I CALCULATE.</b>
-          <p id="flex1-p">Other AIs say "cost depends on..." and wave their hands. I print the brand, the unit price, the math, and the total. Every. Single. Line.</p>
-        </div>
-        <div class="flex-item">
-          <b id="flex2-b">They CHAT. I ENGINEER.</b>
-          <p id="flex2-p">I run Manning's Equation on pipe. I check 30 PSI soil bearing on foundations. Real engineering, stamped into your bid.</p>
-        </div>
-        <div class="flex-item">
-          <b id="flex3-b">They GIVE YOU RAW TEXT. I GIVE YOU A PDF.</b>
-          <p id="flex3-p">No copy-paste. No formatting headaches. A clean, branded PDF ready to hand your client.</p>
-        </div>
-        <div class="flex-item">
-          <b id="flex4-b">They WORK ALONE. I'M YOUR PARTNER.</b>
-          <p id="flex4-p">I estimate the job, check the site, AND review the code. Three brains. One app. Your whole workflow in my hands.</p>
-        </div>
+        <div class="flex-item"><b id="flex1-b">They GUESS. I CALCULATE.</b><p id="flex1-p">Other AIs say "cost depends on..." and wave their hands. I print the brand, the unit price, the math, and the total. Every. Single. Line.</p></div>
+        <div class="flex-item"><b id="flex2-b">They CHAT. I ENGINEER.</b><p id="flex2-p">I run Manning's Equation on pipe. I check 30 PSI soil bearing on foundations. Real engineering, stamped into your bid.</p></div>
+        <div class="flex-item"><b id="flex3-b">They GIVE YOU RAW TEXT. I GIVE YOU A PDF.</b><p id="flex3-p">No copy-paste. No formatting headaches. A clean, branded PDF ready to hand your client.</p></div>
+        <div class="flex-item"><b id="flex4-b">They WORK ALONE. I'M YOUR PARTNER.</b><p id="flex4-p">I estimate the job, check the site, AND review the code. Three brains. One app. Your whole workflow in my hands.</p></div>
       </div>
     </div>
   </div>
 
-  <div class="closing">
-    <div class="cindy-host">
-      <img src="cindy%20happy.png" alt="Cindy AI">
+  <!-- === CINDY'S TRADE SCHOOL === -->
+  <div class="school">
+    <h2 id="school-title">🎓 CINDY'S TRADE SCHOOL</h2>
+    <p class="sub" id="school-sub">Free lessons while in beta. Tap 🔊 and let Cindy teach you the real job specifics — the deep stuff.</p>
+    <div class="school-grid">
+      <div class="lesson-card">
+        <h4>⚡ <span id="ls-electrical-t">Electrical — Panels & Protection</span></h4>
+        <p id="ls-electrical">Let us talk electrical. When I look at a panel I check the amperage — a modern house needs 200 amp service; a 100 amp panel feeding a new addition is an upgrade job right there. I hunt for missing GFCI protection in kitchens, baths and garages because code demands it. I price Southwire 12/2 Romex and I always flag the permit, because unpermitted work kills home sales.</p>
+        <button class="lesson-btn" onclick="speakLesson('ls-electrical')">🔊 <span id="ls-electrical-b">Hear Cindy teach it</span></button>
+      </div>
+      <div class="lesson-card">
+        <h4>🚿 <span id="ls-plumbing-t">Plumbing — Pressure & Slope</span></h4>
+        <p id="ls-plumbing">Plumbing is flow and pressure. I check pressure first — above 80 PSI and code demands a pressure reducing valve or fixtures blow out. Drain slope is a quarter inch per foot: too flat clogs, too steep and water outruns the solids. I price Charlotte Pipe PVC Schedule 40 and I flag the frost line on outside spigots, because a frozen pipe is a burst pipe.</p>
+        <button class="lesson-btn" onclick="speakLesson('ls-plumbing')">🔊 <span id="ls-plumbing-b">Hear Cindy teach it</span></button>
+      </div>
+      <div class="lesson-card">
+        <h4>🏠 <span id="ls-siding-t">Siding — Squares & Water Barriers</span></h4>
+        <p id="ls-siding">Siding is a math problem. One square equals 100 square feet of wall. Height times width, subtract windows and doors, add 10 to 15 percent for waste. I price James Hardie fiber cement or CertainTeed vinyl, and I never skip the layers behind it — Tyvek wrap and flashing, because siding is only as good as the water barrier under it.</p>
+        <button class="lesson-btn" onclick="speakLesson('ls-siding')">🔊 <span id="ls-siding-b">Hear Cindy teach it</span></button>
+      </div>
+      <div class="lesson-card">
+        <h4>🛠️ <span id="ls-roofing-t">Roofing — Squares & Steepness</span></h4>
+        <p id="ls-roofing">Roofing counts in squares too, but I add the steepness factor. A walkable roof is straight labor; a steep roof needs safety gear and more hours, so the price climbs. I price GAF Timberline shingles, synthetic underlayment and drip edge, and I always include tear-off and the dumpster — real money that amateurs forget.</p>
+        <button class="lesson-btn" onclick="speakLesson('ls-roofing')">🔊 <span id="ls-roofing-b">Hear Cindy teach it</span></button>
+      </div>
+      <div class="lesson-card">
+        <h4>🧱 <span id="ls-concrete-t">Concrete — PSI & Curing</span></h4>
+        <p id="ls-concrete">Concrete is chemistry. A sidewalk takes 3,000 PSI, a driveway 4,000, and footings want solid bearing — 30 PSI is my soil limit. Water is the enemy: too much in the mix and it cures weak and cracks. That is why I watch cure time and tell you when it is safe to walk and when it hits full strength at 28 days.</p>
+        <button class="lesson-btn" onclick="speakLesson('ls-concrete')">🔊 <span id="ls-concrete-b">Hear Cindy teach it</span></button>
+      </div>
+      <div class="lesson-card">
+        <h4>🚰 <span id="ls-pipe-t">Pipe & Drain — Manning's Equation</span></h4>
+        <p id="ls-pipe">Pipe and drain is where I flex engineering. I run Manning's equation — diameter, slope, roughness — to compute flow in CFS and compare it against the city requirement. A 12 inch pipe at 1.5 percent slope moves about 4 CFS; if the city wants 3, you PASS. I stamp PASS or RED FLAG on every run, because a failed inspection costs weeks.</p>
+        <button class="lesson-btn" onclick="speakLesson('ls-pipe')">🔊 <span id="ls-pipe-b">Hear Cindy teach it</span></button>
+      </div>
+      <div class="lesson-card">
+        <h4>🧱 <span id="ls-masonry-t">Masonry — Master Mason Secrets</span></h4>
+        <p id="ls-masonry">Masonry is where the real craft lives. First I run the IRA suction test — if brick is bone dry and porous it sucks water out of the mortar and kills the bond. I warn to dampen the pile before laying. Then I check for bleed and creep — if the wall climbs too fast in cold or humid weather the bottom courses sink and heights go off. I watch the crow's foot at corners — if the plumb line drifts off the intersection the lead spirals like a corkscrew. And I track bond patterns — Flemish, English, running bond — row by row, because one brick out of rhythm throws the whole wall.</p>
+        <button class="lesson-btn" onclick="speakLesson('ls-masonry')">🔊 <span id="ls-masonry-b">Hear Cindy teach it</span></button>
+      </div>
     </div>
+    <div style="text-align:center"><span class="coming" id="school-coming">🎓 COMING SOON: Full Cindy Trade School courses with certificates</span></div>
+  </div>
+
+  <div class="closing">
+    <div class="cindy-host"><img src="cindy%20happy.png" alt="Cindy AI"></div>
     <div class="speech-bubble">
       <div class="name">💬 CINDY:</div>
       <span id="close-text">That's the tour. I'm yours. Free during beta. Let's go make some money.</span>
@@ -204,40 +227,35 @@ footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px s
     <a style="display:inline-block;margin:6px;background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;border:1px solid #fff2" href="https://www.facebook.com/search/pages/?q=cnd%20real%20estate%20services">📘 Facebook</a>
     <a style="display:inline-block;margin:6px;background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;border:1px solid #fff2" href="https://www.tiktok.com/search?q=cnd%20real%20estate%20services">🎵 TikTok</a>
   </div>
-
 </section>
 
-<footer>
-  © 2026 CND Real Estate Services · Powered by Cindy AI · Beaverdam, VA
-</footer>
+<footer>© 2026 CND Real Estate Services · Powered by Cindy AI · Beaverdam, VA</footer>
 
 <script>
 let isSpanish = false;
 let audioOn = false;
 let voicesCache = [];
-
 if('speechSynthesis' in window){
   voicesCache = window.speechSynthesis.getVoices();
   window.speechSynthesis.onvoiceschanged = function(){ voicesCache = window.speechSynthesis.getVoices(); };
 }
-
 function pickVoice(){
   const lang = isSpanish ? 'es' : 'en';
   return voicesCache.find(v => v.lang.toLowerCase().startsWith(lang) && /female|woman|samantha|zira|google|monica|paulina/i.test(v.name))
       || voicesCache.find(v => v.lang.toLowerCase().startsWith(lang)) || null;
 }
-
-function speak(text){
-  if(!audioOn || !('speechSynthesis' in window) || !text) return;
+function doSpeak(text){
+  if(!('speechSynthesis' in window) || !text) return;
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.rate = 0.98; u.pitch = 1.15;
+  u.rate = 0.97; u.pitch = 1.15;
   const v = pickVoice(); if(v) u.voice = v;
   document.querySelectorAll('.cindy-host img').forEach(i => i.classList.add('talking'));
   u.onend = u.onerror = function(){ document.querySelectorAll('.cindy-host img').forEach(i => i.classList.remove('talking')); };
   window.speechSynthesis.speak(u);
 }
-
+function speak(text){ if(audioOn) doSpeak(text); }
+function speakLesson(id){ const el = document.getElementById(id); if(el) doSpeak(el.textContent); }
 function toggleAudio(){
   audioOn = !audioOn;
   document.getElementById('audio-btn').textContent = audioOn ? '🔊 Cindy Talking' : '🔇 Sound Off';
@@ -249,108 +267,90 @@ function toggleAudio(){
     document.querySelectorAll('.cindy-host img').forEach(i => i.classList.remove('talking'));
   }
 }
-
 const spoken = new Set();
 if('IntersectionObserver' in window){
   const obs = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
-      if(e.isIntersecting && !spoken.has(e.target.id)){
-        spoken.add(e.target.id);
-        speak(e.target.textContent);
-      }
+      if(e.isIntersecting && !spoken.has(e.target.id)){ spoken.add(e.target.id); speak(e.target.textContent); }
     });
   }, {threshold: 0.7});
   ['intro-text','mid-text','close-text'].forEach(function(id){
-    const el = document.getElementById(id);
-    if(el) obs.observe(el);
+    const el = document.getElementById(id); if(el) obs.observe(el);
   });
 }
-
 function startTour(){
   document.getElementById('landing').style.display = 'none';
   document.getElementById('showroom').classList.add('active');
   window.scrollTo({top:0, behavior:'smooth'});
 }
-
 const translations = {
   es: {
-    'lang-label': '🇺 English',
-    'audio-btn': '🔇 Sin Sonido',
-    'audio-hint': '💡 Toca  arriba para escuchar a Cindy.',
-    'welcome-text': 'Hola, soy Cindy. Bienvenido a mi showroom. No soy una IA básica — soy la socia más inteligente que un contratista haya contratado. ¿Quieres que te muestre todo?',
-    'start-btn': '🎬 EMPEZAR EL RECORRIDO',
-    'intro-text': 'Bien, entra. Aquí están los cerebros que te hacen ganar dinero. Te voy a mostrar cada uno. Mira esto...',
-    'est-tag': 'TU GANADOR DE DINERO',
-    'est-title': 'El Presupuestador',
-    'est-desc': 'Toma una foto del trabajo. Lo leo como un contratista pro — veo la madera, el tubo, el siding. Precifico cada material con marca, costo unitario y matemática completa. Agrego mano de obra, ganancia y permisos. Obtienes un PDF limpio en 15 segundos. Entrégalo al cliente. Gana el trabajo.',
-    'est-cta': '🚀 PROBAR GRATIS',
-    'safe-tag': 'TUS OJOS EN LA OBRA',
-    'safe-title': 'El Chequeo de Obra',
-    'safe-desc': 'Antes de empezar, déjame recorrer la obra contigo. Detecto los riesgos — bordes sin protección, falta de equipo, escaleras malas. Te digo qué está BIEN, qué VIGILAR, y qué ARREGLAR primero. Sin charla de miedo. Solo una lectura profesional amigable.',
-    'safe-cta': '🧪 PROBAR MI OBRA',
-    'mid-text': 'Ahora mira este — aquí es donde me pongo seria para los contratistas comerciales...',
-    'code-tag': 'TU EXPERTA EN CÓDIGO',
-    'code-title': 'El Chequeo de Código',
-    'code-desc': 'Toma foto de un espacio comercial o plano. Lo reviso contra códigos de ciudad — anchos de salida, escaleras, rociadores, cantidad de salidas. Marco lo FALLIDO y te digo exactamente qué arreglar antes que llegue el inspector.',
-    'code-cta': '🏛️ CHEQUEAR CÓDIGO',
-    'trade-tag': 'HECHO PARA CADA OFICIO',
-    'trade-title': 'Seis Oficios, Una Cindy',
-    'trade-desc': 'Eléctrico. Plomería. Siding. Techos. Concreto. Tubería y Drenaje. Conozco cada marca, cada precio unitario, cada chequeo de ingeniería para cada uno. Solo elige tu oficio — yo hago el resto.',
-    'trade-cta': '🛠️ ELIGE TU OFICIO',
-    'flex-title': '💪 Por Qué No Soy Como Las Otras IAs',
-    'flex1-b': 'Ellas ADIVINAN. Yo CALCULO.',
-    'flex1-p': 'Otras IAs dicen "depende de..." y mueven las manos. Yo imprimo la marca, el precio, la matemática y el total. Cada. Sola. Línea.',
-    'flex2-b': 'Ellas CHAT. Yo INGENIERÍA.',
-    'flex2-p': 'Yo corro la Ecuación de Manning en tubería. Chequeo 30 PSI de suelo en cimientos. Ingeniería real, sellada en tu presupuesto.',
-    'flex3-b': 'Ellas TE DAN TEXTO. Yo TE DOY UN PDF.',
-    'flex3-p': 'Sin copiar-pegar. Sin dolores de cabeza de formato. Un PDF limpio y con marca, listo para tu cliente.',
-    'flex4-b': 'Ellas TRABAJAN SOLAS. Yo SOY TU SOCIA.',
-    'flex4-p': 'Presupuesto, chequeo de obra Y revisión de código. Tres cerebros. Una app. Tu flujo entero en mis manos.',
-    'close-text': 'Ese fue el recorrido. Soy tuya. Gratis durante la beta. Vamos a ganar dinero.',
-    'close-btn1': 'PRESUPUESTO GRATIS',
-    'close-btn2': 'PROBAR MI OBRA',
-    'follow-title': 'Sigue a CND Real Estate Services'
+    'lang-label':'🇺 English','audio-btn':'🔇 Sin Sonido','audio-hint':'💡 Toca 🔊 arriba para escuchar a Cindy.',
+    'welcome-text':'Hola, soy Cindy. Bienvenido a mi showroom. No soy una IA básica — soy la socia más inteligente que un contratista haya contratado. ¿Quieres que te muestre todo?',
+    'start-btn':'🎬 EMPEZAR EL RECORRIDO','intro-text':'Bien, entra. Aquí están los cerebros que te hacen ganar dinero. Te voy a mostrar cada uno. Mira esto...',
+    'est-tag':'TU GANADOR DE DINERO','est-title':'El Presupuestador','est-desc':'Toma una foto del trabajo. Lo leo como un contratista pro — veo la madera, el tubo, el siding. Precifico cada material con marca, costo y matemática. Agrego mano de obra, ganancia y permisos. PDF limpio en 15 segundos. Entrégalo y gana el trabajo.','est-cta':'🚀 PROBAR GRATIS',
+    'safe-tag':'TUS OJOS EN LA OBRA','safe-title':'El Chequeo de Obra','safe-desc':'Antes de empezar, recorro la obra contigo. Detecto riesgos — bordes sin protección, falta de equipo, escaleras malas. Te digo qué está BIEN, qué VIGILAR y qué ARREGLAR primero.','safe-cta':'🧪 PROBAR MI OBRA',
+    'mid-text':'Ahora mira este — aquí me pongo seria para los contratistas comerciales...',
+    'code-tag':'TU EXPERTA EN CÓDIGO','code-title':'El Chequeo de Código','code-desc':'Reviso espacios comerciales contra códigos — salidas, escaleras, rociadores. Marco lo FALLIDO y te digo qué arreglar antes que llegue el inspector.','code-cta':'🏛️ CHEQUEAR CÓDIGO',
+    'trade-tag':'HECHO PARA CADA OFICIO','trade-title':'Siete Oficios, Una Cindy','trade-desc':'Eléctrico. Plomería. Siding. Techos. Concreto. Tubería. Y ahora Albañilería. Conozco cada marca y cada chequeo. Elige tu oficio — yo hago el resto.','trade-cta':'🛠️ ELIGE TU OFICIO',
+    'flex-title':'💪 Por Qué No Soy Como Las Otras IAs',
+    'flex1-b':'Ellas ADIVINAN. Yo CALCULO.','flex1-p':'Otras dicen "depende..." Yo imprimo marca, precio, matemática y total. Cada línea.',
+    'flex2-b':'Ellas CHAT. Yo INGENIERÍA.','flex2-p':'Corro Manning en tubería y 30 PSI en cimientos. Ingeniería real en tu presupuesto.',
+    'flex3-b':'Ellas TEXTO. Yo PDF.','flex3-p':'Un PDF limpio y con marca, listo para tu cliente.',
+    'flex4-b':'Ellas SOLAS. Yo TU SOCIA.','flex4-p':'Presupuesto, obra y código. Tres cerebros, una app.',
+    'school-title':'🎓 LA ESCUELA DE OFICIOS DE CINDY','school-sub':'Lecciones gratis durante la beta. Toca 🔊 y deja que Cindy te enseñe lo profundo del oficio.',
+    'ls-electrical-t':'Eléctrico — Paneles y Protección','ls-electrical':'Hablemos de eléctrico. Reviso el amperaje del panel — una casa moderna necesita 200 amperios; un panel de 100 alimentando una adición es un trabajo de upgrade. Busco GFCI faltantes en cocina, baño y garaje porque el código lo exige. Precifico Romex 12/2 de Southwire y siempre marco el permiso, porque el trabajo sin permiso mata la venta de la casa.',
+    'ls-electrical-b':'Escucha a Cindy enseñarlo',
+    'ls-plumbing-t':'Plomería — Presión y Pendiente','ls-plumbing':'Plomería es flujo y presión. Presión arriba de 80 PSI exige válvula reductora o los accesorios revientan. Pendiente de drenaje: un cuarto de pulgada por pie — muy plano se tapa, muy empinado el agua deja los sólidos. Precifico PVC Charlotte Pipe Sch 40 y marco la línea de congelación en grifos exteriores.',
+    'ls-plumbing-b':'Escucha a Cindy enseñarlo',
+    'ls-siding-t':'Siding — Squares y Barreras de Agua','ls-siding':'Siding es matemática. Un square son 100 pies cuadrados. Alto por ancho, resto ventanas y puertas, agrego 10 a 15 por ciento de desperdicio. Precifico James Hardie o CertainTeed, y nunca salto las capas de atrás — Tyvek y flashing, porque el siding vale lo que vale su barrera de agua.',
+    'ls-siding-b':'Escucha a Cindy enseñarlo',
+    'ls-roofing-t':'Techos — Squares y Pendiente','ls-roofing':'Techos también en squares, pero con factor de pendiente. Techo caminable es mano de obra directa; techo empinado exige equipo y más horas. Precifico GAF Timberline, underlayment sintético y drip edge, y siempre incluyo tear-off y el dumpster — dinero real que los amateurs olvidan.',
+    'ls-roofing-b':'Escucha a Cindy enseñarlo',
+    'ls-concrete-t':'Concreto — PSI y Curado','ls-concrete':'Concreto es química. Una acera 3,000 PSI, una entrada 4,000, y zapatas con suelo sólido — 30 PSI es mi límite. El agua es el enemigo: mucha en la mezcla y cura débil y agrietado. Por eso vigilo el curado: cuándo se puede caminar y cuándo llega a fuerza completa a los 28 días.',
+    'ls-concrete-b':'Escucha a Cindy enseñarlo',
+    'ls-pipe-t':'Tubería — Ecuación de Manning','ls-pipe':'Tubería es donde flexo ingeniería. Corro la ecuación de Manning — diámetro, pendiente, rugosidad — para calcular flujo en CFS contra lo que exige la ciudad. Un tubo de 12 pulgadas al 1.5 por ciento mueve como 4 CFS; si la ciudad pide 3, es PASS. Sello PASS o RED FLAG en cada corrida, porque una inspección fallada cuesta semanas.',
+    'ls-pipe-b':'Escucha a Cindy enseñarlo',
+    'ls-masonry-t':'Albañilería — Secretos de Maestro','ls-masonry':'Albañilería es donde vive el arte real. Primero corro la prueba de succión IRA — si el ladrillo está seco y poroso chupa el agua del mortero y mata la unión. Aviso mojar la pila antes de colocar. Luego reviso sangrado y fluencia — si la pared sube muy rápido en frío o humedad las corridas de abajo se hunden y las alturas se desvían. Vigilo el pie de gallo en las esquinas — si la plomada se sale de la intersección la guía se tuerce como un sacacorchos. Y rastreo patrones de unión — flamenco, inglés, corrido — fila por fila, porque un ladrillo fuera de ritmo desvía toda la pared.',
+    'ls-masonry-b':'Escucha a Cindy enseñarlo',
+    'school-coming':'🎓 PRONTO: Cursos completos de la Escuela de Cindy con certificados',
+    'close-text':'Ese fue el recorrido. Soy tuya. Gratis durante la beta. Vamos a ganar dinero.',
+    'close-btn1':'PRESUPUESTO GRATIS','close-btn2':'PROBAR MI OBRA','follow-title':'Sigue a CND Real Estate Services'
   },
   en: {
-    'lang-label': '🇪 Español',
-    'audio-btn': '🔇 Sound Off',
-    'audio-hint': '💡 Tap 🔊 up top to hear Cindy talk.',
-    'welcome-text': 'Hey, I\'m Cindy. Welcome to my showroom. I\'m not some basic AI — I\'m the smartest partner a contractor ever hired. Want me to show you around?',
-    'start-btn': '🎬 START THE TOUR',
-    'intro-text': 'Alright, step inside. Over here we\'ve got the brains that make you money. I\'ll walk you through each one. Watch this...',
-    'est-tag': 'YOUR MONEY-MAKER',
-    'est-title': 'The Estimator',
-    'est-desc': 'Snap a photo of the job. I read it like a pro contractor — I see the lumber, the pipe, the siding. I price every material with brand, unit cost, and full math. Add labor, profit, and permits. You get a clean PDF in 15 seconds. Hand it to the client. Win the job.',
-    'est-cta': '🚀 TRY IT FREE',
-    'safe-tag': 'YOUR EYES ON THE JOB',
-    'safe-title': 'The Site Checkup',
-    'safe-desc': 'Before you start work, let me walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what\'s GOOD, what to WATCH, and what to FIX first. No scary talk. Just a friendly pro read.',
-    'safe-cta': '🧪 TEST YOUR SITE',
-    'mid-text': 'Now watch this one — this is where I get serious for the commercial contractors...',
-    'code-tag': 'YOUR CODE EXPERT',
-    'code-title': 'The Code Check',
-    'code-desc': 'Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix before the inspector shows up.',
-    'code-cta': '🏛️ RUN A CODE CHECK',
-    'trade-tag': 'BUILT FOR EVERY TRADE',
-    'trade-title': 'Six Trades, One Cindy',
-    'trade-desc': 'Electrical. Plumbing. Siding. Roofing. Concrete. Pipe & Drain. I know every brand, every unit price, every engineering check for each one. You just pick your trade — I do the rest.',
-    'trade-cta': '🛠️ PICK YOUR TRADE',
-    'flex-title': '💪 Why I\'m Not Like the Other AIs',
-    'flex1-b': 'They GUESS. I CALCULATE.',
-    'flex1-p': 'Other AIs say "cost depends on..." and wave their hands. I print the brand, the unit price, the math, and the total. Every. Single. Line.',
-    'flex2-b': 'They CHAT. I ENGINEER.',
-    'flex2-p': 'I run Manning\'s Equation on pipe. I check 30 PSI soil bearing on foundations. Real engineering, stamped into your bid.',
-    'flex3-b': 'They GIVE YOU RAW TEXT. I GIVE YOU A PDF.',
-    'flex3-p': 'No copy-paste. No formatting headaches. A clean, branded PDF ready to hand your client.',
-    'flex4-b': 'They WORK ALONE. I\'M YOUR PARTNER.',
-    'flex4-p': 'I estimate the job, check the site, AND review the code. Three brains. One app. Your whole workflow in my hands.',
-    'close-text': 'That\'s the tour. I\'m yours. Free during beta. Let\'s go make some money.',
-    'close-btn1': 'START MY FREE ESTIMATE',
-    'close-btn2': 'TEST MY JOB SITE',
-    'follow-title': 'Follow CND Real Estate Services'
+    'lang-label':'🇪 Español','audio-btn':'🔇 Sound Off','audio-hint':'💡 Tap 🔊 up top to hear Cindy talk.',
+    'welcome-text':'Hey, I\'m Cindy. Welcome to my showroom. I\'m not some basic AI — I\'m the smartest partner a contractor ever hired. Want me to show you around?',
+    'start-btn':'🎬 START THE TOUR','intro-text':'Alright, step inside. Over here we\'ve got the brains that make you money. I\'ll walk you through each one. Watch this...',
+    'est-tag':'YOUR MONEY-MAKER','est-title':'The Estimator','est-desc':'Snap a photo of the job. I read it like a pro contractor — I see the lumber, the pipe, the siding. I price every material with brand, unit cost, and full math. Add labor, profit, and permits. You get a clean PDF in 15 seconds. Hand it to the client. Win the job.','est-cta':'🚀 TRY IT FREE',
+    'safe-tag':'YOUR EYES ON THE JOB','safe-title':'The Site Checkup','safe-desc':'Before you start work, let me walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what\'s GOOD, what to WATCH, and what to FIX first.','safe-cta':'🧪 TEST YOUR SITE',
+    'mid-text':'Now watch this one — this is where I get serious for the commercial contractors...',
+    'code-tag':'YOUR CODE EXPERT','code-title':'The Code Check','code-desc':'Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix.','code-cta':'🏛️ RUN A CODE CHECK',
+    'trade-tag':'BUILT FOR EVERY TRADE','trade-title':'Seven Trades, One Cindy','trade-desc':'Electrical. Plumbing. Siding. Roofing. Concrete. Pipe & Drain. And now Masonry. I know every brand, every unit price, every engineering check for each one. You just pick your trade — I do the rest.','trade-cta':'🛠️ PICK YOUR TRADE',
+    'flex-title':'💪 Why I\'m Not Like the Other AIs',
+    'flex1-b':'They GUESS. I CALCULATE.','flex1-p':'Other AIs say "cost depends on..." and wave their hands. I print the brand, the unit price, the math, and the total. Every. Single. Line.',
+    'flex2-b':'They CHAT. I ENGINEER.','flex2-p':'I run Manning\'s Equation on pipe. I check 30 PSI soil bearing on foundations. Real engineering, stamped into your bid.',
+    'flex3-b':'They GIVE YOU RAW TEXT. I GIVE YOU A PDF.','flex3-p':'No copy-paste. No formatting headaches. A clean, branded PDF ready to hand your client.',
+    'flex4-b':'They WORK ALONE. I\'M YOUR PARTNER.','flex4-p':'I estimate the job, check the site, AND review the code. Three brains. One app. Your whole workflow in my hands.',
+    'school-title':'🎓 CINDY\'S TRADE SCHOOL','school-sub':'Free lessons while in beta. Tap 🔊 and let Cindy teach you the real job specifics — the deep stuff.',
+    'ls-electrical-t':'Electrical — Panels & Protection','ls-electrical':'Let us talk electrical. When I look at a panel I check the amperage — a modern house needs 200 amp service; a 100 amp panel feeding a new addition is an upgrade job right there. I hunt for missing GFCI protection in kitchens, baths and garages because code demands it. I price Southwire 12/2 Romex and I always flag the permit, because unpermitted work kills home sales.',
+    'ls-electrical-b':'Hear Cindy teach it',
+    'ls-plumbing-t':'Plumbing — Pressure & Slope','ls-plumbing':'Plumbing is flow and pressure. I check pressure first — above 80 PSI and code demands a pressure reducing valve or fixtures blow out. Drain slope is a quarter inch per foot: too flat clogs, too steep and water outruns the solids. I price Charlotte Pipe PVC Schedule 40 and I flag the frost line on outside spigots, because a frozen pipe is a burst pipe.',
+    'ls-plumbing-b':'Hear Cindy teach it',
+    'ls-siding-t':'Siding — Squares & Water Barriers','ls-siding':'Siding is a math problem. One square equals 100 square feet of wall. Height times width, subtract windows and doors, add 10 to 15 percent for waste. I price James Hardie fiber cement or CertainTeed vinyl, and I never skip the layers behind it — Tyvek wrap and flashing, because siding is only as good as the water barrier under it.',
+    'ls-siding-b':'Hear Cindy teach it',
+    'ls-roofing-t':'Roofing — Squares & Steepness','ls-roofing':'Roofing counts in squares too, but I add the steepness factor. A walkable roof is straight labor; a steep roof needs safety gear and more hours, so the price climbs. I price GAF Timberline shingles, synthetic underlayment and drip edge, and I always include tear-off and the dumpster — real money that amateurs forget.',
+    'ls-roofing-b':'Hear Cindy teach it',
+    'ls-concrete-t':'Concrete — PSI & Curing','ls-concrete':'Concrete is chemistry. A sidewalk takes 3,000 PSI, a driveway 4,000, and footings want solid bearing — 30 PSI is my soil limit. Water is the enemy: too much in the mix and it cures weak and cracks. That is why I watch cure time and tell you when it is safe to walk and when it hits full strength at 28 days.',
+    'ls-concrete-b':'Hear Cindy teach it',
+    'ls-pipe-t':'Pipe & Drain — Manning\'s Equation','ls-pipe':'Pipe and drain is where I flex engineering. I run Manning\'s equation — diameter, slope, roughness — to compute flow in CFS and compare it against the city requirement. A 12 inch pipe at 1.5 percent slope moves about 4 CFS; if the city wants 3, you PASS. I stamp PASS or RED FLAG on every run, because a failed inspection costs weeks.',
+    'ls-pipe-b':'Hear Cindy teach it',
+    'ls-masonry-t':'Masonry — Master Mason Secrets','ls-masonry':'Masonry is where the real craft lives. First I run the IRA suction test — if brick is bone dry and porous it sucks water out of the mortar and kills the bond. I warn to dampen the pile before laying. Then I check for bleed and creep — if the wall climbs too fast in cold or humid weather the bottom courses sink and heights go off. I watch the crow\'s foot at corners — if the plumb line drifts off the intersection the lead spirals like a corkscrew. And I track bond patterns — Flemish, English, running bond — row by row, because one brick out of rhythm throws the whole wall.',
+    'ls-masonry-b':'Hear Cindy teach it',
+    'school-coming':'🎓 COMING SOON: Full Cindy Trade School courses with certificates',
+    'close-text':'That\'s the tour. I\'m yours. Free during beta. Let\'s go make some money.',
+    'close-btn1':'START MY FREE ESTIMATE','close-btn2':'TEST MY JOB SITE','follow-title':'Follow CND Real Estate Services'
   }
 };
-
 function toggleLang(){
   isSpanish = !isSpanish;
   const trans = translations[isSpanish ? 'es' : 'en'];
@@ -360,6 +360,5 @@ function toggleLang(){
   });
 }
 </script>
-
 </body>
 </html>
