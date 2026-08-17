@@ -12,16 +12,18 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .stars::before{content:'';position:absolute;width:100%;height:100%;background-image:radial-gradient(2px 2px at 20% 30%,white,transparent),radial-gradient(1px 1px at 60% 70%,white,transparent),radial-gradient(1px 1px at 80% 10%,white,transparent),radial-gradient(2px 2px at 30% 80%,white,transparent);background-size:200px 200px;opacity:.3;animation:twinkle 5s infinite}
 @keyframes twinkle{0%,100%{opacity:.3}50%{opacity:.5}}
 
-.top{position:fixed;top:0;left:0;right:0;background:rgba(0,51,102,.95);backdrop-filter:blur(10px);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;z-index:100}
+.top{position:fixed;top:0;left:0;right:0;background:rgba(0,51,102,.95);backdrop-filter:blur(10px);padding:14px 24px;display:flex;justify-content:space-between;align-items:center;z-index:100;flex-wrap:wrap;gap:8px}
 .top b{font-size:18px;letter-spacing:2px;color:#fff}
+.top-btns{display:flex;gap:8px}
 .lang-btn{background:#fff1;color:#fff;border:1px solid #fff4;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:13px;transition:all .2s}
 .lang-btn:hover{background:#fff2}
 
-/* === LANDING === */
-.landing{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 24px 40px;text-align:center;position:relative}
+.landing{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:100px 24px 40px;text-align:center;position:relative}
 .cindy-host{position:relative;margin-bottom:30px}
 .cindy-host img{width:220px;height:220px;border-radius:50%;object-fit:cover;border:4px solid #e8590c;box-shadow:0 0 60px rgba(232,89,12,.5);animation:breathe 3s ease-in-out infinite}
+.cindy-host img.talking{animation:talk .45s ease-in-out infinite}
 @keyframes breathe{0%,100%{transform:scale(1);box-shadow:0 0 60px rgba(232,89,12,.5)}50%{transform:scale(1.03);box-shadow:0 0 80px rgba(232,89,12,.8)}}
+@keyframes talk{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 .speech-bubble{background:#fff;color:#222;padding:20px 28px;border-radius:20px;max-width:520px;margin:20px auto;position:relative;font-size:17px;line-height:1.6;box-shadow:0 8px 30px rgba(0,0,0,.4);animation:fadeInUp 1s ease-out}
 .speech-bubble::before{content:'';position:absolute;top:-15px;left:50%;transform:translateX(-50%);border:15px solid transparent;border-bottom-color:#fff;border-top:0}
 .speech-bubble .name{color:#003366;font-weight:bold;margin-bottom:6px;font-size:15px}
@@ -30,7 +32,6 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 .start-tour:hover{background:#d1480a;transform:scale(1.08)}
 
-/* === SHOWROOM === */
 .showroom{display:none;padding:100px 24px 80px;max-width:1200px;margin:0 auto}
 .showroom.active{display:block;animation:fadeInUp .8s ease-out}
 .stage{display:flex;align-items:flex-start;gap:30px;flex-wrap:wrap;margin-bottom:50px}
@@ -48,7 +49,6 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .feature-card .cta{display:inline-block;background:#e8590c;color:#fff;padding:10px 24px;border-radius:20px;text-decoration:none;font-weight:bold;font-size:14px;transition:all .2s}
 .feature-card .cta:hover{background:#fff;color:#003366}
 
-/* === FLEX SECTION === */
 .flex{background:linear-gradient(135deg,#003366,#001a33);padding:60px 24px;margin:60px 0;border-radius:20px;text-align:center;position:relative;overflow:hidden}
 .flex::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(232,89,12,.2),transparent);animation:spin 8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -59,7 +59,6 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .flex-item b{color:#e8590c;display:block;margin-bottom:6px}
 .flex-item p{color:#ddd;font-size:14px;line-height:1.5}
 
-/* === CLOSING === */
 .closing{text-align:center;padding:60px 24px;max-width:800px;margin:0 auto}
 .closing .cindy-host img{width:200px;height:200px}
 .closing-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:30px}
@@ -70,9 +69,6 @@ body{background:#0a0a14;color:#fff;overflow-x:hidden}
 .btn-ghost:hover{background:#fff;color:#003366}
 
 footer{text-align:center;padding:24px;color:#999;font-size:13px;border-top:1px solid #fff1;margin-top:40px}
-footer a{color:#e8590c;text-decoration:none;margin:0 8px}
-
-.hidden{display:none}
 
 @media(max-width:600px){
   .speech-bubble{font-size:15px;padding:16px 20px}
@@ -88,25 +84,26 @@ footer a{color:#e8590c;text-decoration:none;margin:0 8px}
 
 <div class="top">
   <b>🏠 CND REAL ESTATE SERVICES</b>
-  <button class="lang-btn" onclick="toggleLang()"><span id="lang-label">🇪🇸 Español</span></button>
+  <div class="top-btns">
+    <button class="lang-btn" id="audio-btn" onclick="toggleAudio()">🔇 Sound Off</button>
+    <button class="lang-btn" onclick="toggleLang()"><span id="lang-label">🇪🇸 Español</span></button>
+  </div>
 </div>
 
-<!-- === LANDING === -->
 <section class="landing" id="landing">
   <div class="cindy-host">
-    <img src="cindy%20happy.png" alt="Cindy AI" id="landing-img">
+    <img src="cindy%20happy.png" alt="Cindy AI">
   </div>
   <div class="speech-bubble">
-    <div class="name" id="cindy-name">💬 CINDY:</div>
+    <div class="name">💬 CINDY:</div>
     <span id="welcome-text">Hey, I'm Cindy. Welcome to my showroom. I'm not some basic AI — I'm the smartest partner a contractor ever hired. Want me to show you around?</span>
   </div>
   <button class="start-tour" onclick="startTour()" id="start-btn">🎬 START THE TOUR</button>
+  <p style="margin-top:16px;color:#99a;font-size:14px" id="audio-hint">💡 Tap 🔊 up top to hear Cindy talk.</p>
 </section>
 
-<!-- === SHOWROOM === -->
 <section class="showroom" id="showroom">
   
-  <!-- Stage 1: Cindy welcomes you to the showroom -->
   <div class="stage">
     <div class="cindy-host">
       <img src="cindy%20happy.png" alt="Cindy AI">
@@ -117,7 +114,6 @@ footer a{color:#e8590c;text-decoration:none;margin:0 8px}
     </div>
   </div>
 
-  <!-- Feature 1: The Estimator -->
   <div class="feature-row">
     <div class="feature-card">
       <div class="icon">💰</div>
@@ -131,12 +127,11 @@ footer a{color:#e8590c;text-decoration:none;margin:0 8px}
       <div class="icon">🧪</div>
       <div class="tagline" id="safe-tag">YOUR EYES ON THE JOB</div>
       <h3 id="safe-title">The Site Checkup</h3>
-      <p id="safe-desc">Before you start work, let me walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what's GOOD, what to WATCH, and what to FIX first. No scary OSHA talk. Just a friendly pro read.</p>
+      <p id="safe-desc">Before you start work, let me walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what's GOOD, what to WATCH, and what to FIX first. No scary talk. Just a friendly pro read.</p>
       <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/?safety=1" id="safe-cta">🧪 TEST YOUR SITE</a>
     </div>
   </div>
 
-  <!-- Stage 2: Cindy keeps walking -->
   <div class="stage" style="margin-top:60px">
     <div class="cindy-host">
       <img src="cindy%20happy.png" alt="Cindy AI">
@@ -165,7 +160,6 @@ footer a{color:#e8590c;text-decoration:none;margin:0 8px}
     </div>
   </div>
 
-  <!-- === FLEX SECTION === -->
   <div class="flex">
     <div class="flex-inner">
       <h2 id="flex-title">💪 Why I'm Not Like the Other AIs</h2>
@@ -190,7 +184,6 @@ footer a{color:#e8590c;text-decoration:none;margin:0 8px}
     </div>
   </div>
 
-  <!-- === CLOSING === -->
   <div class="closing">
     <div class="cindy-host">
       <img src="cindy%20happy.png" alt="Cindy AI">
@@ -207,9 +200,9 @@ footer a{color:#e8590c;text-decoration:none;margin:0 8px}
 
   <div style="text-align:center;padding:40px 20px">
     <h3 style="margin-bottom:20px;color:#fff" id="follow-title">Follow CND Real Estate Services</h3>
-    <a class="card" style="display:inline-block;margin:6px;background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;border:1px solid #fff2" href="mailto:cndrealestateservices@gmail.com">📧 Email us</a>
-    <a class="card" style="display:inline-block;margin:6px;background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;border:1px solid #fff2" href="https://www.facebook.com/search/pages/?q=cnd%20real%20estate%20services">📘 Facebook</a>
-    <a class="card" style="display:inline-block;margin:6px;background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;border:1px solid #fff2" href="https://www.tiktok.com/search?q=cnd%20real%20estate%20services">🎵 TikTok</a>
+    <a style="display:inline-block;margin:6px;background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;border:1px solid #fff2" href="mailto:cndrealestateservices@gmail.com">📧 Email us</a>
+    <a style="display:inline-block;margin:6px;background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;border:1px solid #fff2" href="https://www.facebook.com/search/pages/?q=cnd%20real%20estate%20services">📘 Facebook</a>
+    <a style="display:inline-block;margin:6px;background:#1a1a2e;color:#fff;padding:10px 20px;border-radius:20px;text-decoration:none;border:1px solid #fff2" href="https://www.tiktok.com/search?q=cnd%20real%20estate%20services">🎵 TikTok</a>
   </div>
 
 </section>
@@ -220,10 +213,70 @@ footer a{color:#e8590c;text-decoration:none;margin:0 8px}
 
 <script>
 let isSpanish = false;
+let audioOn = false;
+let voicesCache = [];
+
+if('speechSynthesis' in window){
+  voicesCache = window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = function(){ voicesCache = window.speechSynthesis.getVoices(); };
+}
+
+function pickVoice(){
+  const lang = isSpanish ? 'es' : 'en';
+  return voicesCache.find(v => v.lang.toLowerCase().startsWith(lang) && /female|woman|samantha|zira|google|monica|paulina/i.test(v.name))
+      || voicesCache.find(v => v.lang.toLowerCase().startsWith(lang)) || null;
+}
+
+function speak(text){
+  if(!audioOn || !('speechSynthesis' in window) || !text) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.98; u.pitch = 1.15;
+  const v = pickVoice(); if(v) u.voice = v;
+  document.querySelectorAll('.cindy-host img').forEach(i => i.classList.add('talking'));
+  u.onend = u.onerror = function(){ document.querySelectorAll('.cindy-host img').forEach(i => i.classList.remove('talking')); };
+  window.speechSynthesis.speak(u);
+}
+
+function toggleAudio(){
+  audioOn = !audioOn;
+  document.getElementById('audio-btn').textContent = audioOn ? '🔊 Cindy Talking' : '🔇 Sound Off';
+  if(audioOn){
+    const inTour = document.getElementById('showroom').classList.contains('active');
+    speak(document.getElementById(inTour ? 'intro-text' : 'welcome-text').textContent);
+  } else if('speechSynthesis' in window){
+    window.speechSynthesis.cancel();
+    document.querySelectorAll('.cindy-host img').forEach(i => i.classList.remove('talking'));
+  }
+}
+
+const spoken = new Set();
+if('IntersectionObserver' in window){
+  const obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting && !spoken.has(e.target.id)){
+        spoken.add(e.target.id);
+        speak(e.target.textContent);
+      }
+    });
+  }, {threshold: 0.7});
+  ['intro-text','mid-text','close-text'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(el) obs.observe(el);
+  });
+}
+
+function startTour(){
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('showroom').classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
 
 const translations = {
   es: {
-    'lang-label': '🇺🇸 English',
+    'lang-label': '🇺 English',
+    'audio-btn': '🔇 Sin Sonido',
+    'audio-hint': '💡 Toca  arriba para escuchar a Cindy.',
     'welcome-text': 'Hola, soy Cindy. Bienvenido a mi showroom. No soy una IA básica — soy la socia más inteligente que un contratista haya contratado. ¿Quieres que te muestre todo?',
     'start-btn': '🎬 EMPEZAR EL RECORRIDO',
     'intro-text': 'Bien, entra. Aquí están los cerebros que te hacen ganar dinero. Te voy a mostrar cada uno. Mira esto...',
@@ -233,7 +286,7 @@ const translations = {
     'est-cta': '🚀 PROBAR GRATIS',
     'safe-tag': 'TUS OJOS EN LA OBRA',
     'safe-title': 'El Chequeo de Obra',
-    'safe-desc': 'Antes de empezar, déjame recorrer la obra contigo. Detecto los riesgos — bordes sin protección, falta de equipo, escaleras malas. Te digo qué está BIEN, qué VIGILAR, y qué ARREGLAR primero. Sin charla de OSHA. Solo una lectura profesional amigable.',
+    'safe-desc': 'Antes de empezar, déjame recorrer la obra contigo. Detecto los riesgos — bordes sin protección, falta de equipo, escaleras malas. Te digo qué está BIEN, qué VIGILAR, y qué ARREGLAR primero. Sin charla de miedo. Solo una lectura profesional amigable.',
     'safe-cta': '🧪 PROBAR MI OBRA',
     'mid-text': 'Ahora mira este — aquí es donde me pongo seria para los contratistas comerciales...',
     'code-tag': 'TU EXPERTA EN CÓDIGO',
@@ -259,7 +312,9 @@ const translations = {
     'follow-title': 'Sigue a CND Real Estate Services'
   },
   en: {
-    'lang-label': '🇪🇸 Español',
+    'lang-label': '🇪 Español',
+    'audio-btn': '🔇 Sound Off',
+    'audio-hint': '💡 Tap 🔊 up top to hear Cindy talk.',
     'welcome-text': 'Hey, I\'m Cindy. Welcome to my showroom. I\'m not some basic AI — I\'m the smartest partner a contractor ever hired. Want me to show you around?',
     'start-btn': '🎬 START THE TOUR',
     'intro-text': 'Alright, step inside. Over here we\'ve got the brains that make you money. I\'ll walk you through each one. Watch this...',
@@ -269,7 +324,7 @@ const translations = {
     'est-cta': '🚀 TRY IT FREE',
     'safe-tag': 'YOUR EYES ON THE JOB',
     'safe-title': 'The Site Checkup',
-    'safe-desc': 'Before you start work, let me walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what\'s GOOD, what to WATCH, and what to FIX first. No scary OSHA talk. Just a friendly pro read.',
+    'safe-desc': 'Before you start work, let me walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what\'s GOOD, what to WATCH, and what to FIX first. No scary talk. Just a friendly pro read.',
     'safe-cta': '🧪 TEST YOUR SITE',
     'mid-text': 'Now watch this one — this is where I get serious for the commercial contractors...',
     'code-tag': 'YOUR CODE EXPERT',
@@ -296,17 +351,10 @@ const translations = {
   }
 };
 
-function startTour(){
-  document.getElementById('landing').style.display = 'none';
-  document.getElementById('showroom').classList.add('active');
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
 function toggleLang(){
   isSpanish = !isSpanish;
-  const lang = isSpanish ? 'es' : 'en';
-  const trans = translations[lang];
-  Object.keys(trans).forEach(key => {
+  const trans = translations[isSpanish ? 'es' : 'en'];
+  Object.keys(trans).forEach(function(key){
     const el = document.getElementById(key);
     if(el) el.textContent = trans[key];
   });
