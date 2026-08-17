@@ -200,11 +200,31 @@ def parse_bid_items(text):
         items.append({"name": words[0], "desc": " ".join(words[1:]), "mat": money[0] if len(money) >= 3 else "0", "labor": money[-2], "total": money[-1]})
     return items
 
+def clean_for_customer(result_text, items):
+    clean_items = []
+    for it in items:
+        name_upper = it['name'].upper()
+        if any(w in name_upper for w in ("OVERHEAD", "PROFIT", "CONTINGENCY", "GRAND TOTAL", "SUBTOTAL", "MARGIN", "GANANCIA")):
+            continue
+        clean_items.append(it)
+        
+    clean_notes = []
+    if "Notes" in result_text or "Notas" in result_text:
+        split_word = "Notes" if "Notes" in result_text else "Notas"
+        raw_notes = result_text.split(split_word, 1)[1].strip().split("\n")
+        for line in raw_notes:
+            line_upper = line.upper()
+            if any(w in line_upper for w in ("OVERHEAD", "PROFIT", "BALLPARK", "COST DEPENDS", "VARIES", "MARGIN", "RANGO", "COSTO", "GANANCIA", "18%", "15%", "20%")):
+                continue
+            if line.strip() and not set(line.strip()) <= set("-:* "):
+                clean_notes.append(line.strip())
+    return clean_items, clean_notes
+
 def extract_total(result_text, items):
     m = re.search(r"(?i)grand total[^0-9$]*\$?([\d,.]+)", result_text) or re.search(r"(?i)total estimate[^0-9$]*\$?([\d,.]+)", result_text)
     if m: return m.group(1)
     try:
-        s = sum(float(it["total"]) for it in items if not any(w in it["name"].upper() for w in ("OVERHEAD", "GRAND")))
+        s = sum(float(it["total"].replace(",","")) for it in items if not any(w in it["name"].upper() for w in ("OVERHEAD", "GRAND", "PROFIT", "CONTINGENCY", "SUBTOTAL")))
         if s > 0: return f"{s:,.2f}"
     except Exception: pass
     try:
@@ -218,12 +238,16 @@ def build_pdf_bytes(result_text, lang, client_name="", photo_paths=[], extra_lin
         import pdfkit
         items = parse_bid_items(result_text)
         if not items: return None
+        
+        clean_items, clean_notes = clean_for_customer(result_text, items)
         total = extract_total(result_text, items)
+        
         subtext = "Con tecnologia de Cindy AI" if lang == "es" else "Powered by Cindy AI Estimator"
         footer = "Gracias por elegir CND Real Estate Services." if lang == "es" else "Thank you for choosing CND Real Estate Services."
         prepared = f"<p style='color:#003366;font-weight:bold;margin:10px 0 0 0;'>PREPARED FOR: {client_name.upper()}</p>" if client_name else ""
         extra_html = f"<p style='color:#333;font-size:12px;margin:8px 0 0 0;'>" + "<br>".join(extra_lines.split(" | ")) + "</p>" if extra_lines else ""
         photo_gallery_html = generate_image_html(photo_paths) if photo_paths else ""
+        
         html = f"""<html><head><style>
 body {{ font-family: Arial, sans-serif; color: #333; margin: 40px; }}
 .header {{ border-bottom: 2px solid #111; padding-bottom: 20px; margin-bottom: 30px; }}
@@ -238,13 +262,14 @@ td {{ padding: 12px; border-bottom: 1px solid #ddd; font-size: 14px; }}
 </style></head><body>
 <div class="header"><h1>CND REAL ESTATE SERVICES</h1><p style="color:#666;font-style:italic;margin:5px 0 0 0;">{subtext}</p>{prepared}{extra_html}</div>
 {photo_gallery_html}
-<table><tr><th>Item &amp; Description</th><th class="right">Materials</th><th class="right">Labor</th><th class="right">Total</th></tr>"""
-        for it in items:
-            html += f"""<tr><td><strong>{it['name']}</strong><br><span style="color:#666;font-size:12px;">{it['desc']}</span></td><td class="right">${it['mat']}</td><td class="right">${it['labor']}</td><td class="right"><strong>${it['total']}</strong></td></tr>"""
-        html += f"""<tr class="total-row"><td colspan="3" class="right">Grand Total:</td><td class="right" style="color:#111;font-size:16px;">${total}</td></tr></table>"""
-        if "Notes" in result_text:
-            note_lines = [l for l in result_text.split("Notes", 1)[1].strip().split("\n") if l.strip()][:8]
-            html += "<div class='notes'>" + "<br>".join(note_lines) + "</div>"
+<table><tr><th>Item &amp; Description</th><th class="right">Total Price</th></tr>"""
+        for it in clean_items:
+            html += f"""<tr><td><strong>{it['name']}</strong><br><span style="color:#666;font-size:12px;">{it['desc']}</span></td><td class="right"><strong>${it['total']}</strong></td></tr>"""
+        html += f"""<tr class="total-row"><td class="right">Grand Total:</td><td class="right" style="color:#111;font-size:16px;">${total}</td></tr></table>"""
+        
+        if clean_notes:
+            html += "<div class='notes'><strong>Project Notes:</strong><br>" + "<br>".join(clean_notes[:10]) + "</div>"
+            
         html += f"<div class='footer'>{footer}</div></body></html>"
         return pdfkit.from_string(html, False)
     except Exception: return None
@@ -284,16 +309,51 @@ def build_pdf_fallback(result_text, lang, client_name="", photo_paths=[], extra_
                 count += 1
             except Exception: pass
         pdf.ln(4); pdf.set_draw_color(200, 200, 200); pdf.set_line_width(0.5); pdf.line(15, pdf.get_y(), 195, pdf.get_y()); pdf.ln(6)
-    pdf.set_text_color(0, 0, 0); pdf.set_font("Arial", size=11)
-    clean = result_text.replace("**", "").replace("*", "").replace("|", " ").replace("---", "")
-    try: clean = clean.encode('latin-1', 'replace').decode('latin-1')
-    except Exception: pass
-    pdf.multi_cell(0, 7, clean)
-    tot2 = extract_total(result_text, parse_bid_items(result_text))
+
+    # CUSTOMER SAFE TABLE INSTEAD OF RAW TEXT DUMP
+    items = parse_bid_items(result_text)
+    clean_items, clean_notes = clean_for_customer(result_text, items)
+    
+    pdf.set_font("Arial", 'B', 14); pdf.set_text_color(0, 51, 102)
+    pdf.cell(0, 8, "SCOPE OF WORK & PRICING", ln=True)
+    pdf.ln(2)
+    
+    pdf.set_font("Arial", 'B', 11); pdf.set_text_color(0, 0, 0)
+    pdf.cell(140, 8, "Item & Description", border=1, align='L')
+    pdf.cell(40, 8, "Total Price", border=1, align='R')
+    pdf.ln()
+    
+    for it in clean_items:
+        name = it['name']
+        desc = it['desc']
+        total = it['total']
+        
+        pdf.set_font("Arial", 'B', 10)
+        pdf.cell(140, 6, name, border=0)
+        pdf.cell(40, 6, f"${total}", border=0, align='R', ln=True)
+        
+        pdf.set_font("Arial", '', 9)
+        pdf.set_text_color(100, 100, 100)
+        pdf.multi_cell(140, 5, desc)
+        pdf.set_text_color(0, 0, 0)
+        pdf.ln(2)
+
+    tot2 = extract_total(result_text, items)
     if tot2 != "-":
-        pdf.ln(2); pdf.set_font("Arial", 'B', 13); pdf.set_text_color(0, 51, 102)
-        pdf.cell(0, 9, f"GRAND TOTAL: ${tot2}", ln=True, align='R')
-        pdf.set_font("Arial", size=11); pdf.set_text_color(0, 0, 0)
+        pdf.ln(2)
+        pdf.set_font("Arial", 'B', 13); pdf.set_text_color(0, 51, 102)
+        pdf.cell(140, 9, "GRAND TOTAL:", align='R')
+        pdf.cell(40, 9, f"${tot2}", ln=True, align='R')
+        pdf.set_text_color(0, 0, 0)
+
+    if clean_notes:
+        pdf.ln(4)
+        pdf.set_font("Arial", 'B', 11); pdf.set_text_color(0, 51, 102)
+        pdf.cell(0, 8, "PROJECT NOTES:", ln=True)
+        pdf.set_font("Arial", '', 10); pdf.set_text_color(60, 60, 60)
+        for note in clean_notes[:8]:
+            pdf.multi_cell(0, 5, note)
+            
     pdf.ln(10); pdf.set_font("Arial", 'I', 9); pdf.set_text_color(150, 150, 150)
     pdf_footer = "Gracias por elegir CND Real Estate Services." if lang == "es" else "Thank you for choosing CND Real Estate Services."
     pdf.cell(0, 5, pdf_footer, ln=True, align='C')
