@@ -133,19 +133,49 @@ const SCENES=[
   es:"¿Ya tienen hambre? Pidan en línea... o llámenos al 804, 892, 2862. Nos encanta alimentarlos. Nos vemos en la mesa familiar... ¡MABUHAY!"}
 ];
 
-let lang="en", idx=-1, playing=false, VOICES=[];
+let lang="en", idx=-1, playing=false, token=0, VOICES=[];
 function loadVoices(){VOICES=speechSynthesis.getVoices();}
 loadVoices(); speechSynthesis.onvoiceschanged=loadVoices;
 
 function pickVoice(male){
   const pre = lang==="es" ? "es" : "en";
-  const pool = VOICES.filter(v=>v.lang.toLowerCase().indexOf(pre)===0);
-  const natural = pool.filter(v=>/natural|neural|online|google/i.test(v.name));
-  const base = natural.length ? natural : pool;
-  const g = male ? /male|david|mark|daniel|alex|jorge|juan|carlos|enrique|brandon/i
-                 : /female|zira|aria|jenny|ana|samantha|karen|helena|paulina|monica|lucia|michelle/i;
-  return base.find(v=>g.test(v.name)) || base[0] || null;
+  let pool = VOICES.filter(v=>v.lang.toLowerCase().replace("_","-").indexOf(pre)===0);
+  const neural = pool.filter(v=>/natural|neural|online/i.test(v.name));
+  if(neural.length) pool = neural;
+  else{ const nod = pool.filter(v=>!/desktop/i.test(v.name)); if(nod.length) pool = nod; }
+  const g = male ? /male|guy|brandon|davis|tony|ryan|jacob|jorge|juan|carlos|enrique|diego/i
+                 : /female|aria|jenny|michelle|ana|zira|samantha|karen|helena|paulina|monica|lucia|sabina/i;
+  return pool.find(v=>g.test(v.name)) || pool[0] || null;
 }
+
+/* HUMAN SPEECH ENGINE: sentence-by-sentence, breathing pauses, drifting pitch */
+function speakHuman(text, male, onDone){
+  const my = ++token;
+  speechSynthesis.cancel();
+  let chunks = [];
+  text.split("...").forEach(part=>{
+    const s = part.match(/[^.!?]+[.!?]*/g);
+    if(s) chunks.push(...s.map(x=>x.trim()).filter(Boolean));
+  });
+  let i = 0;
+  $("ring").classList.add("talking");
+  (function next(){
+    if(my!==token || !playing){ $("ring").classList.remove("talking"); return; }
+    if(i >= chunks.length){
+      $("ring").classList.remove("talking");
+      if(onDone) onDone();
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(chunks[i++]);
+    const v = pickVoice(male); if(v) u.voice = v;
+    u.lang = lang==="es" ? "es-ES" : "en-US";
+    u.rate  = (male?0.85:0.95) + (Math.random()*0.06-0.03);
+    u.pitch = (male?0.8:1.1)  + (Math.random()*0.1-0.05);
+    u.onend = ()=>{ if(my===token && playing) setTimeout(next, 180+Math.random()*170); };
+    speechSynthesis.speak(u);
+  })();
+}
+
 function renderDots(){$("dots").innerHTML=SCENES.map((s,i)=>'<span class="'+(i===idx?'on':'')+'"></span>').join("");}
 function setFace(s){
   $("face").src = s.who==="maria" ? "maria.png" : "titomel.png";
@@ -153,43 +183,31 @@ function setFace(s){
   $("dish").src = s.img;
   $("dishWin").classList.add("show");
 }
-function speak(text,male){
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  const v=pickVoice(male); if(v)u.voice=v;
-  u.lang = lang==="es" ? "es-ES" : "en-US";
-  u.pitch = male ? 0.8 : 1.1;
-  u.rate  = male ? 0.85 : 0.95;
-  u.onstart=()=>$("ring").classList.add("talking");
-  u.onend=()=>{
-    $("ring").classList.remove("talking");
-    if(!playing)return;
-    if(idx<SCENES.length-1){setTimeout(()=>{if(playing)show(idx+1);},450);}
-    else{playing=false;$("btnTour").textContent="↺ REPLAY TOUR";}
-  };
-  speechSynthesis.speak(u);
-}
 function show(i){
   idx=i; playing=true;
   const s=SCENES[i];
   setFace(s);
   $("caption").textContent=s[lang];
   renderDots();
-  speak(s[lang], s.who==="mel");
+  speakHuman(s[lang], s.who==="mel", ()=>{
+    if(!playing) return;
+    if(idx<SCENES.length-1){ setTimeout(()=>{ if(playing) show(idx+1); },400); }
+    else{ playing=false; $("btnTour").textContent="↺ REPLAY TOUR"; }
+  });
 }
 $("btnTour").onclick=()=>{
   if(!playing){$("btnTour").textContent="NEXT ➡";show(idx<0||idx>=SCENES.length-1?0:idx+1);}
   else{
     if(idx<SCENES.length-1)show(idx+1);
-    else{playing=false;speechSynthesis.cancel();$("ring").classList.remove("talking");$("btnTour").textContent="↺ REPLAY TOUR";}
+    else{playing=false;token++;speechSynthesis.cancel();$("ring").classList.remove("talking");$("btnTour").textContent="↺ REPLAY TOUR";}
   }
 };
-$("btnStop").onclick=()=>{playing=false;speechSynthesis.cancel();$("ring").classList.remove("talking");$("btnTour").textContent="▶ START THE TOUR";};
+$("btnStop").onclick=()=>{playing=false;token++;speechSynthesis.cancel();$("ring").classList.remove("talking");$("btnTour").textContent="▶ START THE TOUR";};
 function setLang(l){
   lang=l;
   $("btnEN").classList.toggle("on",l==="en");
   $("btnES").classList.toggle("on",l==="es");
-  if(idx>=0){$("caption").textContent=SCENES[idx][lang];if(playing)speak(SCENES[idx][lang],SCENES[idx].who==="mel");}
+  if(idx>=0){$("caption").textContent=SCENES[idx][lang];if(playing)speakHuman(SCENES[idx][lang],SCENES[idx].who==="mel",null);}
 }
 $("btnEN").onclick=()=>setLang("en");
 $("btnES").onclick=()=>setLang("es");
