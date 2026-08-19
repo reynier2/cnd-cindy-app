@@ -111,7 +111,7 @@ const MENU=[
 
 const SCENES=[
  {who:"maria",img:"welcome.png",
-  en:"Mabuhay! Welcome to Tito Mel's Filipino Food, right here in Ruther Glen, Virginia. I'm Maria... and I'll be your host today. Come with me... there's someone I really want you to meet. Say hello to... Tito Mel!",
+  en:"Mabuhay! Welcome to Tito Mel's Filipino Food, right here in Ruther Glen, Virginia. My name is Maria... and I'll be your host today. Come with me... there's someone I really want you to meet. Say hello to... Tito Mel!",
   es:"¡Mabuhay! ¡Bienvenido a Tito Mel's Comida Filipina en Ruther Glen, Virginia! Soy María, su anfitriona. Vengan conmigo... quiero presentarles a alguien muy especial. ¡Díganle hola a... Tito Mel!"},
  {who:"mel",img:"specials.png",
   en:"Kumusta, kaibigan! I'm Tito Mel... welcome to my kitchen. Everything you see here... I cooked it myself, with love. Today we have crispy Lechon Kawali... sizzling Pork Sisig... and on the weekends, my famous Chicken BBQ on a stick. Ay, let me show you around... let's go!",
@@ -129,26 +129,34 @@ const SCENES=[
   en:"And don't you forget... the adobo rice, the sweet plantains... my Buko Pandan juice. For dessert... Halo Halo... Ube Biko... just ask us in the store. Sarap!",
   es:"Y no te olvides... el arroz con adobo, los plátanos dulces... mi jugo de Buko Pandan. De postre... Halo Halo... Ube Biko... pregunta en la tienda. ¡Sarap!"},
  {who:"maria",img:"welcome.png",
-  en:"Hungry yet? Order online at order dot Tito Mel's dot com... or call us at 804, 892, 2862. We can't wait to feed you. See you at the family table... MABUHAY!",
-  es:"¿Ya tienen hambre? Pidan en línea... o llámenos al 804, 892, 2862. Nos encanta alimentarlos. Nos vemos en la mesa familiar... ¡MABUHAY!"}
+  en:"Hungry yet? It's Maria again... order online at order dot Tito Mel's dot com... or call us at 804, 892, 2862. We can't wait to feed you. See you at the family table... MABUHAY!",
+  es:"¿Ya tienen hambre? Soy María de nuevo... pidan en línea o llámenos al 804, 892, 2862. Nos encanta alimentarlos. Nos vemos en la mesa familiar... ¡MABUHAY!"}
 ];
 
-let lang="en", idx=-1, playing=false, token=0, VOICES=[];
-function loadVoices(){VOICES=speechSynthesis.getVoices();}
-loadVoices(); speechSynthesis.onvoiceschanged=loadVoices;
+let lang="en", idx=-1, playing=false, token=0;
+let VOICES=[], F_VOICE=null, M_VOICE=null, F_VOICE_ES=null, M_VOICE_ES=null;
 
-function pickVoice(male){
-  const pre = lang==="es" ? "es" : "en";
-  let pool = VOICES.filter(v=>v.lang.toLowerCase().replace("_","-").indexOf(pre)===0);
+function pickFrom(pool, male){
   const neural = pool.filter(v=>/natural|neural|online/i.test(v.name));
   if(neural.length) pool = neural;
   else{ const nod = pool.filter(v=>!/desktop/i.test(v.name)); if(nod.length) pool = nod; }
   const g = male ? /male|guy|brandon|davis|tony|ryan|jacob|jorge|juan|carlos|enrique|diego/i
-                 : /female|aria|jenny|michelle|ana|zira|samantha|karen|helena|paulina|monica|lucia|sabina/i;
+                 : /female|aria|jenny|michelle|ana|zira|samantha|karen|helena|paulina|monica|lucia|sabina|maria/i;
   return pool.find(v=>g.test(v.name)) || pool[0] || null;
 }
+function lockVoices(){
+  VOICES = speechSynthesis.getVoices();
+  if(!VOICES.length) return;
+  const en = VOICES.filter(v=>v.lang.toLowerCase().replace("_","-").indexOf("en")===0);
+  const es = VOICES.filter(v=>v.lang.toLowerCase().replace("_","-").indexOf("es")===0);
+  F_VOICE = pickFrom(en,false); M_VOICE = pickFrom(en,true);
+  F_VOICE_ES = pickFrom(es,false) || F_VOICE;
+  M_VOICE_ES = pickFrom(es,true) || M_VOICE;
+}
+lockVoices();
+speechSynthesis.onvoiceschanged = lockVoices;
 
-/* HUMAN SPEECH ENGINE: sentence-by-sentence, breathing pauses, drifting pitch */
+/* HUMAN SPEECH ENGINE: one locked voice per character, breathing pauses, gentle drift */
 function speakHuman(text, male, onDone){
   const my = ++token;
   speechSynthesis.cancel();
@@ -167,10 +175,11 @@ function speakHuman(text, male, onDone){
       return;
     }
     const u = new SpeechSynthesisUtterance(chunks[i++]);
-    const v = pickVoice(male); if(v) u.voice = v;
+    const v = lang==="es" ? (male?M_VOICE_ES:F_VOICE_ES) : (male?M_VOICE:F_VOICE);
+    if(v) u.voice = v;
     u.lang = lang==="es" ? "es-ES" : "en-US";
-    u.rate  = (male?0.85:0.95) + (Math.random()*0.06-0.03);
-    u.pitch = (male?0.8:1.1)  + (Math.random()*0.1-0.05);
+    u.rate  = (male?0.85:0.95) + (Math.random()*0.04-0.02);
+    u.pitch = (male?0.8:1.1)  + (Math.random()*0.06-0.03);
     u.onend = ()=>{ if(my===token && playing) setTimeout(next, 180+Math.random()*170); };
     speechSynthesis.speak(u);
   })();
@@ -196,6 +205,7 @@ function show(i){
   });
 }
 $("btnTour").onclick=()=>{
+  lockVoices();
   if(!playing){$("btnTour").textContent="NEXT ➡";show(idx<0||idx>=SCENES.length-1?0:idx+1);}
   else{
     if(idx<SCENES.length-1)show(idx+1);
