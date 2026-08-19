@@ -75,7 +75,7 @@ $("send").onclick=async()=>{
       body:JSON.stringify({customer:customer,phone:phone,pickup:$("cpickup").value,note:$("cnote").value.trim(),items:items})});
     if(r.ok){ $("msg").textContent="✅ Order sent! The kitchen sees it on their screen right now. Pay at pickup — see you soon!"; }
     else{ $("msg").textContent="Hmm, that didn't send. Please call us instead 📞"; }
-  }catch(e){ $("msg").textContent="Hmm, that didn't send. Please call us instead 📞"; }
+}catch(e){ $("msg").textContent="NET ERR: "+e.message; }
 };
 </script>
 </body>
