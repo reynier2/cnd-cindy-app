@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tito Mel's — Filipino Kitchen | AI Host</title>
+<style>
+  :root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#e63946;--cream:#fff3e0;--dim:#c9a27a}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  body{background:var(--bg);color:var(--cream);padding-bottom:60px}
+  header{text-align:center;padding:38px 16px 10px}
+  .logo-ring{width:86px;height:86px;margin:0 auto 12px;border-radius:50%;border:3px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;font-size:44px;
+    box-shadow:0 0 24px rgba(255,183,3,.55),inset 0 0 18px rgba(255,183,3,.25)}
+  h1{font-size:2.2rem;letter-spacing:6px;color:var(--gold);text-shadow:0 0 18px rgba(255,183,3,.6)}
+  .tag{color:var(--dim);letter-spacing:4px;font-size:.75rem;margin-top:6px}
+  section{max-width:960px;margin:26px auto 0;padding:0 16px}
+  h2{font-size:1.3rem;text-align:center}
+  h3{color:var(--gold);letter-spacing:2px;margin-bottom:14px;font-size:1.05rem}
+  .hero{text-align:center}
+  .lang-toggle{margin:14px 0}
+  .lang-toggle button{background:none;border:1px solid var(--dim);color:var(--dim);padding:6px 18px;
+    border-radius:20px;cursor:pointer;letter-spacing:2px}
+  .lang-toggle button.on{border-color:var(--gold);color:var(--gold);box-shadow:0 0 10px rgba(255,183,3,.4)}
+  .host-btn{background:linear-gradient(135deg,var(--gold),#fb8500);border:none;color:#140b06;font-weight:800;
+    letter-spacing:1px;padding:14px 26px;border-radius:30px;cursor:pointer;box-shadow:0 0 22px rgba(255,183,3,.5);
+    font-size:1rem;text-decoration:none;display:inline-block}
+  .stop-btn{background:none;border:1px solid var(--red);color:var(--red);padding:12px 18px;border-radius:30px;
+    cursor:pointer;margin-left:10px}
+  .specials ul{list-style:none;display:grid;gap:10px}
+  .specials li{background:var(--card);border-left:4px solid var(--red);padding:12px 16px;border-radius:8px;
+    box-shadow:0 0 12px rgba(230,57,70,.25)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .mcard{background:var(--card);border:1px solid rgba(255,183,3,.25);border-radius:12px;padding:16px;
+    box-shadow:0 0 14px rgba(255,183,3,.12)}
+  .mcard h4{color:var(--gold);letter-spacing:2px;margin-bottom:10px;font-size:.9rem}
+  .mrow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(201,162,122,.25)}
+  .mrow:last-child{border-bottom:none}
+  .mrow .p{color:var(--gold);font-weight:700;white-space:nowrap;margin-left:10px}
+  .order-row{text-align:center;display:grid;gap:12px;justify-items:center}
+  .call-btn{color:var(--gold);text-decoration:none;border:1px solid var(--gold);padding:12px 22px;
+    border-radius:30px;letter-spacing:1px}
+  footer{text-align:center;margin-top:44px;color:var(--dim);font-size:.8rem;line-height:1.8}
+  footer b{color:var(--gold)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-ring">☀️</div>
+  <h1>TITO MEL'S</h1>
+  <div class="tag">FILIPINO FOOD · RUTHER GLEN, VA</div>
+</header>
+
+<section class="hero">
+  <h2>Mabuhay! Welcome to the family table.</h2>
+  <div class="lang-toggle">
+    <button id="btnEN" class="on">EN</button>
+    <button id="btnES">ES</button>
+  </div>
+  <button id="btnHost" class="host-btn">🔊 HEAR THE SPECIALS</button>
+  <button id="btnStop" class="stop-btn">⏹</button>
+</section>
+
+<section class="specials">
+  <h3>🌟 HOUSE SPECIALS</h3>
+  <ul id="specialsList"></ul>
+</section>
+
+<section>
+  <h3>🍽️ THE MENU</h3>
+  <div id="menuGrid" class="grid"></div>
+</section>
+
+<section class="order-row">
+  <h3>🛒 READY TO EAT?</h3>
+  <a class="host-btn" href="https://order.titomels.com" target="_blank">🛒 ORDER ONLINE</a>
+  <a class="call-btn" href="tel:+18048922862">📞 CALL (804) 892-2862</a>
+</section>
+
+<footer>
+  18043 Jefferson Davis Hwy, Ruther Glen, VA 22546<br>
+  MON–SAT 11:00am – 8:00pm · SUN 10:00am – 7:00pm<br><br>
+  Site & AI Host powered by <b>CND Digital</b>
+</footer>
+
+<script>
+const MENU = [
+  {cat:"APPETIZERS", items:[
+    ["Lumpia Shanghai Pork (12pc)","$11.99"],
+    ["Lumpia Shanghai Chicken (12pc)","$11.99"],
+    ["Lumpia Gulay (1pc)","$1.50"],
+    ["Lumpia Sariwa (2pc)","$10.99"]]},
+  {cat:"SPECIALS & BBQ", items:[
+    ["Lechon Kawali","from $10.99"],
+    ["Pork Sisig","from $10.99"],
+    ["Chicken BBQ Stick (2pc · weekends)","$7.99"],
+    ["Pork BBQ Stick","$7.99"]]},
+  {cat:"ENTREES", items:[
+    ["Chicken Adobo","from $8.99"],
+    ["Pork Adobo","from $8.99"],
+    ["Chicken Curry","from $8.99"],
+    ["Menudo","from $8.99"],
+    ["Bicol Express","from $8.99"],
+    ["Kaldereta","from $10.25"],
+    ["Chicken Tinola","from $8.99"],
+    ["Pork Sinigang","from $8.99"],
+    ["Pork Dinuguan","from $8.99"]]},
+  {cat:"NOODLES & COMBO", items:[
+    ["Pancit Bihon","$10.99"],
+    ["Palabok","$11.99"],
+    ["Combo (2 entrees + side)","$14.99"]]},
+  {cat:"SIDES", items:[
+    ["Plain Rice","from $1.99"],
+    ["Adobo Rice","from $2.99"],
+    ["Plantains","from $2.99"],
+    ["Stir Fry Vegetables","from $4.99"]]},
+  {cat:"DRINKS & DESSERTS", items:[
+    ["Buko Pandan Juice","$6.25"],
+    ["Mango / Taro Boba","$6.75"],
+    ["Smoothies","$6.00"],
+    ["Halo-Halo","ask in store"],
+    ["Ube Biko","ask in store"]]}
+];
+
+const SCRIPTS = {
+  en: "Mabuhay! Welcome to Tito Mel's Filipino Food in Ruther Glen, Virginia. " +
+      "Today we're serving crispy Lechon Kawali, sizzling Pork Sisig, and on weekends, " +
+      "our famous Chicken BBQ on a stick. Order online at order dot Tito Mel's dot com, " +
+      "or call us at 804-892-2862. See you at the family table!",
+  es: "¡Mabuhay! Bienvenido a Tito Mel's Comida Filipina en Ruther Glen, Virginia. " +
+      "Hoy servimos Lechon Kawali crujiente, Sisig de cerdo, y los fines de semana, " +
+      "nuestro famoso Pollo BBQ en palito. Pida en línea o llame al 804-892-2862. ¡Nos vemos en la mesa!"
+};
+let lang = "en";
+
+document.getElementById("menuGrid").innerHTML = MENU.map(c =>
+  `<div class="mcard"><h4>${c.cat}</h4>` +
+  c.items.map(i => `<div class="mrow"><span>${i[0]}</span><span class="p">${i[1]}</span></div>`).join("") +
+  `</div>`).join("");
+
+document.getElementById("specialsList").innerHTML =
+  ["🥓 Lechon Kawali — crispy fried pork belly (from $10.99)",
+   "️ Pork Sisig — crispy chopped pork, chili & onions (from $10.99)",
+   "🍢 Chicken BBQ on a Stick — WEEKENDS ONLY ($7.99)"]
+  .map(s => `<li>${s}</li>`).join("");
+
+document.getElementById("btnEN").onclick = () => setLang("en");
+document.getElementById("btnES").onclick = () => setLang("es");
+function setLang(l){
+  lang = l;
+  document.getElementById("btnEN").classList.toggle("on", l==="en");
+  document.getElementById("btnES").classList.toggle("on", l==="es");
+  speak();
+}
+document.getElementById("btnHost").onclick = speak;
+document.getElementById("btnStop").onclick = () => speechSynthesis.cancel();
+function speak(){
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(SCRIPTS[lang]);
+  u.lang = lang==="en" ? "en-US" : "es-ES";
+  u.rate = 0.95;
+  speechSynthesis.speak(u);
+}
+</script>
+</body>
+</html>
