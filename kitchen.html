@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tito Mel's — ORDER BOARD</title>
+<style>
+  :root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#e63946;--cream:#fff3e0;--dim:#c9a27a;--green:#2ec46f}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  body{background:var(--bg);color:var(--cream);padding:16px}
+  header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+  h1{color:var(--gold);letter-spacing:3px;font-size:1.3rem}
+  #clock{color:var(--dim);font-weight:700}
+  .flash{animation:flash .8s ease}
+  @keyframes flash{0%,100%{background:var(--bg)}50%{background:#3a2a00}}
+  #board{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .ticket{background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:14px;box-shadow:0 0 18px rgba(255,183,3,.25)}
+  .ticket.new{border-color:var(--red);box-shadow:0 0 26px rgba(230,57,70,.5);animation:pop .5s ease}
+  @keyframes pop{from{transform:scale(.92);opacity:.4}to{transform:scale(1);opacity:1}}
+  .t-top{display:flex;justify-content:space-between;font-weight:800;color:var(--gold);letter-spacing:1px}
+  .t-name{font-size:1.2rem;color:var(--cream);margin:6px 0}
+  .t-items{list-style:none;margin:8px 0}
+  .t-items li{padding:4px 0;border-bottom:1px dashed rgba(201,162,122,.3);font-size:1.05rem}
+  .t-note{color:var(--dim);font-style:italic;margin:6px 0}
+  .t-meta{color:var(--dim);font-size:.85rem;margin-top:6px}
+  .btns{display:flex;gap:8px;margin-top:10px}
+  button{border:none;border-radius:20px;padding:10px 16px;font-weight:800;cursor:pointer;letter-spacing:1px}
+  .start{background:var(--gold);color:#140b06}
+  .done{background:var(--green);color:#08130c}
+  #empty{color:var(--dim);text-align:center;padding:40px 10px;font-size:1.1rem}
+  #soundBtn{background:none;border:1px solid var(--dim);color:var(--dim);border-radius:20px;padding:8px 14px;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔔 TITO MEL'S — ORDER BOARD</h1>
+  <span><button id="soundBtn">🔔 ON</button> <span id="clock"></span></span>
+</header>
+<div id="board"></div>
+<div id="empty">Waiting for orders... leave this screen open.</div>
+
+<script>
+/* ===== CONFIG: PASTE YOUR SUPABASE URL + ANON KEY ===== */
+const SUPA = "https://sb_publishable_wgehChMt2KQVxpT9DUN16w_qHL0WNje  ";
+const KEY  = "sb_publishable_wgehChMt2KQVxpT9DUN16w_qHL0WNje  ";
+/* ======================================================= */
+const $=id=>document.getElementById(id);
+let soundOn=true, lastMax=null;
+
+function ding(){
+  if(!soundOn) return;
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    [880,1174].forEach((f,i)=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.frequency.value=f; o.type="sine"; o.connect(g); g.connect(ctx.destination);
+      const t=ctx.currentTime+i*0.18;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.4,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+      o.start(t); o.stop(t+0.55);
+    });
+  }catch(e){}
+}
+function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+async function pull(){
+  try{
+    const r=await fetch(SUPA+"/rest/v1/orders?status=neq.done&order=created_at.desc&limit=30",{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});
+    const rows=await r.json();
+    render(rows);
+  }catch(e){}
+}
+function render(rows){
+  const board=$("board");
+  if(!rows.length){ $("empty").style.display="block"; board.innerHTML=""; lastMax=null; return; }
+  $("empty").style.display="none";
+  const maxId=Math.max(...rows.map(r=>r.id));
+  if(lastMax!==null && maxId>lastMax){ ding(); document.body.classList.remove("flash"); void document.body.offsetWidth; document.body.classList.add("flash"); }
+  lastMax=Math.max(lastMax||0,maxId);
+  board.innerHTML=rows.map(r=>{
+    const items=Array.isArray(r.items)? r.items.map(it=>"<li>"+it.qty+" × "+esc(it.name)+"</li>").join("") : "<li>"+esc(r.items)+"</li>";
+    const t=new Date(r.created_at);
+    const hh=t.getHours()%12||12, mm=String(t.getMinutes()).padStart(2,"0");
+    return '<div class="ticket '+r.status+'">'+
+      '<div class="t-top"><span>#'+r.id+'</span><span>'+hh+':'+mm+'</span></div>'+
+      '<div class="t-name">'+esc(r.customer)+' · 📞 '+esc(r.phone)+'</div>'+
+      '<ul class="t-items">'+items+'</ul>'+
+      (r.note?'<div class="t-note">📝 '+esc(r.note)+'</div>':'')+
+      '<div class="t-meta">⏰ Pickup: '+esc(r.pickup||"ASAP")+'</div>'+
+      '<div class="btns">'+
+        (r.status==="new"?'<button class="start" onclick="setStatus('+r.id+',\'prepping\')">🍳 START</button>':'<button class="start" style="opacity:.6">🍳 PREPPING</button>')+
+        '<button class="done" onclick="setStatus('+r.id+',\'done\')">✅ DONE</button>'+
+      '</div></div>';
+  }).join("");
+}
+async function setStatus(id,st){
+  await fetch(SUPA+"/rest/v1/orders?id=eq."+id,{method:"PATCH",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({status:st})});
+  pull();
+}
+$("soundBtn").onclick=()=>{soundOn=!soundOn;$("soundBtn").textContent=soundOn?"🔔 ON":"🔕 OFF";};
+setInterval(()=>{$("clock").textContent=new Date().toLocaleTimeString();},1000);
+setInterval(pull,7000);
+pull();
+</script>
+</body>
+</html>
