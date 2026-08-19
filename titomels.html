@@ -3,30 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tito Mel's — Filipino Kitchen | AI Host</title>
+<title>Tito Mel's — Filipino Kitchen | AI Hosted Experience</title>
 <style>
   :root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#e63946;--cream:#fff3e0;--dim:#c9a27a}
   *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
   body{background:var(--bg);color:var(--cream);padding-bottom:60px}
-  header{text-align:center;padding:38px 16px 10px}
-  .logo-ring{width:86px;height:86px;margin:0 auto 12px;border-radius:50%;border:3px solid var(--gold);
-    display:flex;align-items:center;justify-content:center;font-size:44px;
-    box-shadow:0 0 24px rgba(255,183,3,.55),inset 0 0 18px rgba(255,183,3,.25)}
-  h1{font-size:2.2rem;letter-spacing:6px;color:var(--gold);text-shadow:0 0 18px rgba(255,183,3,.6)}
-  .tag{color:var(--dim);letter-spacing:4px;font-size:.75rem;margin-top:6px}
-  section{max-width:960px;margin:26px auto 0;padding:0 16px}
-  h2{font-size:1.3rem;text-align:center}
+  header{text-align:center;padding:30px 16px 6px}
+  h1{font-size:2.1rem;letter-spacing:6px;color:var(--gold);text-shadow:0 0 18px rgba(255,183,3,.6)}
+  .tag{color:var(--dim);letter-spacing:4px;font-size:.72rem;margin-top:6px}
+  section{max-width:960px;margin:22px auto 0;padding:0 16px}
   h3{color:var(--gold);letter-spacing:2px;margin-bottom:14px;font-size:1.05rem}
-  .hero{text-align:center}
-  .lang-toggle{margin:14px 0}
-  .lang-toggle button{background:none;border:1px solid var(--dim);color:var(--dim);padding:6px 18px;
-    border-radius:20px;cursor:pointer;letter-spacing:2px}
-  .lang-toggle button.on{border-color:var(--gold);color:var(--gold);box-shadow:0 0 10px rgba(255,183,3,.4)}
+  .stage{text-align:center}
+  .face-ring{width:190px;height:190px;margin:0 auto;border-radius:50%;overflow:hidden;
+    border:4px solid var(--gold);box-shadow:0 0 34px rgba(255,183,3,.55)}
+  .face-ring img{width:100%;height:100%;object-fit:cover;display:block}
+  .face-ring.talking{animation:pulse 1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+  #nameTag{margin:12px 0 4px;font-weight:800;letter-spacing:3px;color:var(--gold)}
+  .caption{background:var(--card);border:1px solid rgba(255,183,3,.35);border-radius:14px;
+    padding:16px 18px;min-height:86px;margin:12px auto;max-width:640px;font-size:1.05rem;line-height:1.55;
+    box-shadow:0 0 18px rgba(255,183,3,.15)}
+  .dots{display:flex;gap:8px;justify-content:center;margin:10px 0}
+  .dots span{width:10px;height:10px;border-radius:50%;background:#4a351c}
+  .dots span.on{background:var(--gold);box-shadow:0 0 8px rgba(255,183,3,.8)}
+  .controls{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:14px 0}
   .host-btn{background:linear-gradient(135deg,var(--gold),#fb8500);border:none;color:#140b06;font-weight:800;
     letter-spacing:1px;padding:14px 26px;border-radius:30px;cursor:pointer;box-shadow:0 0 22px rgba(255,183,3,.5);
     font-size:1rem;text-decoration:none;display:inline-block}
-  .stop-btn{background:none;border:1px solid var(--red);color:var(--red);padding:12px 18px;border-radius:30px;
-    cursor:pointer;margin-left:10px}
+  .stop-btn{background:none;border:1px solid var(--red);color:var(--red);padding:12px 18px;border-radius:30px;cursor:pointer}
+  .lang-toggle button{background:none;border:1px solid var(--dim);color:var(--dim);padding:8px 18px;
+    border-radius:20px;cursor:pointer;letter-spacing:2px}
+  .lang-toggle button.on{border-color:var(--gold);color:var(--gold);box-shadow:0 0 10px rgba(255,183,3,.4)}
   .specials ul{list-style:none;display:grid;gap:10px}
   .specials li{background:var(--card);border-left:4px solid var(--red);padding:12px 16px;border-radius:8px;
     box-shadow:0 0 12px rgba(230,57,70,.25)}
@@ -38,8 +45,7 @@
   .mrow:last-child{border-bottom:none}
   .mrow .p{color:var(--gold);font-weight:700;white-space:nowrap;margin-left:10px}
   .order-row{text-align:center;display:grid;gap:12px;justify-items:center}
-  .call-btn{color:var(--gold);text-decoration:none;border:1px solid var(--gold);padding:12px 22px;
-    border-radius:30px;letter-spacing:1px}
+  .call-btn{color:var(--gold);text-decoration:none;border:1px solid var(--gold);padding:12px 22px;border-radius:30px;letter-spacing:1px}
   footer{text-align:center;margin-top:44px;color:var(--dim);font-size:.8rem;line-height:1.8}
   footer b{color:var(--gold)}
 </style>
@@ -47,19 +53,20 @@
 <body>
 
 <header>
-  <div class="logo-ring">☀️</div>
   <h1>TITO MEL'S</h1>
-  <div class="tag">FILIPINO FOOD · RUTHER GLEN, VA</div>
+  <div class="tag">FILIPINO FOOD · RUTHER GLEN, VA · AN AI-HOSTED EXPERIENCE</div>
 </header>
 
-<section class="hero">
-  <h2>Mabuhay! Welcome to the family table.</h2>
-  <div class="lang-toggle">
-    <button id="btnEN" class="on">EN</button>
-    <button id="btnES">ES</button>
+<section class="stage">
+  <div class="face-ring" id="ring"><img id="face" src="maria.png" alt="Your host"></div>
+  <div id="nameTag">MARIA · YOUR HOST</div>
+  <div class="caption" id="caption">Tap START THE TOUR and let us show you around our kitchen!</div>
+  <div class="dots" id="dots"></div>
+  <div class="controls">
+    <button id="btnTour" class="host-btn">▶ START THE TOUR</button>
+    <button id="btnStop" class="stop-btn">⏹</button>
+    <span class="lang-toggle"><button id="btnEN" class="on">EN</button><button id="btnES">ES</button></span>
   </div>
-  <button id="btnHost" class="host-btn">🔊 HEAR THE SPECIALS</button>
-  <button id="btnStop" class="stop-btn">⏹</button>
 </section>
 
 <section class="specials">
@@ -81,87 +88,105 @@
 <footer>
   18043 Jefferson Davis Hwy, Ruther Glen, VA 22546<br>
   MON–SAT 11:00am – 8:00pm · SUN 10:00am – 7:00pm<br><br>
-  Site & AI Host powered by <b>CND Digital</b>
+  Site & AI Hosts powered by <b>CND Digital</b>
 </footer>
 
 <script>
-const MENU = [
-  {cat:"APPETIZERS", items:[
-    ["Lumpia Shanghai Pork (12pc)","$11.99"],
-    ["Lumpia Shanghai Chicken (12pc)","$11.99"],
-    ["Lumpia Gulay (1pc)","$1.50"],
-    ["Lumpia Sariwa (2pc)","$10.99"]]},
-  {cat:"SPECIALS & BBQ", items:[
-    ["Lechon Kawali","from $10.99"],
-    ["Pork Sisig","from $10.99"],
-    ["Chicken BBQ Stick (2pc · weekends)","$7.99"],
-    ["Pork BBQ Stick","$7.99"]]},
-  {cat:"ENTREES", items:[
-    ["Chicken Adobo","from $8.99"],
-    ["Pork Adobo","from $8.99"],
-    ["Chicken Curry","from $8.99"],
-    ["Menudo","from $8.99"],
-    ["Bicol Express","from $8.99"],
-    ["Kaldereta","from $10.25"],
-    ["Chicken Tinola","from $8.99"],
-    ["Pork Sinigang","from $8.99"],
-    ["Pork Dinuguan","from $8.99"]]},
-  {cat:"NOODLES & COMBO", items:[
-    ["Pancit Bihon","$10.99"],
-    ["Palabok","$11.99"],
-    ["Combo (2 entrees + side)","$14.99"]]},
-  {cat:"SIDES", items:[
-    ["Plain Rice","from $1.99"],
-    ["Adobo Rice","from $2.99"],
-    ["Plantains","from $2.99"],
-    ["Stir Fry Vegetables","from $4.99"]]},
-  {cat:"DRINKS & DESSERTS", items:[
-    ["Buko Pandan Juice","$6.25"],
-    ["Mango / Taro Boba","$6.75"],
-    ["Smoothies","$6.00"],
-    ["Halo-Halo","ask in store"],
-    ["Ube Biko","ask in store"]]}
+const $=id=>document.getElementById(id);
+
+const MENU=[
+  {cat:"APPETIZERS",items:[["Lumpia Shanghai Pork (12pc)","$11.99"],["Lumpia Shanghai Chicken (12pc)","$11.99"],["Lumpia Gulay (1pc)","$1.50"],["Lumpia Sariwa (2pc)","$10.99"]]},
+  {cat:"SPECIALS & BBQ",items:[["Lechon Kawali","from $10.99"],["Pork Sisig","from $10.99"],["Chicken BBQ Stick (2pc · weekends)","$7.99"],["Pork BBQ Stick","$7.99"]]},
+  {cat:"ENTREES",items:[["Chicken Adobo","from $8.99"],["Pork Adobo","from $8.99"],["Chicken Curry","from $8.99"],["Menudo","from $8.99"],["Bicol Express","from $8.99"],["Kaldereta","from $10.25"],["Chicken Tinola","from $8.99"],["Pork Sinigang","from $8.99"],["Pork Dinuguan","from $8.99"]]},
+  {cat:"NOODLES & COMBO",items:[["Pancit Bihon","$10.99"],["Palabok","$11.99"],["Combo (2 entrees + side)","$14.99"]]},
+  {cat:"SIDES",items:[["Plain Rice","from $1.99"],["Adobo Rice","from $2.99"],["Plantains","from $2.99"],["Stir Fry Vegetables","from $4.99"]]},
+  {cat:"DRINKS & DESSERTS",items:[["Buko Pandan Juice","$6.25"],["Mango / Taro Boba","$6.75"],["Smoothies","$6.00"],["Halo-Halo","ask in store"],["Ube Biko","ask in store"]]}
 ];
 
-const SCRIPTS = {
-  en: "Mabuhay! Welcome to Tito Mel's Filipino Food in Ruther Glen, Virginia. " +
-      "Today we're serving crispy Lechon Kawali, sizzling Pork Sisig, and on weekends, " +
-      "our famous Chicken BBQ on a stick. Order online at order dot Tito Mel's dot com, " +
-      "or call us at 804-892-2862. See you at the family table!",
-  es: "¡Mabuhay! Bienvenido a Tito Mel's Comida Filipina en Ruther Glen, Virginia. " +
-      "Hoy servimos Lechon Kawali crujiente, Sisig de cerdo, y los fines de semana, " +
-      "nuestro famoso Pollo BBQ en palito. Pida en línea o llame al 804-892-2862. ¡Nos vemos en la mesa!"
-};
-let lang = "en";
+const SCENES=[
+ {who:"maria",
+  en:"Mabuhay! Welcome to Tito Mel's Filipino Food in Ruther Glen, Virginia! I'm Maria, your host for today. Come with me — I want you to meet someone very special. Say hello to... Tito Mel!",
+  es:"¡Mabuhay! ¡Bienvenido a Tito Mel's Comida Filipina en Ruther Glen, Virginia! Soy María, su anfitriona. Vengan conmigo, quiero presentarles a alguien muy especial... ¡Díganle hola a... Tito Mel!"},
+ {who:"mel",
+  en:"Kumusta, kaibigan! I'm Tito Mel! Welcome to my kitchen! Today we've got crispy Lechon Kawali, sizzling Pork Sisig — and on weekends, my famous Chicken BBQ on a stick! Let me show you around — let's go!",
+  es:"¡Kumusta, kaibigan! ¡Soy Tito Mel! ¡Bienvenido a mi cocina! Hoy tenemos Lechon Kawali crujiente, Sisig de cerdo, ¡y los fines de semana, mi famoso Pollo BBQ en palito! ¡Te enseño todo, vamos!"},
+ {who:"mel",
+  en:"We start with the LUMPIA! Lumpia Shanghai — twelve pieces of crispy pork perfection, eleven ninety-nine! Or my Lumpia Gulay, just one dollar fifty! You cannot go wrong, my friend!",
+  es:"¡Empezamos con los LUMPIA! ¡Lumpia Shanghai, doce piezas de pura perfección crujiente, once noventa y nueve! ¡O mi Lumpia Gulay, solo un dólar cincuenta! ¡No te puedes equivocar, amigo!"},
+ {who:"mel",
+  en:"Now the MAIN EVENT! Chicken Adobo, Pork Adobo, Bicol Express, Kaldereta — slow-cooked the way my family taught me, from eight ninety-nine! Taste the love in every bite!",
+  es:"¡Ahora el PLATO FUERTE! Adobo de pollo, Adobo de cerdo, Bicol Express, Kaldereta, cocinado a fuego lento como me enseñó mi familia, ¡desde ocho noventa y nueve! ¡Prueba el amor en cada bocado!"},
+ {who:"mel",
+  en:"Pancit Bihon! Palabok! Or take the COMBO — pick two entrees and a side for fourteen ninety-nine! That's a feast, my friend — a FEAST!",
+  es:"¡Pancit Bihon! ¡Palabok! ¡O lleva el COMBO, elige dos platos y un lado por catorce noventa y nueve! ¡Eso es un festín, amigo mío, un FESTÍN!"},
+ {who:"mel",
+  en:"And don't forget the adobo rice, the sweet plantains, and my Buko Pandan juice! For dessert, Halo-Halo and Ube Biko — just ask in store! Sarap!",
+  es:"¡Y no olvides el arroz con adobo, los plátanos dulces y mi jugo de Buko Pandan! De postre, Halo-Halo y Ube Biko, ¡pregunta en la tienda! ¡Sarap!"},
+ {who:"maria",
+  en:"Hungry yet? Order online at order dot Tito Mel's dot com, or call us at 804-892-2862! We can't wait to feed you. See you at the family table — MABUHAY!",
+  es:"¿Ya tienen hambre? ¡Pidan en línea o llamen al 804-892-2862! Nos encanta alimentarlos. ¡Nos vemos en la mesa familiar, MABUHAY!"}
+];
 
-document.getElementById("menuGrid").innerHTML = MENU.map(c =>
-  `<div class="mcard"><h4>${c.cat}</h4>` +
-  c.items.map(i => `<div class="mrow"><span>${i[0]}</span><span class="p">${i[1]}</span></div>`).join("") +
-  `</div>`).join("");
+let lang="en", idx=-1, playing=false, VOICES=[];
+function loadVoices(){VOICES=speechSynthesis.getVoices();}
+loadVoices(); speechSynthesis.onvoiceschanged=loadVoices;
 
-document.getElementById("specialsList").innerHTML =
-  ["🥓 Lechon Kawali — crispy fried pork belly (from $10.99)",
-   "️ Pork Sisig — crispy chopped pork, chili & onions (from $10.99)",
-   "🍢 Chicken BBQ on a Stick — WEEKENDS ONLY ($7.99)"]
-  .map(s => `<li>${s}</li>`).join("");
-
-document.getElementById("btnEN").onclick = () => setLang("en");
-document.getElementById("btnES").onclick = () => setLang("es");
-function setLang(l){
-  lang = l;
-  document.getElementById("btnEN").classList.toggle("on", l==="en");
-  document.getElementById("btnES").classList.toggle("on", l==="es");
-  speak();
+function pickVoice(male){
+  const pre = lang==="es" ? "es" : "en";
+  const pool = VOICES.filter(v=>v.lang.toLowerCase().indexOf(pre)===0);
+  const g = male ? /male|david|mark|daniel|alex|jorge|juan|carlos|enrique/i
+                 : /female|zira|aria|jenny|samantha|karen|helena|paulina|monica|lucia/i;
+  return pool.find(v=>g.test(v.name)) || pool[0] || null;
 }
-document.getElementById("btnHost").onclick = speak;
-document.getElementById("btnStop").onclick = () => speechSynthesis.cancel();
-function speak(){
+function renderDots(){$("dots").innerHTML=SCENES.map((s,i)=>'<span class="'+(i===idx?'on':'')+'"></span>').join("");}
+function setFace(s){
+  $("face").src = s.who==="maria" ? "maria.png" : "titomel.png";
+  $("nameTag").textContent = s.who==="maria" ? "MARIA · YOUR HOST" : "TITO MEL · THE CHEF";
+}
+function speak(text,male){
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(SCRIPTS[lang]);
-  u.lang = lang==="en" ? "en-US" : "es-ES";
-  u.rate = 0.95;
+  const u=new SpeechSynthesisUtterance(text);
+  const v=pickVoice(male); if(v)u.voice=v;
+  u.lang = lang==="es" ? "es-ES" : "en-US";
+  u.pitch = male ? 0.72 : 1.12;
+  u.rate = 1.0;
+  u.onstart=()=>$("ring").classList.add("talking");
+  u.onend=()=>{
+    $("ring").classList.remove("talking");
+    if(!playing)return;
+    if(idx<SCENES.length-1){setTimeout(()=>{if(playing)show(idx+1);},450);}
+    else{playing=false;$("btnTour").textContent="↺ REPLAY TOUR";}
+  };
   speechSynthesis.speak(u);
 }
+function show(i){
+  idx=i; playing=true;
+  const s=SCENES[i];
+  setFace(s);
+  $("caption").textContent=s[lang];
+  renderDots();
+  speak(s[lang], s.who==="mel");
+}
+$("btnTour").onclick=()=>{
+  if(!playing){$("btnTour").textContent="NEXT ➡";show(idx<0||idx>=SCENES.length-1?0:idx+1);}
+  else{
+    if(idx<SCENES.length-1)show(idx+1);
+    else{playing=false;speechSynthesis.cancel();$("ring").classList.remove("talking");$("btnTour").textContent="↺ REPLAY TOUR";}
+  }
+};
+$("btnStop").onclick=()=>{playing=false;speechSynthesis.cancel();$("ring").classList.remove("talking");$("btnTour").textContent="▶ START THE TOUR";};
+function setLang(l){
+  lang=l;
+  $("btnEN").classList.toggle("on",l==="en");
+  $("btnES").classList.toggle("on",l==="es");
+  if(idx>=0){$("caption").textContent=SCENES[idx][lang];if(playing)speak(SCENES[idx][lang],SCENES[idx].who==="mel");}
+}
+$("btnEN").onclick=()=>setLang("en");
+$("btnES").onclick=()=>setLang("es");
+
+$("menuGrid").innerHTML=MENU.map(c=>'<div class="mcard"><h4>'+c.cat+'</h4>'+c.items.map(i=>'<div class="mrow"><span>'+i[0]+'</span><span class="p">'+i[1]+'</span></div>').join("")+'</div>').join("");
+$("specialsList").innerHTML=["🥓 Lechon Kawali — crispy fried pork belly (from $10.99)","🍚 Pork Sisig — crispy chopped pork, chili & onions (from $10.99)","🍢 Chicken BBQ on a Stick — WEEKENDS ONLY ($7.99)"].map(s=>'<li>'+s+'</li>').join("");
+renderDots();
 </script>
 </body>
 </html>
