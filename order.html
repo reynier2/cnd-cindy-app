@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tito Mel's — Order for Pickup</title>
+<style>
+  :root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#e63946;--cream:#fff3e0;--dim:#c9a27a}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  body{background:var(--bg);color:var(--cream);padding:16px;max-width:640px;margin:0 auto}
+  h1{color:var(--gold);text-align:center;letter-spacing:4px;margin:14px 0 4px}
+  .sub{color:var(--dim);text-align:center;font-size:.85rem;margin-bottom:16px}
+  h3{color:var(--gold);letter-spacing:2px;margin:18px 0 8px;font-size:.95rem}
+  .row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid rgba(255,183,3,.2);border-radius:10px;padding:10px 12px;margin-bottom:8px;gap:8px}
+  .row .n{font-size:.95rem}
+  .row .p{color:var(--gold);font-weight:700;font-size:.85rem;margin-left:8px}
+  .qty{display:flex;gap:8px;align-items:center}
+  .qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:800;cursor:pointer}
+  .qty span{min-width:18px;text-align:center;font-weight:800}
+  input,select,textarea{width:100%;background:var(--card);border:1px solid rgba(255,183,3,.3);color:var(--cream);border-radius:10px;padding:12px;margin-bottom:10px;font-size:1rem}
+  .send{width:100%;background:linear-gradient(135deg,var(--gold),#fb8500);border:none;color:#140b06;font-weight:800;letter-spacing:1px;padding:16px;border-radius:30px;font-size:1.05rem;cursor:pointer;box-shadow:0 0 22px rgba(255,183,3,.5)}
+  #msg{text-align:center;margin:14px 0;font-weight:700;color:var(--gold)}
+</style>
+</head>
+<body>
+<h1>TITO MEL'S</h1>
+<div class="sub">ORDER FOR PICKUP · PAY AT THE COUNTER</div>
+<div id="menu"></div>
+<h3>YOUR INFO</h3>
+<input id="cname" placeholder="Your name">
+<input id="cphone" placeholder="Phone number" type="tel">
+<select id="cpickup">
+  <option value="ASAP">Pickup: ASAP</option>
+  <option value="In 30 min">In 30 minutes</option>
+  <option value="In 1 hour">In 1 hour</option>
+  <option value="In 2 hours">In 2 hours</option>
+</select>
+<textarea id="cnote" rows="2" placeholder="Notes (no onions, extra sauce...)"></textarea>
+<button class="send" id="send">🛒 SEND ORDER TO THE KITCHEN</button>
+<div id="msg"></div>
+
+<script>
+/* ===== CONFIG: PASTE YOUR SUPABASE URL + ANON KEY ===== */
+const SUPA = "https://.supabase.cosb_publishable_wgehChMt2KQVxpT9DUN16w_qHL0WNje";
+const KEY  = "sb_publishable_wgehChMt2KQVxpT9DUN16w_qHL0WNje  ";
+/* ======================================================= */
+const $=id=>document.getElementById(id);
+const MENU=[
+  {cat:"APPETIZERS",items:[["Lumpia Shanghai Pork (12pc)","$11.99"],["Lumpia Shanghai Chicken (12pc)","$11.99"],["Lumpia Gulay (1pc)","$1.50"],["Lumpia Sariwa (2pc)","$10.99"]]},
+  {cat:"SPECIALS & BBQ",items:[["Lechon Kawali","from $10.99"],["Pork Sisig","from $10.99"],["Chicken BBQ Stick (2pc)","$7.99"],["Pork BBQ Stick","$7.99"]]},
+  {cat:"ENTREES",items:[["Chicken Adobo","$8.99"],["Pork Adobo","$8.99"],["Chicken Curry","$8.99"],["Menudo","$8.99"],["Bicol Express","$8.99"],["Kaldereta","$10.25"],["Chicken Tinola","$8.99"],["Pork Sinigang","$8.99"],["Pork Dinuguan","$8.99"]]},
+  {cat:"NOODLES & COMBO",items:[["Pancit Bihon","$10.99"],["Palabok","$11.99"],["Combo (2 entrees + side)","$14.99"]]},
+  {cat:"SIDES",items:[["Plain Rice","$1.99"],["Adobo Rice","$2.99"],["Plantains","$2.99"],["Stir Fry Vegetables","$4.99"]]},
+  {cat:"DRINKS & DESSERTS",items:[["Buko Pandan Juice","$6.25"],["Mango / Taro Boba","$6.75"],["Smoothies","$6.00"],["Halo-Halo","ask in store"],["Ube Biko","ask in store"]]}
+];
+const FLAT=[]; MENU.forEach(c=>c.items.forEach(i=>FLAT.push(i)));
+const qty={};
+$("menu").innerHTML = MENU.map(c=>{
+  let html='<h3>'+c.cat+'</h3>';
+  c.items.forEach(i=>{
+    const key=FLAT.indexOf(i);
+    html+='<div class="row"><span class="n">'+i[0]+' <span class="p">'+i[1]+'</span></span><span class="qty"><button onclick="add('+key+',-1)">−</button><span id="q_'+key+'">0</span><button onclick="add('+key+',1)">+</button></span></div>';
+  });
+  return html;
+}).join("");
+function add(key,d){ qty[key]=Math.max(0,(qty[key]||0)+d); $("q_"+key).textContent=qty[key]; }
+$("send").onclick=async()=>{
+  const items=FLAT.map((i,idx)=>({name:i[0],qty:qty[idx]||0})).filter(x=>x.qty>0);
+  if(!items.length){$("msg").textContent="Add at least one item 🙂";return;}
+  const customer=$("cname").value.trim(), phone=$("cphone").value.trim();
+  if(!customer||!phone){$("msg").textContent="Please add your name and phone number.";return;}
+  $("msg").textContent="Sending...";
+  try{
+    const r=await fetch(SUPA+"/rest/v1/orders",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
+      body:JSON.stringify({customer:customer,phone:phone,pickup:$("cpickup").value,note:$("cnote").value.trim(),items:items})});
+    if(r.ok){ $("msg").textContent="✅ Order sent! The kitchen sees it on their screen right now. Pay at pickup — see you soon!"; }
+    else{ $("msg").textContent="Hmm, that didn't send. Please call us instead 📞"; }
+  }catch(e){ $("msg").textContent="Hmm, that didn't send. Please call us instead 📞"; }
+};
+</script>
+</body>
+</html>
