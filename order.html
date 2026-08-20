@@ -40,10 +40,9 @@
 <div id="msg"></div>
 
 <script>
-/* ===== CONFIG: PASTE YOUR SUPABASE URL + ANON KEY ===== */
 const SUPA = "https://hnwrhbehhljijoxavwuyq.supabase.co";
 const KEY  = "sb_publishable_wgehChMt2KQVxpT9DUN16w_qHL0WNje";
-/* ======================================================= */
+
 const $=id=>document.getElementById(id);
 const MENU=[
   {cat:"APPETIZERS",items:[["Lumpia Shanghai Pork (12pc)","$11.99"],["Lumpia Shanghai Chicken (12pc)","$11.99"],["Lumpia Gulay (1pc)","$1.50"],["Lumpia Sariwa (2pc)","$10.99"]]},
@@ -74,8 +73,8 @@ $("send").onclick=async()=>{
     const r=await fetch(SUPA+"/rest/v1/orders",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
       body:JSON.stringify({customer:customer,phone:phone,pickup:$("cpickup").value,note:$("cnote").value.trim(),items:items})});
     if(r.ok){ $("msg").textContent="✅ Order sent! The kitchen sees it on their screen right now. Pay at pickup — see you soon!"; }
-    else{ $("msg").textContent="Hmm, that didn't send. Please call us instead 📞"; }
-}catch(e){ $("msg").textContent="NET ERR: "+e.message; }
+    else{ const t=await r.text(); $("msg").textContent="ERR "+r.status+": "+t.slice(0,140); }
+  }catch(e){ $("msg").textContent="NET ERR: "+e.message; }
 };
 </script>
 </body>
