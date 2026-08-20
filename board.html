@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mama's Switchboard</title>
+<style>
+  body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 20px; text-align: center; }
+  h1 { color: gold; margin-bottom: 10px; letter-spacing: 2px; }
+  #status-msg { color: lime; font-weight: bold; height: 24px; margin-bottom: 15px; font-size: 1.1rem; }
+  .item-row { background: #2c2c2c; padding: 15px; margin: 12px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+  .item-name { font-size: 1.2rem; font-weight: bold; flex: 1; text-align: left; padding-right: 10px; }
+  .btn-group { display: flex; gap: 12px; }
+  button { padding: 15px 20px; font-size: 1.5rem; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; color: white; transition: all 0.2s; }
+  .btn-green { background: #28a745; }
+  .btn-yellow { background: #ffc107; color: black; }
+  .btn-red { background: #dc3545; }
+  
+  .btn-green.active { box-shadow: 0 0 20px #28a745; transform: scale(1.15); border: 3px solid white; }
+  .btn-yellow.active { box-shadow: 0 0 20px #ffc107; transform: scale(1.15); border: 3px solid white; }
+  .btn-red.active { box-shadow: 0 0 20px #dc3545; transform: scale(1.15); border: 3px solid white; }
+</style>
+</head>
+<body>
+  <h1>🚦 MAMA'S SWITCHBOARD 🚦</h1>
+  <div id="status-msg">Loading the kitchen...</div>
+  <div id="menu-list"></div>
+
+  <script>
+    const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
+    const KEY  = "sb_publishable_CJZipjuCPS_UIT8h-xtVrw_Jy37Cq9K";
+
+    async function loadMenu() {
+      const res = await fetch(`${SUPA}/rest/v1/menu?select=id,name,menu_status(status)&order=id.asc`, {
+        headers: { 'apikey': KEY, 'Authorization': `Bearer ${KEY}` }
+      });
+      const data = await res.json();
+      
+      const list = document.getElementById('menu-list');
+      list.innerHTML = '';
+      
+      data.forEach(item => {
+        const currentStatus = item.menu_status ? item.menu_status.status : 'green';
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        
+        row.innerHTML = `
+          <div class="item-name">${item.name}</div>
+          <div class="btn-group">
+            <button class="btn-green ${currentStatus==='green'?'active':''}" onclick="updateStatus(${item.id}, 'green')">🟢</button>
+            <button class="btn-yellow ${currentStatus==='yellow'?'active':''}" onclick="updateStatus(${item.id}, 'yellow')">🟡</button>
+            <button class="btn-red ${currentStatus==='red'?'active':''}" onclick="updateStatus(${item.id}, 'red')">🔴</button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+      document.getElementById('status-msg').innerText = "Kitchen is live. Tap a color to change it.";
+    }
+
+    async function updateStatus(id, status) {
+      document.getElementById('status-msg').innerText = "Updating Mama's board...";
+      await fetch(`${SUPA}/rest/v1/menu_status?item_id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { 
+          'apikey': KEY, 
+          'Authorization': `Bearer ${KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ status: status, updated_at: new Date().toISOString() })
+      });
+      loadMenu();
+    }
+
+    loadMenu();
+    setInterval(loadMenu, 10000); 
+  </script>
+</body>
+</html>
