@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tito Mel's — ORDER BOARD</title>
+<!-- Load Supabase Library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -14,7 +15,6 @@ body {
   height: 100vh;
   overflow: hidden;
 }
-
 .header {
   background: #0d0805;
   padding: 15px 25px;
@@ -23,171 +23,37 @@ body {
   align-items: center;
   border-bottom: 2px solid #ff8c00;
 }
+.header h1 { font-size: 24px; letter-spacing: 2px; color: #ff8c00; }
+.status-indicator { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.bell { width: 15px; height: 15px; background: #28a745; border-radius: 50%; }
 
-.header h1 {
-  font-size: 24px;
-  letter-spacing: 2px;
-  color: #ff8c00;
-}
+.main-container { display: grid; grid-template-columns: 1fr 450px; height: calc(100vh - 60px); }
 
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-}
-
-.bell {
-  width: 20px;
-  height: 20px;
-  background: #28a745;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.1); }
-}
-
-.main-container {
-  display: grid;
-  grid-template-columns: 1fr 450px;
-  height: calc(100vh - 60px);
-}
-
-/* LEFT SIDE - MENU ITEMS */
-.menu-section {
-  background: #1a0f0a;
-  padding: 20px;
-  overflow-y: auto;
-  border-right: 2px solid #ff8c00;
-}
-
-.menu-section h2 {
-  color: #ff8c00;
-  margin-bottom: 20px;
-  font-size: 20px;
-  text-align: center;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #ff8c00;
-}
-
-.menu-category {
-  margin-bottom: 25px;
-}
-
-.menu-category h3 {
-  color: #ffd700;
-  font-size: 16px;
-  margin-bottom: 12px;
-  padding-left: 10px;
-  border-left: 4px solid #ff8c00;
-}
-
-.menu-item {
-  background: #0d0805;
-  border: 1px solid #ff8c00;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.menu-item-name {
-  color: #ffd700;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.status-badge {
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
+/* LEFT SIDE */
+.menu-section { background: #1a0f0a; padding: 20px; overflow-y: auto; border-right: 2px solid #ff8c00; }
+.menu-section h2 { color: #ff8c00; margin-bottom: 20px; font-size: 20px; text-align: center; border-bottom: 2px solid #ff8c00; padding-bottom: 10px; }
+.menu-category { margin-bottom: 25px; }
+.menu-category h3 { color: #ffd700; font-size: 16px; margin-bottom: 12px; padding-left: 10px; border-left: 4px solid #ff8c00; }
+.menu-item { background: #0d0805; border: 1px solid #ff8c00; border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.menu-item-name { color: #ffd700; font-size: 15px; font-weight: 600; }
+.status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
 .status-green { background: #28a745; color: white; }
 .status-yellow { background: #ffc107; color: black; }
 .status-red { background: #dc3545; color: white; }
 
-/* RIGHT SIDE - TRAFFIC LIGHT CONTROLS */
-.controls-section {
-  background: #0d0805;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.controls-section h2 {
-  color: #ff8c00;
-  margin-bottom: 20px;
-  font-size: 20px;
-  text-align: center;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #ff8c00;
-}
-
-.control-item {
-  background: #1a0f0a;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 12px;
-  border: 1px solid #333;
-}
-
-.control-item-name {
-  color: #ffd700;
-  font-size: 14px;
-  margin-bottom: 10px;
-  font-weight: 600;
-}
-
-.traffic-lights {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-}
-
-.light-btn {
-  height: 50px;
-  border-radius: 8px;
-  border: none;
-  font-weight: bold;
-  font-size: 12px;
-  cursor: pointer;
-  opacity: 0.3;
-  transition: all 0.3s;
-  color: white;
-  text-transform: uppercase;
-}
-
-.light-btn.active {
-  opacity: 1;
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(255,255,255,0.6);
-}
-
+/* RIGHT SIDE */
+.controls-section { background: #0d0805; padding: 20px; overflow-y: auto; }
+.controls-section h2 { color: #ff8c00; margin-bottom: 20px; font-size: 20px; text-align: center; border-bottom: 2px solid #ff8c00; padding-bottom: 10px; }
+.control-item { background: #1a0f0a; border-radius: 8px; padding: 15px; margin-bottom: 12px; border: 1px solid #333; }
+.control-item-name { color: #ffd700; font-size: 14px; margin-bottom: 10px; font-weight: 600; }
+.traffic-lights { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.light-btn { height: 50px; border-radius: 8px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; opacity: 0.3; transition: all 0.3s; color: white; text-transform: uppercase; }
+.light-btn.active { opacity: 1; transform: scale(1.05); box-shadow: 0 0 15px rgba(255,255,255,0.6); }
 .light-green { background: #28a745; }
 .light-yellow { background: #ffc107; color: black; }
 .light-red { background: #dc3545; }
 
-.waiting-message {
-  text-align: center;
-  padding: 40px 20px;
-  color: #666;
-  font-size: 16px;
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .main-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
-}
+.waiting-message { text-align: center; padding: 40px 20px; color: #666; font-size: 16px; }
 </style>
 </head>
 <body>
@@ -202,30 +68,25 @@ body {
 </div>
 
 <div class="main-container">
-  <!-- LEFT: MENU ITEMS -->
   <div class="menu-section">
     <h2>📋 CUSTOMER MENU</h2>
-    <div id="menu-display">
-      <div class="waiting-message">Loading menu...</div>
-    </div>
+    <div id="menu-display"><div class="waiting-message">Loading menu...</div></div>
   </div>
-
-  <!-- RIGHT: TRAFFIC LIGHT CONTROLS -->
   <div class="controls-section">
     <h2>🚦 MENU CONTROLS</h2>
-    <div id="controls-display">
-      <div class="waiting-message">Loading controls...</div>
-    </div>
+    <div id="controls-display"><div class="waiting-message">Loading controls...</div></div>
   </div>
 </div>
 
 <script>
 // ==========================================
-// SUPABASE CONFIGURATION
+// 1. PASTE YOUR KEYS HERE
 // ==========================================
 const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
-const SUPABASE_KEY = ' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE ';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'; // <-- PASTE YOUR eyJ... KEY HERE
+
+// Initialize Supabase
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Clock
 function updateClock() {
@@ -235,135 +96,80 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// Menu categories
 const menuCategories = {
-  'Appetizers': [
-    'Lumpia Shanghai Pork (12pc)',
-    'Lumpia Shanghai Chicken (12pc)',
-    'Lumpia Gulay (1pc)',
-    'Lumpia Sariwa (2pc)'
-  ],
-  'Specials & BBQ': [
-    'Lechon Kawali',
-    'Pork Sisig',
-    'Chicken BBQ Stick (2pc)',
-    'Pork BBQ Stick'
-  ],
-  'Entrees': [
-    'Chicken Adobo',
-    'Pork Adobo',
-    'Chicken Curry'
-  ]
+  'Appetizers': ['Lumpia Shanghai Pork (12pc)', 'Lumpia Shanghai Chicken (12pc)', 'Lumpia Gulay (1pc)', 'Lumpia Sariwa (2pc)'],
+  'Specials & BBQ': ['Lechon Kawali', 'Pork Sisig', 'Chicken BBQ Stick (2pc)', 'Pork BBQ Stick'],
+  'Entrees': ['Chicken Adobo', 'Pork Adobo', 'Chicken Curry']
 };
 
-// Load and display menu
 async function loadMenu() {
-  const { data, error } = await supabase
-    .from('menu_status')
-    .select('*')
-    .order('item_name');
+  const { data, error } = await supabaseClient.from('menu_status').select('*').order('item_name');
 
   if (error) {
-    console.error('Error loading menu:', error);
+    console.error('Database Error:', error);
     return;
   }
 
-  // Build menu display (LEFT SIDE)
+  // Build Left Side (Customer Menu)
   const menuDisplay = document.getElementById('menu-display');
   menuDisplay.innerHTML = '';
 
-  Object.keys(menuCategories).forEach(category => {
-    const categoryDiv = document.createElement('div');
-    categoryDiv.className = 'menu-category';
-    
-    const categoryTitle = document.createElement('h3');
-    categoryTitle.textContent = category;
-    categoryDiv.appendChild(categoryTitle);
-
-    menuCategories[category].forEach(itemName => {
-      const menuItem = data.find(m => m.item_name === itemName);
-      if (!menuItem) return;
-
-      const itemDiv = document.createElement('div');
-      itemDiv.className = 'menu-item';
-      
-      const statusClass = `status-${menuItem.status}`;
-      const statusText = menuItem.status === 'green' ? 'Available' : 
-                        menuItem.status === 'yellow' ? 'Low Stock' : 'Sold Out';
-
-      itemDiv.innerHTML = `
-        <span class="menu-item-name">${itemName}</span>
-        <span class="status-badge ${statusClass}">${statusText}</span>
-      `;
-      
-      categoryDiv.appendChild(itemDiv);
-    });
-
-    menuDisplay.appendChild(categoryDiv);
-  });
-
-  // Build controls display (RIGHT SIDE)
+  // Build Right Side (Controls)
   const controlsDisplay = document.getElementById('controls-display');
   controlsDisplay.innerHTML = '';
 
   Object.keys(menuCategories).forEach(category => {
-    const categoryDiv = document.createElement('div');
-    categoryDiv.className = 'menu-category';
-    
-    const categoryTitle = document.createElement('h3');
-    categoryTitle.textContent = category;
-    categoryDiv.appendChild(categoryTitle);
+    // Left Side Category
+    const catDivLeft = document.createElement('div');
+    catDivLeft.className = 'menu-category';
+    catDivLeft.innerHTML = `<h3>${category}</h3>`;
+
+    // Right Side Category
+    const catDivRight = document.createElement('div');
+    catDivRight.className = 'menu-category';
+    catDivRight.innerHTML = `<h3>${category}</h3>`;
 
     menuCategories[category].forEach(itemName => {
       const menuItem = data.find(m => m.item_name === itemName);
       if (!menuItem) return;
 
-      const controlDiv = document.createElement('div');
-      controlDiv.className = 'control-item';
-      
-      const greenActive = menuItem.status === 'green' ? 'active' : '';
-      const yellowActive = menuItem.status === 'yellow' ? 'active' : '';
-      const redActive = menuItem.status === 'red' ? 'active' : '';
+      const statusClass = `status-${menuItem.status}`;
+      const statusText = menuItem.status === 'green' ? 'Available' : menuItem.status === 'yellow' ? 'Low Stock' : 'Sold Out';
 
-      controlDiv.innerHTML = `
-        <div class="control-item-name">${itemName}</div>
-        <div class="traffic-lights">
-          <button class="light-btn light-green ${greenActive}" onclick="updateStatus('${itemName}', 'green')">🟢 Green</button>
-          <button class="light-btn light-yellow ${yellowActive}" onclick="updateStatus('${itemName}', 'yellow')">🟡 Yellow</button>
-          <button class="light-btn light-red ${redActive}" onclick="updateStatus('${itemName}', 'red')">🔴 Red</button>
-        </div>
-      `;
-      
-      categoryDiv.appendChild(controlDiv);
+      // Add to Left Side
+      catDivLeft.innerHTML += `
+        <div class="menu-item">
+          <span class="menu-item-name">${itemName}</span>
+          <span class="status-badge ${statusClass}">${statusText}</span>
+        </div>`;
+
+      // Add to Right Side
+      const gActive = menuItem.status === 'green' ? 'active' : '';
+      const yActive = menuItem.status === 'yellow' ? 'active' : '';
+      const rActive = menuItem.status === 'red' ? 'active' : '';
+
+      catDivRight.innerHTML += `
+        <div class="control-item">
+          <div class="control-item-name">${itemName}</div>
+          <div class="traffic-lights">
+            <button class="light-btn light-green ${gActive}" onclick="updateStatus('${itemName}', 'green')">🟢 Green</button>
+            <button class="light-btn light-yellow ${yActive}" onclick="updateStatus('${itemName}', 'yellow')"> Yellow</button>
+            <button class="light-btn light-red ${rActive}" onclick="updateStatus('${itemName}', 'red')">🔴 Red</button>
+          </div>
+        </div>`;
     });
 
-    controlsDisplay.appendChild(categoryDiv);
+    menuDisplay.appendChild(catDivLeft);
+    controlsDisplay.appendChild(catDivRight);
   });
 }
 
-// Update menu status
 async function updateStatus(itemName, status) {
-  const { error } = await supabase
-    .from('menu_status')
-    .update({ status: status, updated_at: new Date() })
-    .eq('item_name', itemName);
-  
-  if (!error) {
-    loadMenu();
-  }
+  await supabaseClient.from('menu_status').update({ status: status, updated_at: new Date() }).eq('item_name', itemName);
+  loadMenu();
 }
 
-// Initialize
 loadMenu();
-
-// Real-time subscription
-supabase
-  .channel('menu_changes')
-  .on('postgres_changes', 
-    { event: 'UPDATE', schema: 'public', table: 'menu_status' },
-    () => loadMenu()
-  )
-  .subscribe();
 </script>
 </body>
 </html>
