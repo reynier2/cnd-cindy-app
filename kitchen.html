@@ -2,105 +2,368 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tito Mel's — ORDER BOARD</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#e63946;--cream:#fff3e0;--dim:#c9a27a;--green:#2ec46f}
-  *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  body{background:var(--bg);color:var(--cream);padding:16px}
-  header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
-  h1{color:var(--gold);letter-spacing:3px;font-size:1.3rem}
-  #clock{color:var(--dim);font-weight:700}
-  .flash{animation:flash .8s ease}
-  @keyframes flash{0%,100%{background:var(--bg)}50%{background:#3a2a00}}
-  #board{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
-  .ticket{background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:14px;box-shadow:0 0 18px rgba(255,183,3,.25)}
-  .ticket.new{border-color:var(--red);box-shadow:0 0 26px rgba(230,57,70,.5);animation:pop .5s ease}
-  @keyframes pop{from{transform:scale(.92);opacity:.4}to{transform:scale(1);opacity:1}}
-  .t-top{display:flex;justify-content:space-between;font-weight:800;color:var(--gold);letter-spacing:1px}
-  .t-name{font-size:1.2rem;color:var(--cream);margin:6px 0}
-  .t-items{list-style:none;margin:8px 0}
-  .t-items li{padding:4px 0;border-bottom:1px dashed rgba(201,162,122,.3);font-size:1.05rem}
-  .t-note{color:var(--dim);font-style:italic;margin:6px 0}
-  .t-meta{color:var(--dim);font-size:.85rem;margin-top:6px}
-  .btns{display:flex;gap:8px;margin-top:10px}
-  button{border:none;border-radius:20px;padding:10px 16px;font-weight:800;cursor:pointer;letter-spacing:1px}
-  .start{background:var(--gold);color:#140b06}
-  .done{background:var(--green);color:#08130c}
-  #empty{color:var(--dim);text-align:center;padding:40px 10px;font-size:1.1rem}
-  #soundBtn{background:none;border:1px solid var(--dim);color:var(--dim);border-radius:20px;padding:8px 14px;cursor:pointer}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  background: #1a0f0a; 
+  color: #ffd700; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.header {
+  background: #0d0805;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #ff8c00;
+}
+
+.header h1 {
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: #ff8c00;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.bell {
+  width: 20px;
+  height: 20px;
+  background: #28a745;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.main-container {
+  display: grid;
+  grid-template-columns: 1fr 450px;
+  height: calc(100vh - 60px);
+}
+
+/* LEFT SIDE - MENU ITEMS */
+.menu-section {
+  background: #1a0f0a;
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 2px solid #ff8c00;
+}
+
+.menu-section h2 {
+  color: #ff8c00;
+  margin-bottom: 20px;
+  font-size: 20px;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ff8c00;
+}
+
+.menu-category {
+  margin-bottom: 25px;
+}
+
+.menu-category h3 {
+  color: #ffd700;
+  font-size: 16px;
+  margin-bottom: 12px;
+  padding-left: 10px;
+  border-left: 4px solid #ff8c00;
+}
+
+.menu-item {
+  background: #0d0805;
+  border: 1px solid #ff8c00;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-item-name {
+  color: #ffd700;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-green { background: #28a745; color: white; }
+.status-yellow { background: #ffc107; color: black; }
+.status-red { background: #dc3545; color: white; }
+
+/* RIGHT SIDE - TRAFFIC LIGHT CONTROLS */
+.controls-section {
+  background: #0d0805;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.controls-section h2 {
+  color: #ff8c00;
+  margin-bottom: 20px;
+  font-size: 20px;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ff8c00;
+}
+
+.control-item {
+  background: #1a0f0a;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 12px;
+  border: 1px solid #333;
+}
+
+.control-item-name {
+  color: #ffd700;
+  font-size: 14px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.traffic-lights {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.light-btn {
+  height: 50px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.3;
+  transition: all 0.3s;
+  color: white;
+  text-transform: uppercase;
+}
+
+.light-btn.active {
+  opacity: 1;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255,255,255,0.6);
+}
+
+.light-green { background: #28a745; }
+.light-yellow { background: #ffc107; color: black; }
+.light-red { background: #dc3545; }
+
+.waiting-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .main-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+}
 </style>
 </head>
 <body>
-<header>
+
+<div class="header">
   <h1>🔔 TITO MEL'S — ORDER BOARD</h1>
-  <span><button id="soundBtn">🔔 ON</button> <span id="clock"></span></span>
-</header>
-<div id="board"></div>
-<div id="empty">Waiting for orders... leave this screen open.</div>
+  <div class="status-indicator">
+    <div class="bell"></div>
+    <span>ON</span>
+    <span id="clock"></span>
+  </div>
+</div>
+
+<div class="main-container">
+  <!-- LEFT: MENU ITEMS -->
+  <div class="menu-section">
+    <h2>📋 CUSTOMER MENU</h2>
+    <div id="menu-display">
+      <div class="waiting-message">Loading menu...</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: TRAFFIC LIGHT CONTROLS -->
+  <div class="controls-section">
+    <h2>🚦 MENU CONTROLS</h2>
+    <div id="controls-display">
+      <div class="waiting-message">Loading controls...</div>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ===== CONFIG: PASTE YOUR SUPABASE URL + ANON KEY ===== */
-const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
-const KEY  = "sb_publishable_CJZipjuCPS_UIT8h-xtVrw_Jy37Cq9K";
-/* ======================================================= */
-const $=id=>document.getElementById(id);
-let soundOn=true, lastMax=null;
+// ==========================================
+// SUPABASE CONFIGURATION
+// ==========================================
+const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_CJZipjuCPS_UIT8h-xtVrw_Jy37Cq9K';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function ding(){
-  if(!soundOn) return;
-  try{
-    const ctx=new (window.AudioContext||window.webkitAudioContext)();
-    [880,1174].forEach((f,i)=>{
-      const o=ctx.createOscillator(), g=ctx.createGain();
-      o.frequency.value=f; o.type="sine"; o.connect(g); g.connect(ctx.destination);
-      const t=ctx.currentTime+i*0.18;
-      g.gain.setValueAtTime(0.0001,t);
-      g.gain.exponentialRampToValueAtTime(0.4,t+0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
-      o.start(t); o.stop(t+0.55);
+// Clock
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Menu categories
+const menuCategories = {
+  'Appetizers': [
+    'Lumpia Shanghai Pork (12pc)',
+    'Lumpia Shanghai Chicken (12pc)',
+    'Lumpia Gulay (1pc)',
+    'Lumpia Sariwa (2pc)'
+  ],
+  'Specials & BBQ': [
+    'Lechon Kawali',
+    'Pork Sisig',
+    'Chicken BBQ Stick (2pc)',
+    'Pork BBQ Stick'
+  ],
+  'Entrees': [
+    'Chicken Adobo',
+    'Pork Adobo',
+    'Chicken Curry'
+  ]
+};
+
+// Load and display menu
+async function loadMenu() {
+  const { data, error } = await supabase
+    .from('menu_status')
+    .select('*')
+    .order('item_name');
+
+  if (error) {
+    console.error('Error loading menu:', error);
+    return;
+  }
+
+  // Build menu display (LEFT SIDE)
+  const menuDisplay = document.getElementById('menu-display');
+  menuDisplay.innerHTML = '';
+
+  Object.keys(menuCategories).forEach(category => {
+    const categoryDiv = document.createElement('div');
+    categoryDiv.className = 'menu-category';
+    
+    const categoryTitle = document.createElement('h3');
+    categoryTitle.textContent = category;
+    categoryDiv.appendChild(categoryTitle);
+
+    menuCategories[category].forEach(itemName => {
+      const menuItem = data.find(m => m.item_name === itemName);
+      if (!menuItem) return;
+
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'menu-item';
+      
+      const statusClass = `status-${menuItem.status}`;
+      const statusText = menuItem.status === 'green' ? 'Available' : 
+                        menuItem.status === 'yellow' ? 'Low Stock' : 'Sold Out';
+
+      itemDiv.innerHTML = `
+        <span class="menu-item-name">${itemName}</span>
+        <span class="status-badge ${statusClass}">${statusText}</span>
+      `;
+      
+      categoryDiv.appendChild(itemDiv);
     });
-  }catch(e){}
+
+    menuDisplay.appendChild(categoryDiv);
+  });
+
+  // Build controls display (RIGHT SIDE)
+  const controlsDisplay = document.getElementById('controls-display');
+  controlsDisplay.innerHTML = '';
+
+  Object.keys(menuCategories).forEach(category => {
+    const categoryDiv = document.createElement('div');
+    categoryDiv.className = 'menu-category';
+    
+    const categoryTitle = document.createElement('h3');
+    categoryTitle.textContent = category;
+    categoryDiv.appendChild(categoryTitle);
+
+    menuCategories[category].forEach(itemName => {
+      const menuItem = data.find(m => m.item_name === itemName);
+      if (!menuItem) return;
+
+      const controlDiv = document.createElement('div');
+      controlDiv.className = 'control-item';
+      
+      const greenActive = menuItem.status === 'green' ? 'active' : '';
+      const yellowActive = menuItem.status === 'yellow' ? 'active' : '';
+      const redActive = menuItem.status === 'red' ? 'active' : '';
+
+      controlDiv.innerHTML = `
+        <div class="control-item-name">${itemName}</div>
+        <div class="traffic-lights">
+          <button class="light-btn light-green ${greenActive}" onclick="updateStatus('${itemName}', 'green')">🟢 Green</button>
+          <button class="light-btn light-yellow ${yellowActive}" onclick="updateStatus('${itemName}', 'yellow')">🟡 Yellow</button>
+          <button class="light-btn light-red ${redActive}" onclick="updateStatus('${itemName}', 'red')">🔴 Red</button>
+        </div>
+      `;
+      
+      categoryDiv.appendChild(controlDiv);
+    });
+
+    controlsDisplay.appendChild(categoryDiv);
+  });
 }
-function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
-async function pull(){
-  try{
-    const r=await fetch(SUPA+"/rest/v1/orders?status=neq.done&order=created_at.desc&limit=30",{headers:{apikey:KEY,Authorization:"Bearer "+KEY}});
-    const rows=await r.json();
-    render(rows);
-  }catch(e){}
+
+// Update menu status
+async function updateStatus(itemName, status) {
+  const { error } = await supabase
+    .from('menu_status')
+    .update({ status: status, updated_at: new Date() })
+    .eq('item_name', itemName);
+  
+  if (!error) {
+    loadMenu();
+  }
 }
-function render(rows){
-  const board=$("board");
-  if(!rows.length){ $("empty").style.display="block"; board.innerHTML=""; lastMax=null; return; }
-  $("empty").style.display="none";
-  const maxId=Math.max(...rows.map(r=>r.id));
-  if(lastMax!==null && maxId>lastMax){ ding(); document.body.classList.remove("flash"); void document.body.offsetWidth; document.body.classList.add("flash"); }
-  lastMax=Math.max(lastMax||0,maxId);
-  board.innerHTML=rows.map(r=>{
-    const items=Array.isArray(r.items)? r.items.map(it=>"<li>"+it.qty+" × "+esc(it.name)+"</li>").join("") : "<li>"+esc(r.items)+"</li>";
-    const t=new Date(r.created_at);
-    const hh=t.getHours()%12||12, mm=String(t.getMinutes()).padStart(2,"0");
-    return '<div class="ticket '+r.status+'">'+
-      '<div class="t-top"><span>#'+r.id+'</span><span>'+hh+':'+mm+'</span></div>'+
-      '<div class="t-name">'+esc(r.customer)+' · 📞 '+esc(r.phone)+'</div>'+
-      '<ul class="t-items">'+items+'</ul>'+
-      (r.note?'<div class="t-note">📝 '+esc(r.note)+'</div>':'')+
-      '<div class="t-meta">⏰ Pickup: '+esc(r.pickup||"ASAP")+'</div>'+
-      '<div class="btns">'+
-        (r.status==="new"?'<button class="start" onclick="setStatus('+r.id+',\'prepping\')">🍳 START</button>':'<button class="start" style="opacity:.6">🍳 PREPPING</button>')+
-        '<button class="done" onclick="setStatus('+r.id+',\'done\')">✅ DONE</button>'+
-      '</div></div>';
-  }).join("");
-}
-async function setStatus(id,st){
-  await fetch(SUPA+"/rest/v1/orders?id=eq."+id,{method:"PATCH",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({status:st})});
-  pull();
-}
-$("soundBtn").onclick=()=>{soundOn=!soundOn;$("soundBtn").textContent=soundOn?"🔔 ON":"🔕 OFF";};
-setInterval(()=>{$("clock").textContent=new Date().toLocaleTimeString();},1000);
-setInterval(pull,7000);
-pull();
+
+// Initialize
+loadMenu();
+
+// Real-time subscription
+supabase
+  .channel('menu_changes')
+  .on('postgres_changes', 
+    { event: 'UPDATE', schema: 'public', table: 'menu_status' },
+    () => loadMenu()
+  )
+  .subscribe();
 </script>
 </body>
 </html>
