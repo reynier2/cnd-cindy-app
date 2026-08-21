@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mama's Manager Board</title>
+<title>Mama's Manager Board - Orders & Menu Control</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,6 +12,7 @@ body {
   color: #ffd700; 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   height: 100vh;
+  overflow: hidden;
 }
 
 .header {
@@ -24,91 +25,191 @@ body {
 }
 
 .header h1 {
-  font-size: 24px;
+  font-size: 22px;
   letter-spacing: 2px;
   color: #ff8c00;
 }
 
-.main-container {
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  height: calc(100vh - 60px);
-}
-
-/* LEFT SIDE - MENU LIST */
-.menu-list {
-  background: #1a0f0a;
-  padding: 20px;
-  overflow-y: auto;
-  border-right: 3px solid #ff8c00;
-}
-
-.menu-list h2 {
-  color: #ff8c00;
-  margin-bottom: 20px;
-  font-size: 20px;
-  text-align: center;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #ff8c00;
-}
-
-.menu-item {
-  background: #0d0805;
-  border: 2px solid #ff8c00;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.item-name {
-  color: #ffd700;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.status-indicator {
-  padding: 6px 14px;
+.status-badge {
+  background: #28a745;
+  color: white;
+  padding: 5px 15px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: bold;
-  text-transform: uppercase;
+  animation: pulse 2s infinite;
 }
 
-.status-green { background: #28a745; color: white; }
-.status-yellow { background: #ffc107; color: black; }
-.status-red { background: #dc3545; color: white; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
 
-/* RIGHT SIDE - MAMA'S CONTROLS */
-.controls {
+.main-container {
+  display: grid;
+  grid-template-columns: 1fr 450px;
+  height: calc(100vh - 60px);
+}
+
+/* LEFT SIDE - LIVE ORDERS */
+.orders-panel {
+  background: #1a0f0a;
+  border-right: 3px solid #ff8c00;
+  display: flex;
+  flex-direction: column;
+}
+
+.orders-header {
   background: #0d0805;
-  padding: 20px;
+  padding: 15px;
+  border-bottom: 2px solid #ff8c00;
+  text-align: center;
+}
+
+.orders-header h2 {
+  color: #ff8c00;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+.orders-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.order-card {
+  background: #0d0805;
+  border: 2px solid #ff8c00;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #ff8c00;
+}
+
+.order-id {
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.order-time {
+  color: #888;
+  font-size: 12px;
+}
+
+.order-customer {
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.order-items {
+  background: #1a0f0a;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.order-total {
+  text-align: right;
+  font-size: 18px;
+  font-weight: bold;
+  color: #28a745;
+  margin-top: 8px;
+}
+
+.order-status {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.status-new { background: #28a745; color: white; }
+.status-preparing { background: #ffc107; color: black; }
+.status-ready { background: #17a2b8; color: white; }
+.status-completed { background: #6c757d; color: white; }
+
+.no-orders {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* RIGHT SIDE - MENU CONTROLS */
+.controls-panel {
+  background: #0d0805;
   overflow-y: auto;
 }
 
-.controls h2 {
-  color: #ff8c00;
-  margin-bottom: 20px;
-  font-size: 20px;
-  text-align: center;
-  padding-bottom: 10px;
+.controls-header {
+  background: #0d0805;
+  padding: 15px;
   border-bottom: 2px solid #ff8c00;
+  text-align: center;
+}
+
+.controls-header h2 {
+  color: #ff8c00;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+.controls-content {
+  padding: 15px;
+}
+
+.control-category {
+  margin-bottom: 25px;
+}
+
+.control-category h3 {
+  color: #ffd700;
+  font-size: 14px;
+  margin-bottom: 12px;
+  padding-left: 10px;
+  border-left: 4px solid #ff8c00;
 }
 
 .control-item {
   background: #1a0f0a;
   border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 12px;
-  border: 2px solid #333;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #333;
 }
 
 .control-name {
   color: #ffd700;
-  font-size: 15px;
-  margin-bottom: 12px;
+  font-size: 13px;
+  margin-bottom: 10px;
   font-weight: 600;
   text-align: center;
 }
@@ -116,15 +217,15 @@ body {
 .traffic-lights {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
+  gap: 6px;
 }
 
 .light-btn {
-  height: 55px;
-  border-radius: 8px;
+  height: 45px;
+  border-radius: 6px;
   border: none;
   font-weight: bold;
-  font-size: 13px;
+  font-size: 11px;
   cursor: pointer;
   opacity: 0.35;
   transition: all 0.3s;
@@ -133,8 +234,8 @@ body {
 
 .light-btn.active {
   opacity: 1;
-  transform: scale(1.08);
-  box-shadow: 0 0 15px rgba(255,255,255,0.7);
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(255,255,255,0.6);
   border: 2px solid white;
 }
 
@@ -146,7 +247,7 @@ body {
   text-align: center;
   padding: 40px 20px;
   color: #666;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 @media (max-width: 900px) {
@@ -160,24 +261,28 @@ body {
 <body>
 
 <div class="header">
-  <h1>🚦 MAMA'S MANAGER BOARD</h1>
-  <div style="color: #28a745; font-weight: bold;">● ONLINE</div>
+  <h1>🍽️ MAMA'S MANAGER BOARD</h1>
+  <div class="status-badge">● LIVE</div>
 </div>
 
 <div class="main-container">
-  <!-- LEFT: MENU ITEMS -->
-  <div class="menu-list">
-    <h2>📋 CURRENT MENU STATUS</h2>
-    <div id="menu-display">
-      <div class="waiting">Loading menu...</div>
+  <!-- LEFT: LIVE ORDERS -->
+  <div class="orders-panel">
+    <div class="orders-header">
+      <h2>📲 INCOMING ORDERS</h2>
+    </div>
+    <div class="orders-list" id="orders-list">
+      <div class="waiting">Waiting for orders...</div>
     </div>
   </div>
 
-  <!-- RIGHT: MAMA'S TRAFFIC LIGHT CONTROLS -->
-  <div class="controls">
-    <h2>️ MENU CONTROLS</h2>
-    <div id="controls-display">
-      <div class="waiting">Loading controls...</div>
+  <!-- RIGHT: MENU CONTROLS -->
+  <div class="controls-panel">
+    <div class="controls-header">
+      <h2>🚦 MENU AVAILABILITY</h2>
+    </div>
+    <div class="controls-content" id="controls-content">
+      <div class="waiting">Loading menu...</div>
     </div>
   </div>
 </div>
@@ -191,7 +296,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Menu items organized by category
+// Menu categories
 const MENU_CATEGORIES = {
   'Appetizers': [
     'Lumpia Shanghai Pork (12pc)',
@@ -212,8 +317,64 @@ const MENU_CATEGORIES = {
   ]
 };
 
-// Load menu from database
-async function loadMenu() {
+// ==========================================
+// LEFT SIDE: LOAD AND DISPLAY ORDERS
+// ==========================================
+async function loadOrders() {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) {
+    console.error('Error loading orders:', error);
+    document.getElementById('orders-list').innerHTML = 
+      '<div class="waiting">Error loading orders</div>';
+    return;
+  }
+
+  const ordersList = document.getElementById('orders-list');
+  
+  if (!data || data.length === 0) {
+    ordersList.innerHTML = '<div class="waiting">Waiting for orders...</div>';
+    return;
+  }
+
+  ordersList.innerHTML = data.map(order => {
+    const time = new Date(order.created_at).toLocaleTimeString();
+    const items = order.items || [];
+    const total = order.total || 0;
+    const status = order.status || 'new';
+    
+    return `
+      <div class="order-card">
+        <div class="order-header">
+          <span class="order-id">Order #${order.id}</span>
+          <span class="order-time">${time}</span>
+        </div>
+        <div class="order-customer">
+          👤 ${order.customer_name || 'Customer'} | 📞 ${order.phone || 'N/A'}
+        </div>
+        <div class="order-items">
+          ${items.map(item => `
+            <div class="order-item">
+              <span>${item.qty}x ${item.name}</span>
+              <span>$${(item.price * item.qty).toFixed(2)}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="order-total">Total: $${parseFloat(total).toFixed(2)}</div>
+        <span class="order-status status-${status}">${status}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// ==========================================
+// RIGHT SIDE: LOAD MENU CONTROLS
+// ==========================================
+async function loadMenuControls() {
   const { data, error } = await supabase
     .from('menu_status')
     .select('*')
@@ -221,88 +382,114 @@ async function loadMenu() {
 
   if (error) {
     console.error('Error loading menu:', error);
-    document.getElementById('menu-display').innerHTML = 
-      '<div class="waiting" style="color:#ff6b6b;">⚠️ Error loading menu<br><small>' + error.message + '</small></div>';
-    document.getElementById('controls-display').innerHTML = 
-      '<div class="waiting" style="color:#ff6b6b;">⚠️ Error loading controls</div>';
     return;
   }
 
-  // Build LEFT side (Menu List)
-  const menuDisplay = document.getElementById('menu-display');
-  menuDisplay.innerHTML = '<h2>📋 CURRENT MENU STATUS</h2>';
-
-  // Build RIGHT side (Controls)
-  const controlsDisplay = document.getElementById('controls-display');
-  controlsDisplay.innerHTML = '<h2>🎛️ MENU CONTROLS</h2>';
+  const controlsContent = document.getElementById('controls-content');
+  controlsContent.innerHTML = '';
 
   Object.keys(MENU_CATEGORIES).forEach(category => {
-    // Create category section for LEFT side
-    const leftCategory = document.createElement('div');
-    leftCategory.style.marginBottom = '25px';
-    leftCategory.innerHTML = '<h3 style="color:#ffd700; margin-bottom:12px; padding-left:10px; border-left:4px solid #ff8c00;">' + category + '</h3>';
-
-    // Create category section for RIGHT side
-    const rightCategory = document.createElement('div');
-    rightCategory.style.marginBottom = '25px';
-    rightCategory.innerHTML = '<h3 style="color:#ffd700; margin-bottom:12px; padding-left:10px; border-left:4px solid #ff8c00;">' + category + '</h3>';
+    const categoryDiv = document.createElement('div');
+    categoryDiv.className = 'control-category';
+    categoryDiv.innerHTML = `<h3>${category}</h3>`;
 
     MENU_CATEGORIES[category].forEach(itemName => {
       const menuItem = data.find(m => m.item_name === itemName);
       if (!menuItem) return;
 
-      const statusClass = 'status-' + menuItem.status;
-      const statusText = menuItem.status === 'green' ? 'Available' : 
-                        menuItem.status === 'yellow' ? 'Low Stock' : 'Sold Out';
-
-      // Add to LEFT side (Menu List)
-      leftCategory.innerHTML += 
-        '<div class="menu-item">' +
-          '<span class="item-name">' + itemName + '</span>' +
-          '<span class="status-indicator ' + statusClass + '">' + statusText + '</span>' +
-        '</div>';
-
-      // Add to RIGHT side (Controls)
+      const controlDiv = document.createElement('div');
+      controlDiv.className = 'control-item';
+      
       const gActive = menuItem.status === 'green' ? 'active' : '';
       const yActive = menuItem.status === 'yellow' ? 'active' : '';
       const rActive = menuItem.status === 'red' ? 'active' : '';
 
-      rightCategory.innerHTML += 
-        '<div class="control-item">' +
-          '<div class="control-name">' + itemName + '</div>' +
-          '<div class="traffic-lights">' +
-            '<button class="light-btn light-green ' + gActive + '" onclick="updateStatus(\'' + itemName + '\', \'green\')">🟢 Available</button>' +
-            '<button class="light-btn light-yellow ' + yActive + '" onclick="updateStatus(\'' + itemName + '\', \'yellow\')">🟡 Low Stock</button>' +
-            '<button class="light-btn light-red ' + rActive + '" onclick="updateStatus(\'' + itemName + '\', \'red\')">🔴 Sold Out</button>' +
-          '</div>' +
-        '</div>';
+      controlDiv.innerHTML = `
+        <div class="control-name">${itemName}</div>
+        <div class="traffic-lights">
+          <button class="light-btn light-green ${gActive}" onclick="updateMenuStatus('${itemName}', 'green')">🟢 Avail</button>
+          <button class="light-btn light-yellow ${yActive}" onclick="updateMenuStatus('${itemName}', 'yellow')">🟡 Low</button>
+          <button class="light-btn light-red ${rActive}" onclick="updateMenuStatus('${itemName}', 'red')">🔴 Sold</button>
+        </div>
+      `;
+      
+      categoryDiv.appendChild(controlDiv);
     });
 
-    menuDisplay.appendChild(leftCategory);
-    controlsDisplay.appendChild(rightCategory);
+    controlsContent.appendChild(categoryDiv);
   });
 }
 
-// Update menu status when Mama clicks a button
-async function updateStatus(itemName, status) {
+// ==========================================
+// UPDATE MENU STATUS
+// ==========================================
+async function updateMenuStatus(itemName, status) {
   const { error } = await supabase
     .from('menu_status')
     .update({ status: status, updated_at: new Date() })
     .eq('item_name', itemName);
   
   if (!error) {
-    loadMenu(); // Refresh the display
-  } else {
-    console.error('Update error:', error);
-    alert('Error updating status: ' + error.message);
+    loadMenuControls();
   }
 }
 
-// Load menu when page opens
-loadMenu();
+// ==========================================
+// REAL-TIME SUBSCRIPTIONS
+// ==========================================
+// Listen for new orders
+supabase
+  .channel('orders_channel')
+  .on('postgres_changes', 
+    { event: 'INSERT', schema: 'public', table: 'orders' },
+    (payload) => {
+      console.log('New order received!', payload);
+      loadOrders();
+      // Play notification sound
+      playNotificationSound();
+    }
+  )
+  .subscribe();
 
-// Auto-refresh every 10 seconds to catch any changes
-setInterval(loadMenu, 10000);
+// Listen for menu changes
+supabase
+  .channel('menu_channel')
+  .on('postgres_changes', 
+    { event: 'UPDATE', schema: 'public', table: 'menu_status' },
+    () => loadMenuControls()
+  )
+  .subscribe();
+
+// ==========================================
+// NOTIFICATION SOUND
+// ==========================================
+function playNotificationSound() {
+  // Create a simple beep sound
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.frequency.value = 800;
+  oscillator.type = 'sine';
+  
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+  
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + 0.5);
+}
+
+// ==========================================
+// INITIAL LOAD
+// ==========================================
+loadOrders();
+loadMenuControls();
+
+// Refresh orders every 5 seconds
+setInterval(loadOrders, 5000);
 </script>
 
 </body>
