@@ -25,7 +25,8 @@ body {
 }
 .header h1 { font-size: 24px; letter-spacing: 2px; color: #ff8c00; }
 .status-indicator { display: flex; align-items: center; gap: 10px; font-size: 14px; }
-.bell { width: 15px; height: 15px; background: #28a745; border-radius: 50%; }
+.bell { width: 15px; height: 15px; background: #28a745; border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
 .main-container { display: grid; grid-template-columns: 1fr 450px; height: calc(100vh - 60px); }
 
@@ -80,10 +81,11 @@ body {
 
 <script>
 // ==========================================
-// 1. PASTE YOUR KEYS HERE
+// 1. YOUR SUPABASE KEYS (Cleaned and Fixed)
 // ==========================================
 const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
-const SUPABASE_KEY = ' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwEeyJ';
+// I removed the accidental space and extra letters from your key.
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
 
 // Initialize Supabase
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -107,6 +109,10 @@ async function loadMenu() {
 
   if (error) {
     console.error('Database Error:', error);
+    // Show the exact error on the screen so we know what's wrong
+    const errorMsg = `<div class="waiting-message" style="color:#ff6b6b;">⚠️ Connection Error:<br>${error.message}<br><small>Check your API Key or Database Permissions.</small></div>`;
+    document.getElementById('menu-display').innerHTML = errorMsg;
+    document.getElementById('controls-display').innerHTML = errorMsg;
     return;
   }
 
@@ -152,9 +158,9 @@ async function loadMenu() {
         <div class="control-item">
           <div class="control-item-name">${itemName}</div>
           <div class="traffic-lights">
-            <button class="light-btn light-green ${gActive}" onclick="updateStatus('${itemName}', 'green')">🟢 Green</button>
-            <button class="light-btn light-yellow ${yActive}" onclick="updateStatus('${itemName}', 'yellow')"> Yellow</button>
-            <button class="light-btn light-red ${rActive}" onclick="updateStatus('${itemName}', 'red')">🔴 Red</button>
+            <button class="light-btn light-green ${gActive}" onclick="updateStatus('${itemName}', 'green')">🟢 Avail</button>
+            <button class="light-btn light-yellow ${yActive}" onclick="updateStatus('${itemName}', 'yellow')">🟡 Low</button>
+            <button class="light-btn light-red ${rActive}" onclick="updateStatus('${itemName}', 'red')">🔴 Sold</button>
           </div>
         </div>`;
     });
@@ -165,8 +171,12 @@ async function loadMenu() {
 }
 
 async function updateStatus(itemName, status) {
-  await supabaseClient.from('menu_status').update({ status: status, updated_at: new Date() }).eq('item_name', itemName);
-  loadMenu();
+  const { error } = await supabaseClient.from('menu_status').update({ status: status, updated_at: new Date() }).eq('item_name', itemName);
+  if (!error) {
+    loadMenu();
+  } else {
+    console.error('Update Error:', error);
+  }
 }
 
 loadMenu();
