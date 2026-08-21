@@ -14,7 +14,6 @@ body {
   height: 100vh;
   overflow: hidden;
 }
-
 .header {
   background: #0d0805;
   padding: 15px 25px;
@@ -23,13 +22,7 @@ body {
   align-items: center;
   border-bottom: 3px solid #ff8c00;
 }
-
-.header h1 {
-  font-size: 22px;
-  letter-spacing: 2px;
-  color: #ff8c00;
-}
-
+.header h1 { font-size: 22px; letter-spacing: 2px; color: #ff8c00; }
 .status-badge {
   background: #28a745;
   color: white;
@@ -39,45 +32,26 @@ body {
   font-weight: bold;
   animation: pulse 2s infinite;
 }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 .main-container {
   display: grid;
   grid-template-columns: 1fr 450px;
   height: calc(100vh - 60px);
 }
-
-/* LEFT SIDE - LIVE ORDERS */
 .orders-panel {
   background: #1a0f0a;
   border-right: 3px solid #ff8c00;
   display: flex;
   flex-direction: column;
 }
-
 .orders-header {
   background: #0d0805;
   padding: 15px;
   border-bottom: 2px solid #ff8c00;
   text-align: center;
 }
-
-.orders-header h2 {
-  color: #ff8c00;
-  font-size: 18px;
-  letter-spacing: 1px;
-}
-
-.orders-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 15px;
-}
-
+.orders-header h2 { color: #ff8c00; font-size: 18px; letter-spacing: 1px; }
+.orders-list { flex: 1; overflow-y: auto; padding: 15px; }
 .order-card {
   background: #0d0805;
   border: 2px solid #ff8c00;
@@ -86,12 +60,10 @@ body {
   margin-bottom: 15px;
   animation: slideIn 0.3s ease;
 }
-
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
 .order-header {
   display: flex;
   justify-content: space-between;
@@ -100,31 +72,15 @@ body {
   padding-bottom: 8px;
   border-bottom: 1px dashed #ff8c00;
 }
-
-.order-id {
-  color: #ffd700;
-  font-weight: bold;
-  font-size: 16px;
-}
-
-.order-time {
-  color: #888;
-  font-size: 12px;
-}
-
-.order-customer {
-  color: #aaa;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
+.order-id { color: #ffd700; font-weight: bold; font-size: 16px; }
+.order-time { color: #888; font-size: 12px; }
+.order-customer { color: #aaa; font-size: 14px; margin-bottom: 8px; }
 .order-items {
   background: #1a0f0a;
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 10px;
 }
-
 .order-item {
   display: flex;
   justify-content: space-between;
@@ -132,7 +88,6 @@ body {
   font-size: 14px;
   color: #ccc;
 }
-
 .order-total {
   text-align: right;
   font-size: 18px;
@@ -140,7 +95,6 @@ body {
   color: #28a745;
   margin-top: 8px;
 }
-
 .order-status {
   display: inline-block;
   padding: 5px 12px;
@@ -150,46 +104,21 @@ body {
   text-transform: uppercase;
   margin-top: 8px;
 }
-
 .status-new { background: #28a745; color: white; }
 .status-preparing { background: #ffc107; color: black; }
 .status-ready { background: #17a2b8; color: white; }
 .status-completed { background: #6c757d; color: white; }
-
-.no-orders {
-  text-align: center;
-  padding: 60px 20px;
-  color: #666;
-  font-size: 16px;
-}
-
-/* RIGHT SIDE - MENU CONTROLS */
-.controls-panel {
-  background: #0d0805;
-  overflow-y: auto;
-}
-
+.no-orders { text-align: center; padding: 60px 20px; color: #666; font-size: 16px; }
+.controls-panel { background: #0d0805; overflow-y: auto; }
 .controls-header {
   background: #0d0805;
   padding: 15px;
   border-bottom: 2px solid #ff8c00;
   text-align: center;
 }
-
-.controls-header h2 {
-  color: #ff8c00;
-  font-size: 18px;
-  letter-spacing: 1px;
-}
-
-.controls-content {
-  padding: 15px;
-}
-
-.control-category {
-  margin-bottom: 25px;
-}
-
+.controls-header h2 { color: #ff8c00; font-size: 18px; letter-spacing: 1px; }
+.controls-content { padding: 15px; }
+.control-category { margin-bottom: 25px; }
 .control-category h3 {
   color: #ffd700;
   font-size: 14px;
@@ -197,7 +126,6 @@ body {
   padding-left: 10px;
   border-left: 4px solid #ff8c00;
 }
-
 .control-item {
   background: #1a0f0a;
   border-radius: 8px;
@@ -205,7 +133,6 @@ body {
   margin-bottom: 10px;
   border: 1px solid #333;
 }
-
 .control-name {
   color: #ffd700;
   font-size: 13px;
@@ -213,13 +140,11 @@ body {
   font-weight: 600;
   text-align: center;
 }
-
 .traffic-lights {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 6px;
 }
-
 .light-btn {
   height: 45px;
   border-radius: 6px;
@@ -231,30 +156,18 @@ body {
   transition: all 0.3s;
   color: white;
 }
-
 .light-btn.active {
   opacity: 1;
   transform: scale(1.05);
   box-shadow: 0 0 12px rgba(255,255,255,0.6);
   border: 2px solid white;
 }
-
 .light-green { background: #28a745; }
 .light-yellow { background: #ffc107; color: black; }
 .light-red { background: #dc3545; }
-
-.waiting {
-  text-align: center;
-  padding: 40px 20px;
-  color: #666;
-  font-size: 15px;
-}
-
+.waiting { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
 @media (max-width: 900px) {
-  .main-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-  }
+  .main-container { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
 }
 </style>
 </head>
@@ -266,229 +179,112 @@ body {
 </div>
 
 <div class="main-container">
-  <!-- LEFT: LIVE ORDERS -->
   <div class="orders-panel">
-    <div class="orders-header">
-      <h2>📲 INCOMING ORDERS</h2>
-    </div>
-    <div class="orders-list" id="orders-list">
-      <div class="waiting">Waiting for orders...</div>
-    </div>
+    <div class="orders-header"><h2>📲 INCOMING ORDERS</h2></div>
+    <div class="orders-list" id="orders-list"><div class="waiting">Waiting for orders...</div></div>
   </div>
-
-  <!-- RIGHT: MENU CONTROLS -->
   <div class="controls-panel">
-    <div class="controls-header">
-      <h2>🚦 MENU AVAILABILITY</h2>
-    </div>
-    <div class="controls-content" id="controls-content">
-      <div class="waiting">Loading menu...</div>
-    </div>
+    <div class="controls-header"><h2>🚦 MENU AVAILABILITY</h2></div>
+    <div class="controls-content" id="controls-content"><div class="waiting">Loading menu...</div></div>
   </div>
 </div>
 
 <script>
 // ==========================================
-// SUPABASE SETUP
+// SUPABASE SETUP - FIXED VARIABLE NAME
 // ==========================================
 const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
 
+// RENAMED to supabaseClient to avoid conflict
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Menu categories
 const MENU_CATEGORIES = {
-  'Appetizers': [
-    'Lumpia Shanghai Pork (12pc)',
-    'Lumpia Shanghai Chicken (12pc)',
-    'Lumpia Gulay (1pc)',
-    'Lumpia Sariwa (2pc)'
-  ],
-  'Specials & BBQ': [
-    'Lechon Kawali',
-    'Pork Sisig',
-    'Chicken BBQ Stick (2pc)',
-    'Pork BBQ Stick'
-  ],
-  'Entrees': [
-    'Chicken Adobo',
-    'Pork Adobo',
-    'Chicken Curry'
-  ]
+  'Appetizers': ['Lumpia Shanghai Pork (12pc)', 'Lumpia Shanghai Chicken (12pc)', 'Lumpia Gulay (1pc)', 'Lumpia Sariwa (2pc)'],
+  'Specials & BBQ': ['Lechon Kawali', 'Pork Sisig', 'Chicken BBQ Stick (2pc)', 'Pork BBQ Stick'],
+  'Entrees': ['Chicken Adobo', 'Pork Adobo', 'Chicken Curry']
 };
 
-// ==========================================
-// LEFT SIDE: LOAD AND DISPLAY ORDERS
-// ==========================================
 async function loadOrders() {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(20);
-
-  if (error) {
-    console.error('Error loading orders:', error);
-    document.getElementById('orders-list').innerHTML = 
-      '<div class="waiting">Error loading orders</div>';
-    return;
-  }
-
+  const { data, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false }).limit(20);
+  if (error) { console.error('Error loading orders:', error); return; }
   const ordersList = document.getElementById('orders-list');
-  
-  if (!data || data.length === 0) {
-    ordersList.innerHTML = '<div class="waiting">Waiting for orders...</div>';
-    return;
-  }
-
+  if (!data || data.length === 0) { ordersList.innerHTML = '<div class="waiting">Waiting for orders...</div>'; return; }
   ordersList.innerHTML = data.map(order => {
     const time = new Date(order.created_at).toLocaleTimeString();
     const items = order.items || [];
     const total = order.total || 0;
     const status = order.status || 'new';
-    
     return `
       <div class="order-card">
         <div class="order-header">
           <span class="order-id">Order #${order.id}</span>
           <span class="order-time">${time}</span>
         </div>
-        <div class="order-customer">
-          👤 ${order.customer_name || 'Customer'} | 📞 ${order.phone || 'N/A'}
-        </div>
+        <div class="order-customer">👤 ${order.customer_name || 'Customer'} | 📞 ${order.phone || 'N/A'}</div>
         <div class="order-items">
-          ${items.map(item => `
-            <div class="order-item">
-              <span>${item.qty}x ${item.name}</span>
-              <span>$${(item.price * item.qty).toFixed(2)}</span>
-            </div>
-          `).join('')}
+          ${items.map(item => `<div class="order-item"><span>${item.qty}x ${item.name}</span><span>$${(item.price * item.qty).toFixed(2)}</span></div>`).join('')}
         </div>
         <div class="order-total">Total: $${parseFloat(total).toFixed(2)}</div>
         <span class="order-status status-${status}">${status}</span>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
-// ==========================================
-// RIGHT SIDE: LOAD MENU CONTROLS
-// ==========================================
 async function loadMenuControls() {
-  const { data, error } = await supabase
-    .from('menu_status')
-    .select('*')
-    .order('item_name');
-
-  if (error) {
-    console.error('Error loading menu:', error);
-    return;
-  }
-
+  const { data, error } = await supabaseClient.from('menu_status').select('*').order('item_name');
+  if (error) { console.error('Error loading menu:', error); return; }
   const controlsContent = document.getElementById('controls-content');
   controlsContent.innerHTML = '';
-
   Object.keys(MENU_CATEGORIES).forEach(category => {
     const categoryDiv = document.createElement('div');
     categoryDiv.className = 'control-category';
     categoryDiv.innerHTML = `<h3>${category}</h3>`;
-
     MENU_CATEGORIES[category].forEach(itemName => {
       const menuItem = data.find(m => m.item_name === itemName);
       if (!menuItem) return;
-
       const controlDiv = document.createElement('div');
       controlDiv.className = 'control-item';
-      
       const gActive = menuItem.status === 'green' ? 'active' : '';
       const yActive = menuItem.status === 'yellow' ? 'active' : '';
       const rActive = menuItem.status === 'red' ? 'active' : '';
-
       controlDiv.innerHTML = `
         <div class="control-name">${itemName}</div>
         <div class="traffic-lights">
           <button class="light-btn light-green ${gActive}" onclick="updateMenuStatus('${itemName}', 'green')">🟢 Avail</button>
           <button class="light-btn light-yellow ${yActive}" onclick="updateMenuStatus('${itemName}', 'yellow')">🟡 Low</button>
           <button class="light-btn light-red ${rActive}" onclick="updateMenuStatus('${itemName}', 'red')">🔴 Sold</button>
-        </div>
-      `;
-      
+        </div>`;
       categoryDiv.appendChild(controlDiv);
     });
-
     controlsContent.appendChild(categoryDiv);
   });
 }
 
-// ==========================================
-// UPDATE MENU STATUS
-// ==========================================
 async function updateMenuStatus(itemName, status) {
-  const { error } = await supabase
-    .from('menu_status')
-    .update({ status: status, updated_at: new Date() })
-    .eq('item_name', itemName);
-  
-  if (!error) {
-    loadMenuControls();
-  }
+  const { error } = await supabaseClient.from('menu_status').update({ status: status, updated_at: new Date() }).eq('item_name', itemName);
+  if (!error) loadMenuControls();
 }
 
-// ==========================================
-// REAL-TIME SUBSCRIPTIONS
-// ==========================================
-// Listen for new orders
-supabase
-  .channel('orders_channel')
-  .on('postgres_changes', 
-    { event: 'INSERT', schema: 'public', table: 'orders' },
-    (payload) => {
-      console.log('New order received!', payload);
-      loadOrders();
-      // Play notification sound
-      playNotificationSound();
-    }
-  )
-  .subscribe();
+supabaseClient.channel('orders_channel').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => { loadOrders(); playNotificationSound(); }).subscribe();
+supabaseClient.channel('menu_channel').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'menu_status' }, () => loadMenuControls()).subscribe();
 
-// Listen for menu changes
-supabase
-  .channel('menu_channel')
-  .on('postgres_changes', 
-    { event: 'UPDATE', schema: 'public', table: 'menu_status' },
-    () => loadMenuControls()
-  )
-  .subscribe();
-
-// ==========================================
-// NOTIFICATION SOUND
-// ==========================================
 function playNotificationSound() {
-  // Create a simple beep sound
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
-  
   oscillator.connect(gainNode);
   gainNode.connect(audioContext.destination);
-  
   oscillator.frequency.value = 800;
   oscillator.type = 'sine';
-  
   gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
   gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-  
   oscillator.start(audioContext.currentTime);
   oscillator.stop(audioContext.currentTime + 0.5);
 }
 
-// ==========================================
-// INITIAL LOAD
-// ==========================================
 loadOrders();
 loadMenuControls();
-
-// Refresh orders every 5 seconds
 setInterval(loadOrders, 5000);
 </script>
 
