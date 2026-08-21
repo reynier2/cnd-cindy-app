@@ -45,13 +45,13 @@ body { background: #1a0f0a; color: #ffd700; font-family: 'Segoe UI', sans-serif;
 <body>
 
 <div class="header">
-  <h1>🍽️ MAMA'S MANAGER BOARD</h1>
+  <h1>️ MAMA'S MANAGER BOARD</h1>
   <div class="status-badge">● LIVE</div>
 </div>
 
 <div class="main-container">
   <div class="orders-panel">
-    <div class="orders-header"><h2>📲 INCOMING ORDERS</h2></div>
+    <div class="orders-header"><h2> INCOMING ORDERS</h2></div>
     <div class="orders-list" id="orders-list"><div class="waiting">Waiting for orders...</div></div>
   </div>
   <div class="controls-panel">
@@ -61,10 +61,11 @@ body { background: #1a0f0a; color: #ffd700; font-family: 'Segoe UI', sans-serif;
 </div>
 
 <script>
-const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// UNIQUE variable name to prevent conflicts
+const mamaSupabaseClient = window.supabase.createClient(
+  'https://mkvpuawmkudezotbhmxl.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE'
+);
 
 const MENU_CATEGORIES = {
   'Appetizers': ['Lumpia Shanghai Pork (12pc)', 'Lumpia Shanghai Chicken (12pc)', 'Lumpia Gulay (1pc)', 'Lumpia Sariwa (2pc)'],
@@ -73,7 +74,7 @@ const MENU_CATEGORIES = {
 };
 
 async function loadOrders() {
-  const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(20);
+  const { data, error } = await mamaSupabaseClient.from('orders').select('*').order('created_at', { ascending: false }).limit(20);
   if (error) { console.error('Error:', error); return; }
   const list = document.getElementById('orders-list');
   if (!data || data.length === 0) { list.innerHTML = '<div class="waiting">Waiting for orders...</div>'; return; }
@@ -88,7 +89,7 @@ async function loadOrders() {
 }
 
 async function loadMenu() {
-  const { data, error } = await supabase.from('menu_status').select('*').order('item_name');
+  const { data, error } = await mamaSupabaseClient.from('menu_status').select('*').order('item_name');
   if (error) { console.error('Error:', error); return; }
   const div = document.getElementById('controls-content');
   div.innerHTML = '';
@@ -104,8 +105,8 @@ async function loadMenu() {
           <div class="control-name">${name}</div>
           <div class="traffic-lights">
             <button class="light-btn light-green ${item.status==='green'?'active':''}" onclick="update('${name}','green')">🟢 Avail</button>
-            <button class="light-btn light-yellow ${item.status==='yellow'?'active':''}" onclick="update('${name}','yellow')"> Low</button>
-            <button class="light-btn light-red ${item.status==='red'?'active':''}" onclick="update('${name}','red')"> Sold</button>
+            <button class="light-btn light-yellow ${item.status==='yellow'?'active':''}" onclick="update('${name}','yellow')">🟡 Low</button>
+            <button class="light-btn light-red ${item.status==='red'?'active':''}" onclick="update('${name}','red')">🔴 Sold</button>
           </div>
         </div>`;
     });
@@ -114,11 +115,10 @@ async function loadMenu() {
 }
 
 async function update(name, status) {
-  await supabase.from('menu_status').update({status, updated_at: new Date()}).eq('item_name', name);
+  await mamaSupabaseClient.from('menu_status').update({status, updated_at: new Date()}).eq('item_name', name);
   loadMenu();
 }
 
-// Load now and refresh every 5 seconds
 loadOrders();
 loadMenu();
 setInterval(loadOrders, 5000);
