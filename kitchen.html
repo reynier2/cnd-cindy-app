@@ -7,168 +7,47 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { 
-  background: #1a0f0a; 
-  color: #ffd700; 
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  height: 100vh;
-  overflow: hidden;
-}
-.header {
-  background: #0d0805;
-  padding: 15px 25px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 3px solid #ff8c00;
-}
+body { background: #1a0f0a; color: #ffd700; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; overflow: hidden; }
+.header { background: #0d0805; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #ff8c00; }
 .header h1 { font-size: 22px; letter-spacing: 2px; color: #ff8c00; }
-.status-badge {
-  background: #28a745;
-  color: white;
-  padding: 5px 15px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: bold;
-  animation: pulse 2s infinite;
-}
+.status-badge { background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-.main-container {
-  display: grid;
-  grid-template-columns: 1fr 450px;
-  height: calc(100vh - 60px);
-}
-.orders-panel {
-  background: #1a0f0a;
-  border-right: 3px solid #ff8c00;
-  display: flex;
-  flex-direction: column;
-}
-.orders-header {
-  background: #0d0805;
-  padding: 15px;
-  border-bottom: 2px solid #ff8c00;
-  text-align: center;
-}
+.main-container { display: grid; grid-template-columns: 1fr 450px; height: calc(100vh - 60px); }
+.orders-panel { background: #1a0f0a; border-right: 3px solid #ff8c00; display: flex; flex-direction: column; }
+.orders-header { background: #0d0805; padding: 15px; border-bottom: 2px solid #ff8c00; text-align: center; }
 .orders-header h2 { color: #ff8c00; font-size: 18px; letter-spacing: 1px; }
 .orders-list { flex: 1; overflow-y: auto; padding: 15px; }
-.order-card {
-  background: #0d0805;
-  border: 2px solid #ff8c00;
-  border-radius: 10px;
-  padding: 15px;
-  margin-bottom: 15px;
-  animation: slideIn 0.3s ease;
-}
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed #ff8c00;
-}
+.order-card { background: #0d0805; border: 2px solid #ff8c00; border-radius: 10px; padding: 15px; margin-bottom: 15px; animation: slideIn 0.3s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #ff8c00; }
 .order-id { color: #ffd700; font-weight: bold; font-size: 16px; }
 .order-time { color: #888; font-size: 12px; }
 .order-customer { color: #aaa; font-size: 14px; margin-bottom: 8px; }
-.order-items {
-  background: #1a0f0a;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 10px;
-}
-.order-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-  font-size: 14px;
-  color: #ccc;
-}
-.order-total {
-  text-align: right;
-  font-size: 18px;
-  font-weight: bold;
-  color: #28a745;
-  margin-top: 8px;
-}
-.order-status {
-  display: inline-block;
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 12px;
-  font-weight: bold;
-  text-transform: uppercase;
-  margin-top: 8px;
-}
+.order-items { background: #1a0f0a; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+.order-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; color: #ccc; }
+.order-total { text-align: right; font-size: 18px; font-weight: bold; color: #28a745; margin-top: 8px; }
+.order-status { display: inline-block; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-top: 8px; }
 .status-new { background: #28a745; color: white; }
 .status-preparing { background: #ffc107; color: black; }
 .status-ready { background: #17a2b8; color: white; }
 .status-completed { background: #6c757d; color: white; }
 .no-orders { text-align: center; padding: 60px 20px; color: #666; font-size: 16px; }
 .controls-panel { background: #0d0805; overflow-y: auto; }
-.controls-header {
-  background: #0d0805;
-  padding: 15px;
-  border-bottom: 2px solid #ff8c00;
-  text-align: center;
-}
+.controls-header { background: #0d0805; padding: 15px; border-bottom: 2px solid #ff8c00; text-align: center; }
 .controls-header h2 { color: #ff8c00; font-size: 18px; letter-spacing: 1px; }
 .controls-content { padding: 15px; }
 .control-category { margin-bottom: 25px; }
-.control-category h3 {
-  color: #ffd700;
-  font-size: 14px;
-  margin-bottom: 12px;
-  padding-left: 10px;
-  border-left: 4px solid #ff8c00;
-}
-.control-item {
-  background: #1a0f0a;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
-  border: 1px solid #333;
-}
-.control-name {
-  color: #ffd700;
-  font-size: 13px;
-  margin-bottom: 10px;
-  font-weight: 600;
-  text-align: center;
-}
-.traffic-lights {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
-}
-.light-btn {
-  height: 45px;
-  border-radius: 6px;
-  border: none;
-  font-weight: bold;
-  font-size: 11px;
-  cursor: pointer;
-  opacity: 0.35;
-  transition: all 0.3s;
-  color: white;
-}
-.light-btn.active {
-  opacity: 1;
-  transform: scale(1.05);
-  box-shadow: 0 0 12px rgba(255,255,255,0.6);
-  border: 2px solid white;
-}
+.control-category h3 { color: #ffd700; font-size: 14px; margin-bottom: 12px; padding-left: 10px; border-left: 4px solid #ff8c00; }
+.control-item { background: #1a0f0a; border-radius: 8px; padding: 12px; margin-bottom: 10px; border: 1px solid #333; }
+.control-name { color: #ffd700; font-size: 13px; margin-bottom: 10px; font-weight: 600; text-align: center; }
+.traffic-lights { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.light-btn { height: 45px; border-radius: 6px; border: none; font-weight: bold; font-size: 11px; cursor: pointer; opacity: 0.35; transition: all 0.3s; color: white; }
+.light-btn.active { opacity: 1; transform: scale(1.05); box-shadow: 0 0 12px rgba(255,255,255,0.6); border: 2px solid white; }
 .light-green { background: #28a745; }
 .light-yellow { background: #ffc107; color: black; }
 .light-red { background: #dc3545; }
 .waiting { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
-@media (max-width: 900px) {
-  .main-container { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
-}
+@media (max-width: 900px) { .main-container { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } }
 </style>
 </head>
 <body>
@@ -191,12 +70,12 @@ body {
 
 <script>
 // ==========================================
-// SUPABASE SETUP - FIXED VARIABLE NAME
+// SUPABASE SETUP
 // ==========================================
 const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
 
-// RENAMED to supabaseClient to avoid conflict
+// Create client
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const MENU_CATEGORIES = {
@@ -251,7 +130,7 @@ async function loadMenuControls() {
       controlDiv.innerHTML = `
         <div class="control-name">${itemName}</div>
         <div class="traffic-lights">
-          <button class="light-btn light-green ${gActive}" onclick="updateMenuStatus('${itemName}', 'green')">🟢 Avail</button>
+          <button class="light-btn light-green ${gActive}" onclick="updateMenuStatus('${itemName}', 'green')"> Avail</button>
           <button class="light-btn light-yellow ${yActive}" onclick="updateMenuStatus('${itemName}', 'yellow')">🟡 Low</button>
           <button class="light-btn light-red ${rActive}" onclick="updateMenuStatus('${itemName}', 'red')">🔴 Sold</button>
         </div>`;
@@ -266,6 +145,7 @@ async function updateMenuStatus(itemName, status) {
   if (!error) loadMenuControls();
 }
 
+// FIXED: Changed from supabase.channel to supabaseClient.channel
 supabaseClient.channel('orders_channel').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => { loadOrders(); playNotificationSound(); }).subscribe();
 supabaseClient.channel('menu_channel').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'menu_status' }, () => loadMenuControls()).subscribe();
 
