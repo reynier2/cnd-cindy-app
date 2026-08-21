@@ -15,66 +15,182 @@
   .row .n{font-size:.95rem}
   .row .p{color:var(--gold);font-weight:700;font-size:.85rem;margin-left:8px}
   .qty{display:flex;gap:8px;align-items:center}
-  .qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:800;cursor:pointer}
-  .qty span{min-width:18px;text-align:center;font-weight:800}
+  .qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:800;cursor:pointer;font-size:1.2rem}
+  .qty span{min-width:18px;text-align:center;font-weight:800;font-size:1.1rem}
   input,select,textarea{width:100%;background:var(--card);border:1px solid rgba(255,183,3,.3);color:var(--cream);border-radius:10px;padding:12px;margin-bottom:10px;font-size:1rem}
-  .send{width:100%;background:linear-gradient(135deg,var(--gold),#fb8500);border:none;color:#140b06;font-weight:800;letter-spacing:1px;padding:16px;border-radius:30px;font-size:1.05rem;cursor:pointer;box-shadow:0 0 22px rgba(255,183,3,.5)}
-  #msg{text-align:center;margin:14px 0;font-weight:700;color:var(--gold)}
+  .send{width:100%;background:linear-gradient(135deg,var(--gold),#fb8500);border:none;color:#140b06;font-weight:800;letter-spacing:1px;padding:16px;border-radius:30px;font-size:1.05rem;cursor:pointer;box-shadow:0 0 22px rgba(255,183,3,.5);margin-top:10px}
+  .send:disabled{opacity:0.6;cursor:not-allowed}
+  #msg{text-align:center;margin:14px 0;font-weight:700;color:var(--gold);min-height:24px}
+
+  /* CONFIRMATION SCREEN STYLES */
+  #confirmation-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--card);
+    border: 3px solid #28a745;
+    border-radius: 20px;
+    margin-top: 20px;
+    box-shadow: 0 0 30px rgba(40, 167, 69, 0.3);
+  }
+  #confirmation-screen h2 { color: #28a745; font-size: 2rem; margin-bottom: 10px; }
+  #confirmation-screen .order-number { color: var(--gold); font-size: 1.5rem; font-weight: bold; margin: 15px 0; }
+  #confirmation-screen p { color: var(--cream); font-size: 1.1rem; line-height: 1.6; margin-bottom: 10px; }
+  #confirmation-screen .highlight { color: var(--gold); font-weight: bold; }
+  #confirmation-screen .btn-home {
+    display: inline-block;
+    margin-top: 25px;
+    padding: 14px 30px;
+    background: var(--gold);
+    color: #140b06;
+    text-decoration: none;
+    font-weight: 800;
+    border-radius: 30px;
+    font-size: 1rem;
+  }
 </style>
 </head>
 <body>
-<h1>TITO MEL'S</h1>
-<div class="sub">ORDER FOR PICKUP · PAY AT THE COUNTER</div>
-<div id="menu"></div>
-<h3>YOUR INFO</h3>
-<input id="cname" placeholder="Your name">
-<input id="cphone" placeholder="Phone number" type="tel">
-<select id="cpickup">
-  <option value="ASAP">Pickup: ASAP</option>
-  <option value="In 30 min">In 30 minutes</option>
-  <option value="In 1 hour">In 1 hour</option>
-  <option value="In 2 hours">In 2 hours</option>
-</select>
-<textarea id="cnote" rows="2" placeholder="Notes (no onions, extra sauce...)"></textarea>
-<button class="send" id="send">🛒 SEND ORDER TO THE KITCHEN</button>
-<div id="msg"></div>
+
+<!-- ORDER FORM -->
+<div id="order-form">
+  <h1>TITO MEL'S</h1>
+  <div class="sub">ORDER FOR PICKUP · PAY AT THE COUNTER</div>
+  <div id="menu"></div>
+  
+  <h3>YOUR INFO</h3>
+  <input id="cname" placeholder="Your name">
+  <input id="cphone" placeholder="Phone number" type="tel">
+  <select id="cpickup">
+    <option value="ASAP">Pickup: ASAP</option>
+    <option value="In 30 min">In 30 minutes</option>
+    <option value="In 1 hour">In 1 hour</option>
+    <option value="In 2 hours">In 2 hours</option>
+  </select>
+  <textarea id="cnote" rows="2" placeholder="Notes (no onions, extra sauce...)"></textarea>
+  
+  <button class="send" id="send">🛒 SEND ORDER TO THE KITCHEN</button>
+  <div id="msg"></div>
+</div>
+
+<!-- CONFIRMATION SCREEN (Hidden by default) -->
+<div id="confirmation-screen">
+  <div style="font-size: 4rem; margin-bottom: 10px;">✅</div>
+  <h2>ORDER ACCEPTED!</h2>
+  <div class="order-number" id="conf-order-id">Order #---</div>
+  <p>The kitchen has received your order and is preparing it now.</p>
+  <p>Pickup Time: <span class="highlight" id="conf-pickup">ASAP</span></p>
+  <p style="color: var(--dim); font-size: 0.9rem; margin-top: 20px;">Please pay at the counter when you arrive.<br>Thank you for choosing Tito Mel's!</p>
+  <a href="/" class="btn-home">← BACK TO HOME</a>
+</div>
 
 <script>
+// ==========================================
+// 1. FIXED API KEY (Replace with your real eyJ... key if needed)
+// ==========================================
 const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
-const KEY  = "sb_publishable_CJZipjuCPS_UIT8h-xtVrw_Jy37Cq9K";
+const KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE";
 
 const $=id=>document.getElementById(id);
+
+// Menu with actual prices parsed for calculation
 const MENU=[
-  {cat:"APPETIZERS",items:[["Lumpia Shanghai Pork (12pc)","$11.99"],["Lumpia Shanghai Chicken (12pc)","$11.99"],["Lumpia Gulay (1pc)","$1.50"],["Lumpia Sariwa (2pc)","$10.99"]]},
-  {cat:"SPECIALS & BBQ",items:[["Lechon Kawali","from $10.99"],["Pork Sisig","from $10.99"],["Chicken BBQ Stick (2pc)","$7.99"],["Pork BBQ Stick","$7.99"]]},
-  {cat:"ENTREES",items:[["Chicken Adobo","$8.99"],["Pork Adobo","$8.99"],["Chicken Curry","$8.99"],["Menudo","$8.99"],["Bicol Express","$8.99"],["Kaldereta","$10.25"],["Chicken Tinola","$8.99"],["Pork Sinigang","$8.99"],["Pork Dinuguan","$8.99"]]},
-  {cat:"NOODLES & COMBO",items:[["Pancit Bihon","$10.99"],["Palabok","$11.99"],["Combo (2 entrees + side)","$14.99"]]},
-  {cat:"SIDES",items:[["Plain Rice","$1.99"],["Adobo Rice","$2.99"],["Plantains","$2.99"],["Stir Fry Vegetables","$4.99"]]},
-  {cat:"DRINKS & DESSERTS",items:[["Buko Pandan Juice","$6.25"],["Mango / Taro Boba","$6.75"],["Smoothies","$6.00"],["Halo-Halo","ask in store"],["Ube Biko","ask in store"]]}
+  {cat:"APPETIZERS",items:[["Lumpia Shanghai Pork (12pc)",11.99],["Lumpia Shanghai Chicken (12pc)",11.99],["Lumpia Gulay (1pc)",1.50],["Lumpia Sariwa (2pc)",10.99]]},
+  {cat:"SPECIALS & BBQ",items:[["Lechon Kawali",10.99],["Pork Sisig",10.99],["Chicken BBQ Stick (2pc)",7.99],["Pork BBQ Stick",7.99]]},
+  {cat:"ENTREES",items:[["Chicken Adobo",8.99],["Pork Adobo",8.99],["Chicken Curry",8.99],["Menudo",8.99],["Bicol Express",8.99],["Kaldereta",10.25],["Chicken Tinola",8.99],["Pork Sinigang",8.99],["Pork Dinuguan",8.99]]},
+  {cat:"NOODLES & COMBO",items:[["Pancit Bihon",10.99],["Palabok",11.99],["Combo (2 entrees + side)",14.99]]},
+  {cat:"SIDES",items:[["Plain Rice",1.99],["Adobo Rice",2.99],["Plantains",2.99],["Stir Fry Vegetables",4.99]]},
+  {cat:"DRINKS & DESSERTS",items:[["Buko Pandan Juice",6.25],["Mango / Taro Boba",6.75],["Smoothies",6.00],["Halo-Halo",6.50],["Ube Biko",5.99]]}
 ];
-const FLAT=[]; MENU.forEach(c=>c.items.forEach(i=>FLAT.push(i)));
+
+const FLAT=[]; 
+MENU.forEach(c=>c.items.forEach(i=>FLAT.push(i)));
 const qty={};
+
+// Render Menu
 $("menu").innerHTML = MENU.map(c=>{
   let html='<h3>'+c.cat+'</h3>';
   c.items.forEach(i=>{
     const key=FLAT.indexOf(i);
-    html+='<div class="row"><span class="n">'+i[0]+' <span class="p">'+i[1]+'</span></span><span class="qty"><button onclick="add('+key+',-1)">−</button><span id="q_'+key+'">0</span><button onclick="add('+key+',1)">+</button></span></div>';
+    html+='<div class="row"><span class="n">'+i[0]+' <span class="p">$'+i[1].toFixed(2)+'</span></span><span class="qty"><button onclick="add('+key+',-1)">−</button><span id="q_'+key+'">0</span><button onclick="add('+key+',1)">+</button></span></div>';
   });
   return html;
 }).join("");
-function add(key,d){ qty[key]=Math.max(0,(qty[key]||0)+d); $("q_"+key).textContent=qty[key]; }
+
+function add(key,d){ 
+  qty[key]=Math.max(0,(qty[key]||0)+d); 
+  $("q_"+key).textContent=qty[key]; 
+}
+
 $("send").onclick=async()=>{
-  const items=FLAT.map((i,idx)=>({name:i[0],qty:qty[idx]||0})).filter(x=>x.qty>0);
-  if(!items.length){$("msg").textContent="Add at least one item 🙂";return;}
-  const customer=$("cname").value.trim(), phone=$("cphone").value.trim();
-  if(!customer||!phone){$("msg").textContent="Please add your name and phone number.";return;}
-  $("msg").textContent="Sending...";
+  const items=FLAT.map((i,idx)=>{
+    const q = qty[idx]||0;
+    return q > 0 ? {name:i[0], qty:q, price:i[1]} : null;
+  }).filter(x=>x!==null);
+
+  if(!items.length){
+    $("msg").textContent="⚠️ Please add at least one item 🙂";
+    return;
+  }
+  
+  const customer=$("cname").value.trim();
+  const phone=$("cphone").value.trim();
+  
+  if(!customer||!phone){
+    $("msg").textContent="⚠️ Please add your name and phone number.";
+    return;
+  }
+
+  // Calculate total
+  const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+  $("send").disabled = true;
+  $("send").textContent = "⏳ Sending to kitchen...";
+  $("msg").textContent = "";
+
   try{
-    const r=await fetch(SUPA+"/rest/v1/orders",{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
-      body:JSON.stringify({customer:customer,phone:phone,pickup:$("cpickup").value,note:$("cnote").value.trim(),items:items})});
-    if(r.ok){ $("msg").textContent="✅ Order sent! The kitchen sees it on their screen right now. Pay at pickup — see you soon!"; }
-    else{ const t=await r.text(); $("msg").textContent="ERR "+r.status+": "+t.slice(0,140); }
-  }catch(e){ $("msg").textContent="NET ERR: "+e.message; }
+    const payload = {
+      customer_name: customer,
+      phone: phone,
+      pickup_time: $("cpickup").value,
+      notes: $("cnote").value.trim(),
+      items: items,
+      total: total,
+      status: "new"
+    };
+
+    const r = await fetch(SUPA + "/rest/v1/orders", {
+      method: "POST",
+      headers: {
+        apikey: KEY,
+        Authorization: "Bearer " + KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if(r.ok){ 
+      const result = await r.json();
+      const orderId = result[0].id;
+      
+      // Hide form, show beautiful confirmation
+      $("order-form").style.display = "none";
+      $("conf-order-id").textContent = "Order #" + orderId;
+      $("conf-pickup").textContent = $("cpickup").value;
+      $("confirmation-screen").style.display = "block";
+      window.scrollTo(0, 0);
+    } else { 
+      const t = await r.text(); 
+      $("msg").textContent = "❌ Error: " + r.status + ". Please try again or call us.";
+      $("send").disabled = false;
+      $("send").textContent = "🛒 SEND ORDER TO THE KITCHEN";
+    }
+  } catch(e){ 
+    $("msg").textContent = "❌ Network error. Please check your connection.";
+    $("send").disabled = false;
+    $("send").textContent = "🛒 SEND ORDER TO THE KITCHEN";
+  }
 };
 </script>
 </body>
