@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tito Mel's — ORDER BOARD</title>
-<!-- Load Supabase Library -->
+<title>Mama's Manager Board</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,173 +12,298 @@ body {
   color: #ffd700; 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   height: 100vh;
-  overflow: hidden;
 }
+
 .header {
   background: #0d0805;
   padding: 15px 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 3px solid #ff8c00;
+}
+
+.header h1 {
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: #ff8c00;
+}
+
+.main-container {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  height: calc(100vh - 60px);
+}
+
+/* LEFT SIDE - MENU LIST */
+.menu-list {
+  background: #1a0f0a;
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 3px solid #ff8c00;
+}
+
+.menu-list h2 {
+  color: #ff8c00;
+  margin-bottom: 20px;
+  font-size: 20px;
+  text-align: center;
+  padding-bottom: 10px;
   border-bottom: 2px solid #ff8c00;
 }
-.header h1 { font-size: 24px; letter-spacing: 2px; color: #ff8c00; }
-.status-indicator { display: flex; align-items: center; gap: 10px; font-size: 14px; }
-.bell { width: 15px; height: 15px; background: #28a745; border-radius: 50%; animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-.main-container { display: grid; grid-template-columns: 1fr 450px; height: calc(100vh - 60px); }
+.menu-item {
+  background: #0d0805;
+  border: 2px solid #ff8c00;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-/* LEFT SIDE */
-.menu-section { background: #1a0f0a; padding: 20px; overflow-y: auto; border-right: 2px solid #ff8c00; }
-.menu-section h2 { color: #ff8c00; margin-bottom: 20px; font-size: 20px; text-align: center; border-bottom: 2px solid #ff8c00; padding-bottom: 10px; }
-.menu-category { margin-bottom: 25px; }
-.menu-category h3 { color: #ffd700; font-size: 16px; margin-bottom: 12px; padding-left: 10px; border-left: 4px solid #ff8c00; }
-.menu-item { background: #0d0805; border: 1px solid #ff8c00; border-radius: 8px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-.menu-item-name { color: #ffd700; font-size: 15px; font-weight: 600; }
-.status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+.item-name {
+  color: #ffd700;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.status-indicator {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
 .status-green { background: #28a745; color: white; }
 .status-yellow { background: #ffc107; color: black; }
 .status-red { background: #dc3545; color: white; }
 
-/* RIGHT SIDE */
-.controls-section { background: #0d0805; padding: 20px; overflow-y: auto; }
-.controls-section h2 { color: #ff8c00; margin-bottom: 20px; font-size: 20px; text-align: center; border-bottom: 2px solid #ff8c00; padding-bottom: 10px; }
-.control-item { background: #1a0f0a; border-radius: 8px; padding: 15px; margin-bottom: 12px; border: 1px solid #333; }
-.control-item-name { color: #ffd700; font-size: 14px; margin-bottom: 10px; font-weight: 600; }
-.traffic-lights { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.light-btn { height: 50px; border-radius: 8px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; opacity: 0.3; transition: all 0.3s; color: white; text-transform: uppercase; }
-.light-btn.active { opacity: 1; transform: scale(1.05); box-shadow: 0 0 15px rgba(255,255,255,0.6); }
+/* RIGHT SIDE - MAMA'S CONTROLS */
+.controls {
+  background: #0d0805;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.controls h2 {
+  color: #ff8c00;
+  margin-bottom: 20px;
+  font-size: 20px;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ff8c00;
+}
+
+.control-item {
+  background: #1a0f0a;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 12px;
+  border: 2px solid #333;
+}
+
+.control-name {
+  color: #ffd700;
+  font-size: 15px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.traffic-lights {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.light-btn {
+  height: 55px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+  opacity: 0.35;
+  transition: all 0.3s;
+  color: white;
+}
+
+.light-btn.active {
+  opacity: 1;
+  transform: scale(1.08);
+  box-shadow: 0 0 15px rgba(255,255,255,0.7);
+  border: 2px solid white;
+}
+
 .light-green { background: #28a745; }
 .light-yellow { background: #ffc107; color: black; }
 .light-red { background: #dc3545; }
 
-.waiting-message { text-align: center; padding: 40px 20px; color: #666; font-size: 16px; }
+.waiting {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+@media (max-width: 900px) {
+  .main-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>🔔 TITO MEL'S — ORDER BOARD</h1>
-  <div class="status-indicator">
-    <div class="bell"></div>
-    <span>ON</span>
-    <span id="clock"></span>
-  </div>
+  <h1>🚦 MAMA'S MANAGER BOARD</h1>
+  <div style="color: #28a745; font-weight: bold;">● ONLINE</div>
 </div>
 
 <div class="main-container">
-  <div class="menu-section">
-    <h2>📋 CUSTOMER MENU</h2>
-    <div id="menu-display"><div class="waiting-message">Loading menu...</div></div>
+  <!-- LEFT: MENU ITEMS -->
+  <div class="menu-list">
+    <h2>📋 CURRENT MENU STATUS</h2>
+    <div id="menu-display">
+      <div class="waiting">Loading menu...</div>
+    </div>
   </div>
-  <div class="controls-section">
-    <h2>🚦 MENU CONTROLS</h2>
-    <div id="controls-display"><div class="waiting-message">Loading controls...</div></div>
+
+  <!-- RIGHT: MAMA'S TRAFFIC LIGHT CONTROLS -->
+  <div class="controls">
+    <h2>️ MENU CONTROLS</h2>
+    <div id="controls-display">
+      <div class="waiting">Loading controls...</div>
+    </div>
   </div>
 </div>
 
 <script>
 // ==========================================
-// 1. YOUR SUPABASE KEYS (Cleaned and Fixed)
+// SUPABASE SETUP
 // ==========================================
 const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
-// I removed the accidental space and extra letters from your key.
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
 
-// Initialize Supabase
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Clock
-function updateClock() {
-  const now = new Date();
-  document.getElementById('clock').textContent = now.toLocaleTimeString();
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-const menuCategories = {
-  'Appetizers': ['Lumpia Shanghai Pork (12pc)', 'Lumpia Shanghai Chicken (12pc)', 'Lumpia Gulay (1pc)', 'Lumpia Sariwa (2pc)'],
-  'Specials & BBQ': ['Lechon Kawali', 'Pork Sisig', 'Chicken BBQ Stick (2pc)', 'Pork BBQ Stick'],
-  'Entrees': ['Chicken Adobo', 'Pork Adobo', 'Chicken Curry']
+// Menu items organized by category
+const MENU_CATEGORIES = {
+  'Appetizers': [
+    'Lumpia Shanghai Pork (12pc)',
+    'Lumpia Shanghai Chicken (12pc)',
+    'Lumpia Gulay (1pc)',
+    'Lumpia Sariwa (2pc)'
+  ],
+  'Specials & BBQ': [
+    'Lechon Kawali',
+    'Pork Sisig',
+    'Chicken BBQ Stick (2pc)',
+    'Pork BBQ Stick'
+  ],
+  'Entrees': [
+    'Chicken Adobo',
+    'Pork Adobo',
+    'Chicken Curry'
+  ]
 };
 
+// Load menu from database
 async function loadMenu() {
-  const { data, error } = await supabaseClient.from('menu_status').select('*').order('item_name');
+  const { data, error } = await supabase
+    .from('menu_status')
+    .select('*')
+    .order('item_name');
 
   if (error) {
-    console.error('Database Error:', error);
-    // Show the exact error on the screen so we know what's wrong
-    const errorMsg = `<div class="waiting-message" style="color:#ff6b6b;">⚠️ Connection Error:<br>${error.message}<br><small>Check your API Key or Database Permissions.</small></div>`;
-    document.getElementById('menu-display').innerHTML = errorMsg;
-    document.getElementById('controls-display').innerHTML = errorMsg;
+    console.error('Error loading menu:', error);
+    document.getElementById('menu-display').innerHTML = 
+      '<div class="waiting" style="color:#ff6b6b;">⚠️ Error loading menu<br><small>' + error.message + '</small></div>';
+    document.getElementById('controls-display').innerHTML = 
+      '<div class="waiting" style="color:#ff6b6b;">⚠️ Error loading controls</div>';
     return;
   }
 
-  // Build Left Side (Customer Menu)
+  // Build LEFT side (Menu List)
   const menuDisplay = document.getElementById('menu-display');
-  menuDisplay.innerHTML = '';
+  menuDisplay.innerHTML = '<h2>📋 CURRENT MENU STATUS</h2>';
 
-  // Build Right Side (Controls)
+  // Build RIGHT side (Controls)
   const controlsDisplay = document.getElementById('controls-display');
-  controlsDisplay.innerHTML = '';
+  controlsDisplay.innerHTML = '<h2>🎛️ MENU CONTROLS</h2>';
 
-  Object.keys(menuCategories).forEach(category => {
-    // Left Side Category
-    const catDivLeft = document.createElement('div');
-    catDivLeft.className = 'menu-category';
-    catDivLeft.innerHTML = `<h3>${category}</h3>`;
+  Object.keys(MENU_CATEGORIES).forEach(category => {
+    // Create category section for LEFT side
+    const leftCategory = document.createElement('div');
+    leftCategory.style.marginBottom = '25px';
+    leftCategory.innerHTML = '<h3 style="color:#ffd700; margin-bottom:12px; padding-left:10px; border-left:4px solid #ff8c00;">' + category + '</h3>';
 
-    // Right Side Category
-    const catDivRight = document.createElement('div');
-    catDivRight.className = 'menu-category';
-    catDivRight.innerHTML = `<h3>${category}</h3>`;
+    // Create category section for RIGHT side
+    const rightCategory = document.createElement('div');
+    rightCategory.style.marginBottom = '25px';
+    rightCategory.innerHTML = '<h3 style="color:#ffd700; margin-bottom:12px; padding-left:10px; border-left:4px solid #ff8c00;">' + category + '</h3>';
 
-    menuCategories[category].forEach(itemName => {
+    MENU_CATEGORIES[category].forEach(itemName => {
       const menuItem = data.find(m => m.item_name === itemName);
       if (!menuItem) return;
 
-      const statusClass = `status-${menuItem.status}`;
-      const statusText = menuItem.status === 'green' ? 'Available' : menuItem.status === 'yellow' ? 'Low Stock' : 'Sold Out';
+      const statusClass = 'status-' + menuItem.status;
+      const statusText = menuItem.status === 'green' ? 'Available' : 
+                        menuItem.status === 'yellow' ? 'Low Stock' : 'Sold Out';
 
-      // Add to Left Side
-      catDivLeft.innerHTML += `
-        <div class="menu-item">
-          <span class="menu-item-name">${itemName}</span>
-          <span class="status-badge ${statusClass}">${statusText}</span>
-        </div>`;
+      // Add to LEFT side (Menu List)
+      leftCategory.innerHTML += 
+        '<div class="menu-item">' +
+          '<span class="item-name">' + itemName + '</span>' +
+          '<span class="status-indicator ' + statusClass + '">' + statusText + '</span>' +
+        '</div>';
 
-      // Add to Right Side
+      // Add to RIGHT side (Controls)
       const gActive = menuItem.status === 'green' ? 'active' : '';
       const yActive = menuItem.status === 'yellow' ? 'active' : '';
       const rActive = menuItem.status === 'red' ? 'active' : '';
 
-      catDivRight.innerHTML += `
-        <div class="control-item">
-          <div class="control-item-name">${itemName}</div>
-          <div class="traffic-lights">
-            <button class="light-btn light-green ${gActive}" onclick="updateStatus('${itemName}', 'green')">🟢 Avail</button>
-            <button class="light-btn light-yellow ${yActive}" onclick="updateStatus('${itemName}', 'yellow')">🟡 Low</button>
-            <button class="light-btn light-red ${rActive}" onclick="updateStatus('${itemName}', 'red')">🔴 Sold</button>
-          </div>
-        </div>`;
+      rightCategory.innerHTML += 
+        '<div class="control-item">' +
+          '<div class="control-name">' + itemName + '</div>' +
+          '<div class="traffic-lights">' +
+            '<button class="light-btn light-green ' + gActive + '" onclick="updateStatus(\'' + itemName + '\', \'green\')">🟢 Available</button>' +
+            '<button class="light-btn light-yellow ' + yActive + '" onclick="updateStatus(\'' + itemName + '\', \'yellow\')">🟡 Low Stock</button>' +
+            '<button class="light-btn light-red ' + rActive + '" onclick="updateStatus(\'' + itemName + '\', \'red\')">🔴 Sold Out</button>' +
+          '</div>' +
+        '</div>';
     });
 
-    menuDisplay.appendChild(catDivLeft);
-    controlsDisplay.appendChild(catDivRight);
+    menuDisplay.appendChild(leftCategory);
+    controlsDisplay.appendChild(rightCategory);
   });
 }
 
+// Update menu status when Mama clicks a button
 async function updateStatus(itemName, status) {
-  const { error } = await supabaseClient.from('menu_status').update({ status: status, updated_at: new Date() }).eq('item_name', itemName);
+  const { error } = await supabase
+    .from('menu_status')
+    .update({ status: status, updated_at: new Date() })
+    .eq('item_name', itemName);
+  
   if (!error) {
-    loadMenu();
+    loadMenu(); // Refresh the display
   } else {
-    console.error('Update Error:', error);
+    console.error('Update error:', error);
+    alert('Error updating status: ' + error.message);
   }
 }
 
+// Load menu when page opens
 loadMenu();
+
+// Auto-refresh every 10 seconds to catch any changes
+setInterval(loadMenu, 10000);
 </script>
+
 </body>
 </html>
