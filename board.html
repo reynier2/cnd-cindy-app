@@ -5,20 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mama's Switchboard</title>
 <style>
-  body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 20px; text-align: center; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; color: white; padding: 20px; text-align: center; }
   h1 { color: gold; margin-bottom: 10px; letter-spacing: 2px; }
   #status-msg { color: lime; font-weight: bold; height: 24px; margin-bottom: 15px; font-size: 1.1rem; }
   .item-row { background: #2c2c2c; padding: 15px; margin: 12px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-  .item-name { font-size: 1.2rem; font-weight: bold; flex: 1; text-align: left; padding-right: 10px; }
+  .item-name { font-size: 1.2rem; font-weight: bold; flex: 1; text-align: left; padding-right: 10px; color: #ffd700; }
   .btn-group { display: flex; gap: 12px; }
-  button { padding: 15px 20px; font-size: 1.5rem; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; color: white; transition: all 0.2s; }
+  button { padding: 12px 18px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; color: white; transition: all 0.2s; opacity: 0.4; }
+  button:hover { opacity: 0.8; }
+  
   .btn-green { background: #28a745; }
   .btn-yellow { background: #ffc107; color: black; }
   .btn-red { background: #dc3545; }
   
-  .btn-green.active { box-shadow: 0 0 20px #28a745; transform: scale(1.15); border: 3px solid white; }
-  .btn-yellow.active { box-shadow: 0 0 20px #ffc107; transform: scale(1.15); border: 3px solid white; }
-  .btn-red.active { box-shadow: 0 0 20px #dc3545; transform: scale(1.15); border: 3px solid white; }
+  .btn-green.active { opacity: 1; box-shadow: 0 0 20px #28a745; transform: scale(1.1); border: 2px solid white; }
+  .btn-yellow.active { opacity: 1; box-shadow: 0 0 20px #ffc107; transform: scale(1.1); border: 2px solid white; }
+  .btn-red.active { opacity: 1; box-shadow: 0 0 20px #dc3545; transform: scale(1.1); border: 2px solid white; }
 </style>
 </head>
 <body>
@@ -27,11 +29,13 @@
   <div id="menu-list"></div>
 
   <script>
+    // Your Supabase credentials
     const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
     const KEY  = "sb_publishable_CJZipjuCPS_UIT8h-xtVrw_Jy37Cq9K";
 
     async function loadMenu() {
-      const res = await fetch(`${SUPA}/rest/v1/menu?select=id,name,menu_status(status)&order=id.asc`, {
+      // FIXED: Querying the correct table (menu_status) and column (item_name)
+      const res = await fetch(`${SUPA}/rest/v1/menu_status?select=item_name,status&order=item_name.asc`, {
         headers: { 'apikey': KEY, 'Authorization': `Bearer ${KEY}` }
       });
       const data = await res.json();
@@ -39,27 +43,40 @@
       const list = document.getElementById('menu-list');
       list.innerHTML = '';
       
+      if (!data || data.length === 0) {
+        document.getElementById('status-msg').innerText = "⚠️ No items found. Did you run the SQL insert?";
+        document.getElementById('status-msg').style.color = "orange";
+        return;
+      }
+      
       data.forEach(item => {
-        const currentStatus = item.menu_status ? item.menu_status.status : 'green';
+        const currentStatus = item.status || 'green';
+        const itemName = item.item_name;
         const row = document.createElement('div');
         row.className = 'item-row';
         
         row.innerHTML = `
-          <div class="item-name">${item.name}</div>
+          <div class="item-name">${itemName}</div>
           <div class="btn-group">
-            <button class="btn-green ${currentStatus==='green'?'active':''}" onclick="updateStatus(${item.id}, 'green')">🟢</button>
-            <button class="btn-yellow ${currentStatus==='yellow'?'active':''}" onclick="updateStatus(${item.id}, 'yellow')">🟡</button>
-            <button class="btn-red ${currentStatus==='red'?'active':''}" onclick="updateStatus(${item.id}, 'red')">🔴</button>
+            <button class="btn-green ${currentStatus==='green'?'active':''}" onclick="updateStatus(this.dataset.name, 'green')" data-name="${itemName}">🟢 Avail</button>
+            <button class="btn-yellow ${currentStatus==='yellow'?'active':''}" onclick="updateStatus(this.dataset.name, 'yellow')" data-name="${itemName}">🟡 Low</button>
+            <button class="btn-red ${currentStatus==='red'?'active':''}" onclick="updateStatus(this.dataset.name, 'red')" data-name="${itemName}">🔴 Sold</button>
           </div>
         `;
         list.appendChild(row);
       });
-      document.getElementById('status-msg').innerText = "Kitchen is live. Tap a color to change it.";
+      document.getElementById('status-msg').innerText = "✅ Kitchen is live. Tap a color to change it.";
+      document.getElementById('status-msg').style.color = "lime";
     }
 
-    async function updateStatus(id, status) {
-      document.getElementById('status-msg').innerText = "Updating Mama's board...";
-      await fetch(`${SUPA}/rest/v1/menu_status?item_id=eq.${id}`, {
+    async function updateStatus(itemName, status) {
+      document.getElementById('status-msg').innerText = "⏳ Updating Mama's board...";
+      document.getElementById('status-msg').style.color = "yellow";
+      
+      // FIXED: Encoding the item name and using the correct column (item_name)
+      const encodedName = encodeURIComponent(itemName);
+      
+      await fetch(`${SUPA}/rest/v1/menu_status?item_name=eq.${encodedName}`, {
         method: 'PATCH',
         headers: { 
           'apikey': KEY, 
@@ -69,9 +86,12 @@
         },
         body: JSON.stringify({ status: status, updated_at: new Date().toISOString() })
       });
+      
+      // Reload to show the new active button
       loadMenu();
     }
 
+    // Load immediately and then check for updates every 10 seconds
     loadMenu();
     setInterval(loadMenu, 10000); 
   </script>
