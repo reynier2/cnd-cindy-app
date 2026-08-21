@@ -3,384 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CND Real Estate Services — Cindy AI</title>
-<meta name="description" content="Cindy AI prices the whole job in 15 seconds. Estimates, engineering stamps, and trade knowledge that talks.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Mama's Manager Board</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#05060a;color:#e8ecf5;font-family:'Rajdhani',sans-serif;overflow-x:hidden}
-h1,h2,h3,h4,.orb-t{font-family:'Orbitron',sans-serif}
-.stars{position:fixed;inset:0;z-index:-3;background:radial-gradient(ellipse at 50% -20%,#101a35 0%,#05060a 60%)}
-.stars::before{content:'';position:absolute;inset:0;background-image:radial-gradient(2px 2px at 15% 25%,#fff8,transparent),radial-gradient(1px 1px at 65% 60%,#fff6,transparent),radial-gradient(1.5px 1.5px at 85% 15%,#00e5ff88,transparent),radial-gradient(1px 1px at 35% 80%,#ff6a0088,transparent);background-size:260px 260px;animation:tw 6s infinite}
-@keyframes tw{0%,100%{opacity:.5}50%{opacity:.9}}
-.floor{position:fixed;left:-20%;right:-20%;bottom:0;height:42vh;z-index:-2;pointer-events:none;opacity:.30;
-background:repeating-linear-gradient(0deg,#00e5ff55 0 2px,transparent 2px 70px),repeating-linear-gradient(90deg,#00e5ff33 0 2px,transparent 2px 90px);
-transform:perspective(500px) rotateX(62deg);transform-origin:bottom;animation:fl 2.6s linear infinite}
-@keyframes fl{from{background-position:0 0,0 0}to{background-position:0 70px,0 0}}
-.orb{position:fixed;border-radius:50%;filter:blur(90px);z-index:-2;opacity:.5;animation:drift 14s ease-in-out infinite alternate}
-.o1{width:420px;height:420px;background:#ff6a00;top:-120px;left:-120px}
-.o2{width:380px;height:380px;background:#00e5ff;bottom:-100px;right:-120px;animation-delay:-7s}
-@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(60px,40px) scale(1.15)}}
-.top{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:12px 22px;background:#05060acc;backdrop-filter:blur(12px);border-bottom:1px solid #00e5ff22}
-.top b{font-family:'Orbitron';font-size:16px;letter-spacing:3px;color:#fff}
-.top b span{color:#ff6a00}
-.top-btns{display:flex;gap:8px}
-.lang-btn{background:#00e5ff11;color:#9ff;border:1px solid #00e5ff44;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:13px;font-family:'Rajdhani';font-weight:600;transition:.2s}
-.lang-btn:hover{background:#00e5ff22;box-shadow:0 0 14px #00e5ff55}
-.landing{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:110px 20px 60px}
-.ring{position:relative;width:250px;height:250px;margin-bottom:26px}
-.ring::before{content:'';position:absolute;inset:-14px;border-radius:50%;background:conic-gradient(#ff6a00,transparent 30%,#00e5ff 50%,transparent 80%,#ff6a00);animation:spin 4s linear infinite;filter:blur(2px)}
-.ring::after{content:'';position:absolute;inset:-26px;border-radius:50%;border:1px dashed #00e5ff44;animation:spin 18s linear infinite reverse}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ring img{position:relative;width:250px;height:250px;border-radius:50%;object-fit:cover;border:3px solid #ff6a00;box-shadow:0 0 40px #ff6a0066,inset 0 0 30px #00000088;animation:breathe 3s ease-in-out infinite}
-.ring img.talking{animation:talk .4s ease-in-out infinite}
-@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
-@keyframes talk{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-.typed-line{font-family:'Orbitron';font-size:clamp(20px,4.6vw,44px);font-weight:900;letter-spacing:2px;min-height:1.3em}
-.typed-line .caret{display:inline-block;width:3px;background:#ff6a00;animation:blink .8s infinite;margin-left:4px}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.grad{background:linear-gradient(90deg,#ff6a00,#ffd200,#00e5ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.bubble{background:#0b0f1add;border:1px solid #00e5ff33;border-radius:14px;max-width:560px;margin:22px auto;padding:18px 24px;font-size:17px;line-height:1.6;color:#cfe3ff;box-shadow:0 0 30px #00e5ff22;position:relative}
-.bubble::before{content:'💬 CINDY';position:absolute;top:-11px;left:20px;background:#05060a;padding:0 10px;font-family:'Orbitron';font-size:11px;letter-spacing:2px;color:#ff6a00}
-.neon-btn{font-family:'Orbitron';font-weight:700;letter-spacing:2px;font-size:17px;color:#fff;background:linear-gradient(90deg,#ff6a00,#ff8c00);border:none;border-radius:8px;padding:18px 42px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 0 24px #ff6a0088;animation:pulse 2.2s infinite;transition:.2s}
-.neon-btn:hover{transform:scale(1.06);box-shadow:0 0 44px #ff6a00cc}
-.neon-btn::after{content:'';position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(90deg,transparent,#ffffff66,transparent);animation:shine 3s infinite}
-@keyframes shine{0%{left:-80%}60%,100%{left:130%}}
-@keyframes pulse{0%,100%{box-shadow:0 0 24px #ff6a0088}50%{box-shadow:0 0 40px #ff6a00cc}}
-.hint{margin-top:14px;color:#7f93b8;font-size:14px}
-.marquee{overflow:hidden;white-space:nowrap;border-top:1px solid #ff6a0033;border-bottom:1px solid #ff6a0033;background:#0a0d16aa}
-.marquee div{display:inline-block;padding:12px 0;font-family:'Orbitron';font-size:14px;letter-spacing:3px;color:#ff6a00;animation:mq 26s linear infinite}
-@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.showroom{display:none;max-width:1200px;margin:0 auto;padding:90px 20px 70px}
-.showroom.active{display:block}
-.rv{opacity:0;transform:translateY(34px);transition:all .8s cubic-bezier(.2,.7,.3,1)}
-.rv.on{opacity:1;transform:none}
-.stage{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;margin-bottom:44px}
-.stage .ring{width:150px;height:150px;margin:0}
-.stage .ring img{width:150px;height:150px}
-.stage .bubble{margin:0;flex:1;min-width:270px}
-.counters{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:10px 0 50px}
-.counter{background:#0b0f1a;border:1px solid #00e5ff33;border-radius:12px;padding:18px 30px;text-align:center;min-width:150px}
-.counter .num{font-family:'Orbitron';font-size:38px;font-weight:900;color:#00e5ff;text-shadow:0 0 18px #00e5ff88}
-.counter .lbl{font-size:13px;letter-spacing:2px;color:#7f93b8}
-.row{display:grid;grid-template-columns:1fr;gap:26px;margin-bottom:26px}
-@media(min-width:900px){.row{grid-template-columns:1fr 1fr}}
-.hcard{position:relative;background:#0b0f1acc;border:1px solid #00e5ff2e;border-radius:14px;padding:28px;transition:transform .25s,box-shadow .25s;transform-style:preserve-3d}
-.hcard::before,.hcard::after{content:'';position:absolute;width:20px;height:20px;border:2px solid #ff6a00}
-.hcard::before{top:-2px;left:-2px;border-right:none;border-bottom:none}
-.hcard::after{bottom:-2px;right:-2px;border-left:none;border-top:none}
-.hcard:hover{box-shadow:0 12px 44px #00e5ff22,0 0 24px #ff6a0022}
-.hcard .icon{font-size:54px;margin-bottom:12px;filter:drop-shadow(0 0 14px #ff6a0088)}
-.hcard .tagline{font-family:'Orbitron';color:#ff6a00;font-size:12px;letter-spacing:3px;margin-bottom:8px}
-.hcard h3{color:#fff;font-size:22px;margin-bottom:10px}
-.hcard p{color:#a9bcd8;line-height:1.65;margin-bottom:18px}
-.cta{display:inline-block;font-family:'Orbitron';font-size:13px;letter-spacing:2px;color:#05060a;background:linear-gradient(90deg,#00e5ff,#7ff);padding:10px 22px;border-radius:6px;text-decoration:none;font-weight:700;box-shadow:0 0 16px #00e5ff66;transition:.2s}
-.cta:hover{box-shadow:0 0 30px #00e5ffaa;transform:translateY(-2px)}
-.locked{display:inline-block;font-family:'Orbitron';font-size:13px;letter-spacing:2px;color:#66788f;background:#141a26;padding:10px 22px;border-radius:6px;border:1px dashed #33405a}
-.flexbox{position:relative;overflow:hidden;border-radius:18px;border:1px solid #ff6a0044;background:linear-gradient(135deg,#0d1322,#101a35);padding:54px 26px;margin:60px 0;text-align:center}
-.flexbox::before{content:'';position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent 0 70%,#ff6a0033 80%,transparent 90%);animation:spin 7s linear infinite}
-.flex-in{position:relative;z-index:1;max-width:860px;margin:0 auto}
-.flexbox h2{font-size:clamp(22px,4vw,34px);color:#fff;margin-bottom:26px}
-.flex-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;text-align:left}
-.flex-item{background:#0b0f1acc;border-left:3px solid #ff6a00;padding:18px;border-radius:8px}
-.flex-item b{color:#ff6a00;display:block;margin-bottom:6px;font-family:'Orbitron';font-size:14px;letter-spacing:1px}
-.flex-item p{color:#a9bcd8;font-size:14px;line-height:1.55}
-
-/* TITO MEL'S MANAGER BOARD STYLES */
-.tito-container{background:#0b0f1acc;border:2px solid #ff6a0044;border-radius:14px;padding:28px;margin-top:20px}
-.tito-header{text-align:center;margin-bottom:24px}
-.tito-header h3{color:#ff6a00;font-size:20px;margin-bottom:8px}
-.tito-header p{color:#7f93b8;font-size:14px}
-.tito-item{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #00e5ff22}
-.tito-item:last-child{border-bottom:none}
-.tito-name{color:#FFA500;font-weight:600;font-size:16px;font-family:'Rajdhani',sans-serif}
-.tito-btns{display:flex;gap:10px}
-.t-btn{width:70px;height:50px;border-radius:8px;border:none;color:white;font-weight:700;font-size:11px;cursor:pointer;opacity:0.35;transition:all .2s}
-.t-btn.active{opacity:1;box-shadow:0 0 12px rgba(255,255,255,0.5);transform:scale(1.08)}
-.t-btn:hover{transform:scale(1.05)}
-.t-green{background-color:#28a745}
-.t-yellow{background-color:#ffc107;color:black}
-.t-red{background-color:#dc3545}
-
-.school{padding:50px 0}
-.school h2{text-align:center;font-size:clamp(22px,4vw,34px);color:#fff}
-.school .sub{text-align:center;color:#7f93b8;margin:10px 0 24px}
-.school-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:22px}
-.lesson-card{background:#0b0f1acc;border:1px solid #00e5ff26;border-radius:12px;padding:22px;transition:.25s}
-.lesson-card:hover{border-color:#ff6a00;box-shadow:0 0 24px #ff6a0022}
-.lesson-card h4{color:#00e5ff;font-size:17px;margin-bottom:10px;letter-spacing:1px}
-.lesson-card p{color:#93a7c4;font-size:14px;line-height:1.7;margin-bottom:14px}
-.lesson-btn{font-family:'Orbitron';font-size:12px;letter-spacing:2px;background:#00e5ff11;color:#9ff;border:1px solid #00e5ff44;padding:9px 18px;border-radius:6px;cursor:pointer;transition:.2s}
-.lesson-btn:hover{background:#00e5ff22;box-shadow:0 0 16px #00e5ff66}
-.coming{display:inline-block;margin-top:34px;font-family:'Orbitron';letter-spacing:2px;font-size:13px;color:#05060a;background:linear-gradient(90deg,#ff6a00,#ffd200);padding:12px 26px;border-radius:6px;font-weight:700;box-shadow:0 0 24px #ff6a0088}
-.closing{text-align:center;padding:60px 0}
-.closing .ring{width:190px;height:190px;margin:0 auto 20px}
-.closing .ring img{width:190px;height:190px}
-.closing-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:26px}
-.closing-buttons a{font-family:'Orbitron';letter-spacing:2px;font-size:15px;padding:15px 30px;border-radius:8px;text-decoration:none;font-weight:700;transition:.2s}
-.btn-primary{background:linear-gradient(90deg,#ff6a00,#ff8c00);color:#fff;box-shadow:0 0 24px #ff6a0088}
-.btn-primary:hover{box-shadow:0 0 44px #ff6a00cc;transform:scale(1.05)}
-.social{text-align:center;padding:30px 20px 50px}
-.social h3{color:#fff;margin-bottom:18px;letter-spacing:2px}
-.social a{display:inline-block;margin:6px;color:#9ff;text-decoration:none;border:1px solid #00e5ff33;padding:10px 20px;border-radius:20px;transition:.2s}
-.social a:hover{background:#00e5ff11;box-shadow:0 0 16px #00e5ff55}
-footer{text-align:center;padding:22px;color:#5a6b85;font-size:13px;border-top:1px solid #00e5ff15}
-@media(max-width:600px){.bubble{font-size:15px}.ring{width:190px;height:190px}.ring img{width:190px;height:190px}.t-btn{width:60px;height:45px;font-size:10px}}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a0f0a; color: #ffd700; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
+.header { background: #0d0805; padding: 15px 25px; display: flex; justify-content: space-between; border-bottom: 3px solid #ff8c00; }
+.header h1 { font-size: 22px; letter-spacing: 2px; color: #ff8c00; }
+.status-badge { background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+.main-container { display: grid; grid-template-columns: 1fr 450px; height: calc(100vh - 60px); }
+.orders-panel { background: #1a0f0a; border-right: 3px solid #ff8c00; overflow: hidden; display: flex; flex-direction: column; }
+.orders-header { background: #0d0805; padding: 15px; border-bottom: 2px solid #ff8c00; text-align: center; }
+.orders-header h2 { color: #ff8c00; font-size: 18px; }
+.orders-list { flex: 1; overflow-y: auto; padding: 15px; }
+.order-card { background: #0d0805; border: 2px solid #ff8c00; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+.order-header { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #ff8c00; }
+.order-id { color: #ffd700; font-weight: bold; }
+.order-time { color: #888; font-size: 12px; }
+.order-customer { color: #aaa; font-size: 14px; margin-bottom: 8px; }
+.order-items { background: #1a0f0a; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+.order-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; color: #ccc; }
+.order-total { text-align: right; font-size: 18px; font-weight: bold; color: #28a745; }
+.order-status { display: inline-block; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; margin-top: 8px; background: #28a745; color: white; }
+.controls-panel { background: #0d0805; overflow-y: auto; }
+.controls-header { background: #0d0805; padding: 15px; border-bottom: 2px solid #ff8c00; text-align: center; }
+.controls-header h2 { color: #ff8c00; font-size: 18px; }
+.controls-content { padding: 15px; }
+.control-category { margin-bottom: 25px; }
+.control-category h3 { color: #ffd700; font-size: 14px; margin-bottom: 12px; padding-left: 10px; border-left: 4px solid #ff8c00; }
+.control-item { background: #1a0f0a; border-radius: 8px; padding: 12px; margin-bottom: 10px; border: 1px solid #333; }
+.control-name { color: #ffd700; font-size: 13px; margin-bottom: 10px; font-weight: 600; text-align: center; }
+.traffic-lights { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.light-btn { height: 45px; border-radius: 6px; border: none; font-weight: bold; font-size: 11px; cursor: pointer; opacity: 0.35; transition: all 0.3s; color: white; }
+.light-btn.active { opacity: 1; transform: scale(1.05); box-shadow: 0 0 12px rgba(255,255,255,0.6); border: 2px solid white; }
+.light-green { background: #28a745; }
+.light-yellow { background: #ffc107; color: black; }
+.light-red { background: #dc3545; }
+.waiting { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
 </style>
 </head>
 <body>
-<div class="stars"></div><div class="floor"></div><div class="orb o1"></div><div class="orb o2"></div>
-<div class="top">
-  <b>CND <span>REAL ESTATE</span> SERVICES</b>
-  <div class="top-btns">
-    <button class="lang-btn" id="audio-btn" onclick="toggleAudio()">🔇 SOUND OFF</button>
-    <button class="lang-btn" onclick="toggleLang()"><span id="lang-label">🇪 ESPAÑOL</span></button>
+
+<div class="header">
+  <h1>️ MAMA'S MANAGER BOARD</h1>
+  <div class="status-badge">● LIVE</div>
+</div>
+
+<div class="main-container">
+  <div class="orders-panel">
+    <div class="orders-header"><h2> INCOMING ORDERS</h2></div>
+    <div class="orders-list" id="orders-list"><div class="waiting">Waiting for orders...</div></div>
+  </div>
+  <div class="controls-panel">
+    <div class="controls-header"><h2>🚦 MENU AVAILABILITY</h2></div>
+    <div class="controls-content" id="controls-content"><div class="waiting">Loading menu...</div></div>
   </div>
 </div>
 
-<section class="landing" id="landing">
-  <div class="ring"><img src="cindy%20happy.png" alt="Cindy AI" style="cursor:pointer" onclick="tapCindy()"></div>
-  <div class="typed-line"><span id="typed" class="grad"></span><span class="caret">&nbsp;</span></div>
-  <div class="bubble"><span id="welcome-text">Hey, I'm Cindy. Welcome to my showroom. I'm not some basic AI — I'm the smartest partner a contractor ever hired. Want me to show you around?</span></div>
-  <button class="neon-btn" onclick="startTour()" id="start-btn"> START THE TOUR</button>
-  <p class="hint" id="audio-hint">💡 Tap Cindy's face or hit START — she talks the whole tour.</p>
-</section>
-
-<div class="marquee"><div>⚡ ELECTRICAL &nbsp;•&nbsp; 🚿 PLUMBING &nbsp;•&nbsp; 🏠 SIDING &nbsp;•&nbsp; 🛠️ ROOFING &nbsp;•&nbsp;  CONCRETE &nbsp;•&nbsp; 🚰 PIPE &amp; DRAIN &nbsp;•&nbsp; 🧱 MASONRY &nbsp;•&nbsp;  ELECTRICAL &nbsp;•&nbsp; 🚿 PLUMBING &nbsp;•&nbsp; 🏠 SIDING &nbsp;•&nbsp; 🛠️ ROOFING &nbsp;•&nbsp; 🧱 CONCRETE &nbsp;•&nbsp; 🚰 PIPE &amp; DRAIN &nbsp;•&nbsp;  MASONRY &nbsp;•&nbsp; </div></div>
-
-<section class="showroom" id="showroom">
-  <div class="stage rv">
-    <div class="ring"><img src="cindy%20happy.png" alt="Cindy AI"></div>
-    <div class="bubble"><span id="intro-text" class="vo">Alright, step inside. Over here we've got the brains that make you money. I'll walk you through each one. Watch this...</span></div>
-  </div>
-
-  <div class="counters rv">
-    <div class="counter"><div class="num"><span class="count" data-n="15">0</span>s</div><div class="lbl" id="c1-l">PER ESTIMATE</div></div>
-    <div class="counter"><div class="num"><span class="count" data-n="7">0</span></div><div class="lbl" id="c2-l">TRADES WIRED IN</div></div>
-    <div class="counter"><div class="num"><span class="count" data-n="100">0</span>%</div><div class="lbl" id="c3-l">FREE DURING BETA</div></div>
-  </div>
-
-  <div class="row">
-    <div class="hcard tilt rv">
-      <div class="icon">💰</div>
-      <div class="tagline" id="est-tag">YOUR MONEY-MAKER</div>
-      <h3 id="est-title">The Estimator</h3>
-      <p id="est-desc" class="vo">Snap a photo of the job. I read it like a pro contractor — I see the lumber, the pipe, the siding. I price every material with brand, unit cost, and full math. Add labor, profit, and permits. You get a clean PDF in 15 seconds. Hand it to the client. Win the job.</p>
-      <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="est-cta">🚀 TRY IT FREE</a>
-    </div>
-    <div class="hcard tilt rv">
-      <div class="icon"></div>
-      <div class="tagline" id="safe-tag">YOUR EYES ON THE JOB</div>
-      <h3 id="safe-title">The Site Checkup</h3>
-      <p id="safe-desc" class="vo">Before you start work, I walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what's GOOD, what to WATCH, and what to FIX first. Launching soon for Pro members.</p>
-      <span class="locked" id="safe-cta">🔒 COMING SOON</span>
-    </div>
-  </div>
-
-  <div class="stage rv">
-    <div class="ring"><img src="cindy%20happy.png" alt="Cindy AI"></div>
-    <div class="bubble"><span id="mid-text" class="vo">Now watch this one — this is where I get serious for the commercial contractors...</span></div>
-  </div>
-
-  <div class="row">
-    <div class="hcard tilt rv">
-      <div class="icon">🏛️</div>
-      <div class="tagline" id="code-tag">YOUR CODE EXPERT</div>
-      <h3 id="code-title">The Code Check</h3>
-      <p id="code-desc" class="vo">Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix before the inspector shows up.</p>
-      <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="code-cta">🏛️ ASK CINDY IN THE APP</a>
-    </div>
-    <div class="hcard tilt rv">
-      <div class="icon">🚿</div>
-      <div class="tagline" id="trade-tag">BUILT FOR EVERY TRADE</div>
-      <h3 id="trade-title">Seven Trades, One Cindy</h3>
-      <p id="trade-desc" class="vo">Electrical. Plumbing. Siding. Roofing. Concrete. Pipe & Drain. And now Masonry. I know every brand, every unit price, every engineering check for each one. You just pick your trade — I do the rest.</p>
-      <a class="cta" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/" id="trade-cta">🛠️ PICK YOUR TRADE</a>
-    </div>
-  </div>
-
-  <div class="flexbox rv">
-    <div class="flex-in">
-      <h2 id="flex-title">💪 WHY I'M NOT LIKE THE OTHER AIs</h2>
-      <div class="flex-list">
-        <div class="flex-item"><b id="flex1-b">THEY GUESS. I CALCULATE.</b><p id="flex1-p" class="vo">Other AIs say "cost depends on..." and wave their hands. I print the brand, the unit price, the math, and the total. Every. Single. Line.</p></div>
-        <div class="flex-item"><b id="flex2-b">THEY CHAT. I ENGINEER.</b><p id="flex2-p" class="vo">I run Manning's Equation on pipe. I check 30 PSI soil bearing on foundations. Real engineering, stamped into your bid.</p></div>
-        <div class="flex-item"><b id="flex3-b">THEY GIVE YOU RAW TEXT. I GIVE YOU A PDF.</b><p id="flex3-p" class="vo">No copy-paste. No formatting headaches. A clean, branded PDF ready to hand your client.</p></div>
-        <div class="flex-item"><b id="flex4-b">THEY WORK ALONE. I'M YOUR PARTNER.</b><p id="flex4-p" class="vo">I estimate the job, check the site, AND review the code. Three brains. One app. Your whole workflow in my hands.</p></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="flexbox rv" style="margin-top:0">
-    <div class="flex-in">
-      <h2>⚡ THE ENGINE UNDER CINDY'S HOOD</h2>
-      <div class="flex-list">
-        <div class="flex-item"><b>15-SECOND TURNAROUND</b><p>Photo in, professional PDF bid out. Fast is reliable when the math is locked.</p></div>
-        <div class="flex-item"><b>MACHINE-VERIFIED MATH</b><p>Every pipe stamp runs the real Manning equation on the server. Cindy never freestyles a number.</p></div>
-        <div class="flex-item"><b>MASTER-TRADE VISION</b><p>GPT-4o class vision reads brick, pipe and lumber like a 20-year vet: IRA suction, bleed &amp; creep, bond logic, mortar grades.</p></div>
-        <div class="flex-item"><b>GPS-STAMPED PAPER TRAIL</b><p>Every report carries location, time and compliance status. Highest standard. No cut corners.</p></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TITO MEL'S LIVE MANAGER BOARD -->
-  <div class="flexbox rv" style="margin-top:40px">
-    <div class="flex-in">
-      <h2>🍽️ LIVE DEMO: MANAGER CONTROL BOARD</h2>
-      <p style="color:#a9bcd8; margin-bottom:24px; text-align:center; max-width:700px; margin-left:auto; margin-right:auto">
-        Watch how a non-technical manager updates the customer menu instantly. 
-        Tap the buttons below to see the database update in real-time.
-      </p>
-      
-      <div class="tito-container">
-        <div class="tito-header">
-          <h3>TITO MEL'S - ORDER FOR PICKUP</h3>
-          <p>Manager Control Panel - Real-Time Menu Updates</p>
-        </div>
-        <div id="tito-mel-menu">
-          <p style="text-align:center; color:#fff; padding:30px; font-size:16px;">Loading live menu...</p>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="school rv">
-    <h2 id="school-title">🎓 CINDY'S TRADE SCHOOL</h2>
-    <p class="sub" id="school-sub">Free lessons while in beta. Tap 🔊 on any lesson and let Cindy teach you the deep stuff — out loud.</p>
-    <div style="text-align:center;margin-bottom:28px">
-      <button class="lesson-btn" onclick="testVoice()">🔊 TEST CINDY'S VOICE</button>
-      <p id="voice-status" style="display:none;margin:12px auto 0;max-width:560px;font-weight:600;font-size:14px"></p>
-    </div>
-    <div class="school-grid">
-      <div class="lesson-card"><h4>⚡ <span id="ls-electrical-t">Electrical — Panels & Protection</span></h4><p id="ls-electrical">Let us talk electrical. When I look at a panel I check the amperage — a modern house needs 200 amp service; a 100 amp panel feeding a new addition is an upgrade job right there. I hunt for missing GFCI protection in kitchens, baths and garages because code demands it. I price Southwire 12/2 Romex and I always flag the permit, because unpermitted work kills home sales.</p><button class="lesson-btn" onclick="speakLesson('ls-electrical')">🔊 <span id="ls-electrical-b">HEAR CINDY TEACH IT</span></button></div>
-      <div class="lesson-card"><h4>🚿 <span id="ls-plumbing-t">Plumbing — Pressure & Slope</span></h4><p id="ls-plumbing">Plumbing is flow and pressure. I check pressure first — above 80 PSI and code demands a pressure reducing valve or fixtures blow out. Drain slope is a quarter inch per foot: too flat clogs, too steep and water outruns the solids. I price Charlotte Pipe PVC Schedule 40 and I flag the frost line on outside spigots, because a frozen pipe is a burst pipe.</p><button class="lesson-btn" onclick="speakLesson('ls-plumbing')">🔊 <span id="ls-plumbing-b">HEAR CINDY TEACH IT</span></button></div>
-      <div class="lesson-card"><h4>🏠 <span id="ls-siding-t">Siding — Squares & Water Barriers</span></h4><p id="ls-siding">Siding is a math problem. One square equals 100 square feet of wall. Height times width, subtract windows and doors, add 10 to 15 percent for waste. I price James Hardie fiber cement or CertainTeed vinyl, and I never skip the layers behind it — Tyvek wrap and flashing, because siding is only as good as the water barrier under it.</p><button class="lesson-btn" onclick="speakLesson('ls-siding')">🔊 <span id="ls-siding-b">HEAR CINDY TEACH IT</span></button></div>
-      <div class="lesson-card"><h4>🛠️ <span id="ls-roofing-t">Roofing — Squares & Steepness</span></h4><p id="ls-roofing">Roofing counts in squares too, but I add the steepness factor. A walkable roof is straight labor; a steep roof needs safety gear and more hours, so the price climbs. I price GAF Timberline shingles, synthetic underlayment and drip edge, and I always include tear-off and the dumpster — real money that amateurs forget.</p><button class="lesson-btn" onclick="speakLesson('ls-roofing')">🔊 <span id="ls-roofing-b">HEAR CINDY TEACH IT</span></button></div>
-      <div class="lesson-card"><h4>🧱 <span id="ls-concrete-t">Concrete — PSI & Curing</span></h4><p id="ls-concrete">Concrete is chemistry. A sidewalk takes 3,000 PSI, a driveway 4,000, and footings want solid bearing — 30 PSI is my soil limit. Water is the enemy: too much in the mix and it cures weak and cracks. That is why I watch cure time and tell you when it is safe to walk and when it hits full strength at 28 days.</p><button class="lesson-btn" onclick="speakLesson('ls-concrete')">🔊 <span id="ls-concrete-b">HEAR CINDY TEACH IT</span></button></div>
-      <div class="lesson-card"><h4> <span id="ls-pipe-t">Pipe & Drain — Manning's Equation</span></h4><p id="ls-pipe">Pipe and drain is where I flex engineering. I run Manning's equation — diameter, slope, roughness — to compute flow in CFS and compare it against the city requirement. A 12 inch pipe at 1.5 percent slope moves about 4 CFS; if the city wants 3, you PASS. I stamp PASS or RED FLAG on every run, because a failed inspection costs weeks.</p><button class="lesson-btn" onclick="speakLesson('ls-pipe')">🔊 <span id="ls-pipe-b">HEAR CINDY TEACH IT</span></button></div>
-      <div class="lesson-card"><h4>🧱 <span id="ls-masonry-t">Masonry — Master Mason Secrets</span></h4><p id="ls-masonry">Masonry is where the real craft lives. First I run the IRA suction test — if brick is bone dry and porous it sucks water out of the mortar and kills the bond. I warn to dampen the pile before laying. Then I check for bleed and creep — if the wall climbs too fast in cold or humid weather the bottom courses sink and heights go off. I watch the crow's foot at corners — if the plumb line drifts off the intersection the lead spirals like a corkscrew. And I track bond patterns — Flemish, English, running bond — row by row, because one brick out of rhythm throws the whole wall.</p><button class="lesson-btn" onclick="speakLesson('ls-masonry')">🔊 <span id="ls-masonry-b">HEAR CINDY TEACH IT</span></button></div>
-    </div>
-    <div style="text-align:center"><span class="coming" id="school-coming">🎓 COMING SOON: FULL COURSES WITH CERTIFICATES</span></div>
-  </div>
-
-  <div class="closing rv">
-    <div class="ring"><img src="cindy%20happy.png" alt="Cindy AI"></div>
-    <div class="bubble"><span id="close-text" class="vo">That's the tour. I'm yours. Free during beta. Let's go make some money.</span></div>
-    <div class="closing-buttons">
-      <a class="btn-primary" href="https://cnd-cindy-app-c2eqrjnkernnkqy74rx6zs.streamlit.app/">🚀 <span id="close-btn1">START MY FREE ESTIMATE</span></a>
-    </div>
-  </div>
-
-  <div class="social">
-    <h3 id="follow-title">FOLLOW CND REAL ESTATE SERVICES</h3>
-    <a href="mailto:cndrealestateservices@gmail.com">📧 EMAIL</a>
-    <a href="https://www.facebook.com/search/pages/?q=cnd%20real%20estate%20services"> FACEBOOK</a>
-    <a href="https://www.tiktok.com/search?q=cnd%20real%20estate%20services">🎵 TIKTOK</a>
-  </div>
-</section>
-
-<footer>© 2026 CND REAL ESTATE SERVICES · POWERED BY CINDY AI · BEAVERDAM, VA</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-let isSpanish=false,audioOn=false,voicesCache=[];
-function loadVoices(){if('speechSynthesis' in window){voicesCache=window.speechSynthesis.getVoices();}}
-if('speechSynthesis' in window){loadVoices();window.speechSynthesis.onvoiceschanged=loadVoices;setTimeout(loadVoices,500);setTimeout(loadVoices,1500);}
-function pickVoice(){const l=isSpanish?'es':'en';return voicesCache.find(v=>v.lang.toLowerCase().startsWith(l)&&/female|woman|samantha|zira|google|monica|paulina/i.test(v.name))||voicesCache.find(v=>v.lang.toLowerCase().startsWith(l))||null;}
-function voiceStatus(msg,ok){const el=document.getElementById('voice-status');if(el){el.style.display='block';el.style.color=ok?'#7ff':'#f66';el.textContent=msg;}}
-function doSpeak(t){
-  if(!t)return;
-  if(!('speechSynthesis' in window)){voiceStatus('❌ This browser has no voice engine. Open this site in Chrome or Samsung Internet.',false);return;}
-  window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(t);
-  u.rate=.97;u.pitch=1.15;u.volume=1;
-  const v=pickVoice();if(v)u.voice=v;
-  u.onstart=function(){document.querySelectorAll('.ring img').forEach(i=>i.classList.add('talking'));};
-  u.onend=u.onerror=function(){document.querySelectorAll('.ring img').forEach(i=>i.classList.remove('talking'));};
-  setTimeout(function(){window.speechSynthesis.speak(u);},60);
-}
-function testVoice(){
-  setAudio(true);
-  doSpeak(isSpanish?'Hola, soy Cindy. Si me escuchas, la voz funciona. Sube el volumen y vamos a ganar dinero.':'Hey boss, this is Cindy. If you can hear me, the voice engine works. Turn your media volume up and let us make some money.');
-  voiceStatus('✅ Voice FIRED. If you heard NOTHING, your media volume or speaker output is muted — check the side volume buttons or the speaker icon by the clock.',true);
-}
-function setAudio(on){audioOn=on;document.getElementById('audio-btn').textContent=on?'🔊 CINDY TALKING':'🔇 SOUND OFF';if(!on&&'speechSynthesis' in window){window.speechSynthesis.cancel();document.querySelectorAll('.ring img').forEach(i=>i.classList.remove('talking'));}}
-function toggleAudio(){setAudio(!audioOn);if(audioOn){const t=document.getElementById('showroom').classList.contains('active');doSpeak(document.getElementById(t?'intro-text':'welcome-text').textContent);}}
-function tapCindy(){setAudio(true);doSpeak(document.getElementById('welcome-text').textContent);}
-function speakLesson(id){const el=document.getElementById(id);if(el){setAudio(true);doSpeak(el.textContent);voiceStatus('🔊 Cindy is teaching this lesson out loud. If it is silent, raise the MEDIA volume with the side buttons and make sure silent mode is off.',true);}}
-const spoken=new Set();
-if('IntersectionObserver' in window){
-  const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&!spoken.has(e.target)){spoken.add(e.target);if(audioOn)doSpeak(e.target.textContent);}}),{threshold:.4});
-  document.querySelectorAll('.vo').forEach(el=>obs.observe(el));
-  const rv=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');rv.unobserve(e.target);}}),{threshold:.15});
-  document.querySelectorAll('.rv').forEach(el=>rv.observe(el));
-  const co=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){animCount(e.target);co.unobserve(e.target);}}),{threshold:.6});
-  document.querySelectorAll('.count').forEach(el=>co.observe(el));
-}
-function animCount(el){const n=+el.dataset.n,t0=performance.now();(function f(t){const p=Math.min((t-t0)/1200,1);el.textContent=Math.round(n*p);if(p<1)requestAnimationFrame(f);})(t0);}
-document.querySelectorAll('.tilt').forEach(c=>{c.addEventListener('mousemove',ev=>{const r=c.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width-.5,y=(ev.clientY-r.top)/r.height-.5;c.style.transform='translateY(-6px) rotateX('+(-y*7)+'deg) rotateY('+(x*7)+'deg)';});c.addEventListener('mouseleave',()=>{c.style.transform='';});});
-function startTour(){document.getElementById('landing').style.display='none';document.getElementById('showroom').classList.add('active');window.scrollTo({top:0,behavior:'smooth'});const i=document.getElementById('intro-text');spoken.add(i);setAudio(true);doSpeak(i.textContent);}
-(function(){const line="SHE PRICES THE WHOLE JOB IN 15 SECONDS.";let i=0;const el=document.getElementById('typed');(function t(){if(i<=line.length){el.textContent=line.slice(0,i);i++;setTimeout(t,55);}})();})();
-const translations={
- es:{'lang-label':'🇺 ENGLISH','audio-btn':' SIN SONIDO','audio-hint':' Toca la cara de Cindy o EMPEZAR — ella habla todo el recorrido.','welcome-text':'Hola, soy Cindy. Bienvenido a mi showroom. No soy una IA básica — soy la socia más inteligente que un contratista haya contratado. ¿Quieres que te muestre todo?','start-btn':' EMPEZAR EL RECORRIDO','intro-text':'Bien, entra. Aquí están los cerebros que te hacen ganar dinero. Te voy a mostrar cada uno. Mira esto...','est-tag':'TU GANADOR DE DINERO','est-title':'El Presupuestador','est-desc':'Toma una foto del trabajo. Lo leo como un contratista pro — veo la madera, el tubo, el siding. Precifico cada material con marca, costo y matemática. Agrego mano de obra, ganancia y permisos. PDF limpio en 15 segundos. Entrégalo y gana el trabajo.','est-cta':'🚀 PROBAR GRATIS','safe-tag':'TUS OJOS EN LA OBRA','safe-title':'El Chequeo de Obra','safe-desc':'Antes de empezar, recorro la obra contigo. Detecto riesgos — bordes sin protección, falta de equipo, escaleras malas. Te digo qué está BIEN, qué VIGILAR y qué ARREGLAR primero. Lanzándose pronto para miembros Pro.','safe-cta':'🔒 PRONTO','mid-text':'Ahora mira este — aquí me pongo seria para los contratistas comerciales...','code-tag':'TU EXPERTA EN CÓDIGO','code-title':'El Chequeo de Código','code-desc':'Reviso espacios comerciales contra códigos — salidas, escaleras, rociadores. Marco lo FALLIDO y te digo qué arreglar antes que llegue el inspector.','code-cta':'🏛️ PREGÚNTALE EN LA APP','trade-tag':'HECHO PARA CADA OFICIO','trade-title':'Siete Oficios, Una Cindy','trade-desc':'Eléctrico. Plomería. Siding. Techos. Concreto. Tubería. Y ahora Albañilería. Conozco cada marca y cada chequeo. Elige tu oficio — yo hago el resto.','trade-cta':'🛠️ ELIGE TU OFICIO','flex-title':'💪 POR QUÉ NO SOY COMO LAS OTRAS IAs','flex1-b':'ELLAS ADIVINAN. YO CALCULO.','flex1-p':'Otras dicen "depende..." Yo imprimo marca, precio, matemática y total. Cada línea.','flex2-b':'ELLAS CHAT. YO INGENIERÍA.','flex2-p':'Corro Manning en tubería y 30 PSI en cimientos. Ingeniería real en tu presupuesto.','flex3-b':'ELLAS TEXTO. Yo PDF.','flex3-p':'Un PDF limpio y con marca, listo para tu cliente.','flex4-b':'ELLAS SOLAS. YO TU SOCIA.','flex4-p':'Presupuesto, obra y código. Tres cerebros, una app.','school-title':'🎓 LA ESCUELA DE OFICIOS DE CINDY','school-sub':'Lecciones gratis durante la beta. Toca 🔊 en cualquier lección y deja que Cindy te enseñe lo profundo del oficio.','ls-electrical-t':'Eléctrico — Paneles y Protección','ls-electrical':'Hablemos de eléctrico. Reviso el amperaje del panel — una casa moderna necesita 200 amperios; un panel de 100 alimentando una adición es un trabajo de upgrade. Busco GFCI faltantes en cocina, baño y garaje porque el código lo exige. Precifico Romex 12/2 de Southwire y siempre marco el permiso, porque el trabajo sin permiso mata la venta de la casa.','ls-electrical-b':'ESCUCHA A CINDY ENSEÑARLO','ls-plumbing-t':'Plomería — Presión y Pendiente','ls-plumbing':'Plomería es flujo y presión. Presión arriba de 80 PSI exige válvula reductora o los accesorios revientan. Pendiente de drenaje: un cuarto de pulgada por pie — muy plano se tapa, muy empinado el agua deja los sólidos. Precifico PVC Charlotte Pipe Sch 40 y marco la línea de congelación en grifos exteriores.','ls-plumbing-b':'ESCUCHA A CINDY ENSEÑARLO','ls-siding-t':'Siding — Squares y Barreras de Agua','ls-siding':'Siding es matemática. Un square son 100 pies cuadrados. Alto por ancho, resto ventanas y puertas, agrego 10 a 15 por ciento de desperdicio. Precifico James Hardie o CertainTeed, y nunca salto las capas de atrás — Tyvek y flashing, porque el siding vale lo que vale su barrera de agua.','ls-siding-b':'ESCUCHA A CINDY ENSEÑARLO','ls-roofing-t':'Techos — Squares y Pendiente','ls-roofing':'Techos también en squares, pero con factor de pendiente. Techo caminable es mano de obra directa; techo empinado exige equipo y más horas. Precifico GAF Timberline, underlayment sintético y drip edge, y siempre incluyo tear-off y el dumpster — dinero real que los amateurs olvidan.','ls-roofing-b':'ESCUCHA A CINDY ENSEÑARLO','ls-concrete-t':'Concreto — PSI y Curado','ls-concrete':'Concreto es química. Una acera 3,000 PSI, una entrada 4,000, y zapatas con suelo sólido — 30 PSI es mi límite. El agua es el enemigo: mucha en la mezcla y cura débil y agrietado. Por eso vigilo el curado: cuándo se puede caminar y cuándo llega a fuerza completa a los 28 días.','ls-concrete-b':'ESCUCHA A CINDY ENSEÑARLO','ls-pipe-t':'Tubería — Ecuación de Manning','ls-pipe':'Tubería es donde flexo ingeniería. Corro la ecuación de Manning — diámetro, pendiente, rugosidad — para calcular flujo en CFS contra lo que exige la ciudad. Un tubo de 12 pulgadas al 1.5 por ciento mueve como 4 CFS; si la ciudad pide 3, es PASS. Sello PASS o RED FLAG en cada corrida, porque una inspección fallada cuesta semanas.','ls-pipe-b':'ESCUCHA A CINDY ENSEÑARLO','ls-masonry-t':'Albañilería — Secretos de Maestro','ls-masonry':'Albañilería es donde vive el arte real. Primero corro la prueba de succión IRA — si el ladrillo está seco y poroso chupa el agua del mortero y mata la unión. Aviso mojar la pila antes de colocar. Luego reviso sangrado y fluencia — si la pared sube muy rápido en frío o humedad las corridas de abajo se hunden y las alturas se desvían. Vigilo el pie de gallo en las esquinas — si la plomada se sale de la intersección la guía se tuerce como un sacacorchos. Y rastreo patrones de unión — flamenco, inglés, corrido — fila por fila, porque un ladrillo fuera de ritmo desvía toda la pared.','ls-masonry-b':'ESCUCHA A CINDY ENSEÑARLO','school-coming':' PRONTO: CURSOS COMPLETOS CON CERTIFICADOS','close-text':'Ese fue el recorrido. Soy tuya. Gratis durante la beta. Vamos a ganar dinero.','close-btn1':'PRESUPUESTO GRATIS','follow-title':'SIGUE A CND REAL ESTATE SERVICES','c1-l':'POR PRESUPUESTO','c2-l':'OFICIOS CONECTADOS','c3-l':'GRATIS DURANTE BETA'},
- en:{'lang-label':'🇪 ESPAÑOL','audio-btn':'🔇 SOUND OFF','audio-hint':'💡 Tap Cindy\'s face or hit START — she talks the whole tour.','welcome-text':'Hey, I\'m Cindy. Welcome to my showroom. I\'m not some basic AI — I\'m the smartest partner a contractor ever hired. Want me to show you around?','start-btn':'🎬 START THE TOUR','intro-text':'Alright, step inside. Over here we\'ve got the brains that make you money. I\'ll walk you through each one. Watch this...','est-tag':'YOUR MONEY-MAKER','est-title':'The Estimator','est-desc':'Snap a photo of the job. I read it like a pro contractor — I see the lumber, the pipe, the siding. I price every material with brand, unit cost, and full math. Add labor, profit, and permits. You get a clean PDF in 15 seconds. Hand it to the client. Win the job.','est-cta':'🚀 TRY IT FREE','safe-tag':'YOUR EYES ON THE JOB','safe-title':'The Site Checkup','safe-desc':'Before you start work, I walk the site with you. I spot the risks — unguarded edges, missing PPE, bad ladders. I tell you what\'s GOOD, what to WATCH, and what to FIX first. Launching soon for Pro members.','safe-cta':'🔒 COMING SOON','mid-text':'Now watch this one — this is where I get serious for the commercial contractors...','code-tag':'YOUR CODE EXPERT','code-title':'The Code Check','code-desc':'Snap a commercial space or a floorplan. I check it against city codes — egress widths, stair clearances, fire suppression, exit counts. I flag FAILED items and tell you exactly what to fix.','code-cta':'🏛️ ASK CINDY IN THE APP','trade-tag':'BUILT FOR EVERY TRADE','trade-title':'Seven Trades, One Cindy','trade-desc':'Electrical. Plumbing. Siding. Roofing. Concrete. Pipe & Drain. And now Masonry. I know every brand, every unit price, every engineering check for each one. You just pick your trade — I do the rest.','trade-cta':'️ PICK YOUR TRADE','flex-title':' WHY I\'M NOT LIKE THE OTHER AIs','flex1-b':'THEY GUESS. I CALCULATE.','flex1-p':'Other AIs say "cost depends on..." and wave their hands. I print the brand, the unit price, the math, and the total. Every. Single. Line.','flex2-b':'THEY CHAT. I ENGINEER.','flex2-p':'I run Manning\'s Equation on pipe. I check 30 PSI soil bearing on foundations. Real engineering, stamped into your bid.','flex3-b':'THEY GIVE YOU RAW TEXT. I GIVE YOU A PDF.','flex3-p':'No copy-paste. No formatting headaches. A clean, branded PDF ready to hand your client.','flex4-b':'THEY WORK ALONE. I\'M YOUR PARTNER.','flex4-p':'I estimate the job, check the site, AND review the code. Three brains. One app. Your whole workflow in my hands.','school-title':'🎓 CINDY\'S TRADE SCHOOL','school-sub':'Free lessons while in beta. Tap 🔊 on any lesson and let Cindy teach you the deep stuff — out loud.','ls-electrical-t':'Electrical — Panels & Protection','ls-electrical':'Let us talk electrical. When I look at a panel I check the amperage — a modern house needs 200 amp service; a 100 amp panel feeding a new addition is an upgrade job right there. I hunt for missing GFCI protection in kitchens, baths and garages because code demands it. I price Southwire 12/2 Romex and I always flag the permit, because unpermitted work kills home sales.','ls-electrical-b':'HEAR CINDY TEACH IT','ls-plumbing-t':'Plumbing — Pressure & Slope','ls-plumbing':'Plumbing is flow and pressure. I check pressure first — above 80 PSI and code demands a pressure reducing valve or fixtures blow out. Drain slope is a quarter inch per foot: too flat clogs, too steep and water outruns the solids. I price Charlotte Pipe PVC Schedule 40 and I flag the frost line on outside spigots, because a frozen pipe is a burst pipe.','ls-plumbing-b':'HEAR CINDY TEACH IT','ls-siding-t':'Siding — Squares & Water Barriers','ls-siding':'Siding is a math problem. One square equals 100 square feet of wall. Height times width, subtract windows and doors, add 10 to 15 percent for waste. I price James Hardie fiber cement or CertainTeed vinyl, and I never skip the layers behind it — Tyvek wrap and flashing, because siding is only as good as the water barrier under it.','ls-siding-b':'HEAR CINDY TEACH IT','ls-roofing-t':'Roofing — Squares & Steepness','ls-roofing':'Roofing counts in squares too, but I add the steepness factor. A walkable roof is straight labor; a steep roof needs safety gear and more hours, so the price climbs. I price GAF Timberline shingles, synthetic underlayment and drip edge, and I always include tear-off and the dumpster — real money that amateurs forget.','ls-roofing-b':'HEAR CINDY TEACH IT','ls-concrete-t':'Concrete — PSI & Curing','ls-concrete':'Concrete is chemistry. A sidewalk takes 3,000 PSI, a driveway 4,000, and footings want solid bearing — 30 PSI is my soil limit. Water is the enemy: too much in the mix and it cures weak and cracks. That is why I watch cure time and tell you when it is safe to walk and when it hits full strength at 28 days.','ls-concrete-b':'HEAR CINDY TEACH IT','ls-pipe-t':'Pipe & Drain — Manning\'s Equation','ls-pipe':'Pipe and drain is where I flex engineering. I run Manning\'s equation — diameter, slope, roughness — to compute flow in CFS and compare it against the city requirement. A 12 inch pipe at 1.5 percent slope moves about 4 CFS; if the city wants 3, you PASS. I stamp PASS or RED FLAG on every run, because a failed inspection costs weeks.','ls-pipe-b':'HEAR CINDY TEACH IT','ls-masonry-t':'Masonry — Master Mason Secrets','ls-masonry':'Masonry is where the real craft lives. First I run the IRA suction test — if brick is bone dry and porous it sucks water out of the mortar and kills the bond. I warn to dampen the pile before laying. Then I check for bleed and creep — if the wall climbs too fast in cold or humid weather the bottom courses sink and heights go off. I watch the crow\'s foot at corners — if the plumb line drifts off the intersection the lead spirals like a corkscrew. And I track bond patterns — Flemish, English, running bond — row by row, because one brick out of rhythm throws the whole wall.','ls-masonry-b':'HEAR CINDY TEACH IT','school-coming':'🎓 COMING SOON: FULL COURSES WITH CERTIFICATES','close-text':'That\'s the tour. I\'m yours. Free during beta. Let\'s go make some money.','close-btn1':'START MY FREE ESTIMATE','follow-title':'FOLLOW CND REAL ESTATE SERVICES','c1-l':'PER ESTIMATE','c2-l':'TRADES WIRED IN','c3-l':'FREE DURING BETA'}
+// UNIQUE variable name to prevent conflicts
+const mamaSupabaseClient = window.supabase.createClient(
+  'https://mkvpuawmkudezotbhmxl.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE'
+);
+
+const MENU_CATEGORIES = {
+  'Appetizers': ['Lumpia Shanghai Pork (12pc)', 'Lumpia Shanghai Chicken (12pc)', 'Lumpia Gulay (1pc)', 'Lumpia Sariwa (2pc)'],
+  'Specials & BBQ': ['Lechon Kawali', 'Pork Sisig', 'Chicken BBQ Stick (2pc)', 'Pork BBQ Stick'],
+  'Entrees': ['Chicken Adobo', 'Pork Adobo', 'Chicken Curry']
 };
-function toggleLang(){isSpanish=!isSpanish;const t=translations[isSpanish?'es':'en'];Object.keys(t).forEach(k=>{const el=document.getElementById(k);if(el)el.textContent=t[k];});}
 
-// ==========================================
-// TITO MEL'S LIVE DEMO INTEGRATION
-// ==========================================
-const TITO_SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const TITO_SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
-
-// Only run this if the variables are set
-if (TITO_SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-  const titoClient = window.supabase.createClient(TITO_SUPABASE_URL, TITO_SUPABASE_KEY);
-
-  async function loadTitoMenu() {
-    const { data, error } = await titoClient.from('menu_status').select('*').order('item_name');
-    if (error) { 
-      console.error('Tito menu error:', error); 
-      document.getElementById('tito-mel-menu').innerHTML = '<p style="text-align:center; color:#f66; padding:30px;">Error loading menu. Check console.</p>';
-      return; 
-    }
-
-    const container = document.getElementById('tito-mel-menu');
-    if (!container) return;
-    container.innerHTML = '';
-
-    data.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'tito-item';
-      const gActive = item.status === 'green' ? 'active' : '';
-      const yActive = item.status === 'yellow' ? 'active' : '';
-      const rActive = item.status === 'red' ? 'active' : '';
-
-      row.innerHTML = `
-        <div class="tito-name">${item.item_name}</div>
-        <div class="tito-btns">
-          <button class="t-btn t-green ${gActive}" onclick="updateTitoStatus('${item.item_name}', 'green')">Avail</button>
-          <button class="t-btn t-yellow ${yActive}" onclick="updateTitoStatus('${item.item_name}', 'yellow')">Low</button>
-          <button class="t-btn t-red ${rActive}" onclick="updateTitoStatus('${item.item_name}', 'red')">Sold</button>
-        </div>
-      `;
-      container.appendChild(row);
-    });
-  }
-
-  async function updateTitoStatus(itemName, newStatus) {
-    const { error } = await titoClient.from('menu_status').update({ status: newStatus, updated_at: new Date() }).eq('item_name', itemName);
-    if (!error) {
-      loadTitoMenu();
-    } else {
-      console.error('Update error:', error);
-    }
-  }
-
-  // Load the demo menu when the page loads
-  loadTitoMenu();
+async function loadOrders() {
+  const { data, error } = await mamaSupabaseClient.from('orders').select('*').order('created_at', { ascending: false }).limit(20);
+  if (error) { console.error('Error:', error); return; }
+  const list = document.getElementById('orders-list');
+  if (!data || data.length === 0) { list.innerHTML = '<div class="waiting">Waiting for orders...</div>'; return; }
+  list.innerHTML = data.map(o => `
+    <div class="order-card">
+      <div class="order-header"><span class="order-id">#${o.id}</span><span class="order-time">${new Date(o.created_at).toLocaleTimeString()}</span></div>
+      <div class="order-customer">👤 ${o.customer_name || 'Customer'} | 📞 ${o.phone || 'N/A'}</div>
+      <div class="order-items">${(o.items||[]).map(i => `<div class="order-item"><span>${i.qty}x ${i.name}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>`).join('')}</div>
+      <div class="order-total">Total: $${parseFloat(o.total||0).toFixed(2)}</div>
+      <span class="order-status">${o.status || 'new'}</span>
+    </div>`).join('');
 }
+
+async function loadMenu() {
+  const { data, error } = await mamaSupabaseClient.from('menu_status').select('*').order('item_name');
+  if (error) { console.error('Error:', error); return; }
+  const div = document.getElementById('controls-content');
+  div.innerHTML = '';
+  Object.keys(MENU_CATEGORIES).forEach(cat => {
+    const catDiv = document.createElement('div');
+    catDiv.className = 'control-category';
+    catDiv.innerHTML = `<h3>${cat}</h3>`;
+    MENU_CATEGORIES[cat].forEach(name => {
+      const item = data.find(m => m.item_name === name);
+      if (!item) return;
+      catDiv.innerHTML += `
+        <div class="control-item">
+          <div class="control-name">${name}</div>
+          <div class="traffic-lights">
+            <button class="light-btn light-green ${item.status==='green'?'active':''}" onclick="update('${name}','green')">🟢 Avail</button>
+            <button class="light-btn light-yellow ${item.status==='yellow'?'active':''}" onclick="update('${name}','yellow')">🟡 Low</button>
+            <button class="light-btn light-red ${item.status==='red'?'active':''}" onclick="update('${name}','red')">🔴 Sold</button>
+          </div>
+        </div>`;
+    });
+    div.appendChild(catDiv);
+  });
+}
+
+async function update(name, status) {
+  await mamaSupabaseClient.from('menu_status').update({status, updated_at: new Date()}).eq('item_name', name);
+  loadMenu();
+}
+
+loadOrders();
+loadMenu();
+setInterval(loadOrders, 5000);
+setInterval(loadMenu, 5000);
 </script>
+
 </body>
 </html>
