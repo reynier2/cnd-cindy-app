@@ -7,28 +7,45 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #1a0f0a; color: #ffd700; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; }
-.header { background: #0d0805; padding: 15px 25px; display: flex; justify-content: space-between; border-bottom: 3px solid #ff8c00; }
+body { background: #1a0f0a; color: #ffd700; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+/* HEADER */
+.header { background: #0d0805; padding: 15px 25px; display: flex; justify-content: space-between; border-bottom: 3px solid #ff8c00; flex-shrink: 0; }
 .header h1 { font-size: 22px; letter-spacing: 2px; color: #ff8c00; }
 .status-badge { background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; }
-.main-container { display: grid; grid-template-columns: 1fr 450px; height: calc(100vh - 60px); }
-.orders-panel { background: #1a0f0a; border-right: 3px solid #ff8c00; overflow: hidden; display: flex; flex-direction: column; }
-.orders-header { background: #0d0805; padding: 15px; border-bottom: 2px solid #ff8c00; text-align: center; }
-.orders-header h2 { color: #ff8c00; font-size: 18px; }
-.orders-list { flex: 1; overflow-y: auto; padding: 15px; }
-.order-card { background: #0d0805; border: 2px solid #ff8c00; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
-.order-header { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #ff8c00; }
-.order-id { color: #ffd700; font-weight: bold; }
-.order-time { color: #888; font-size: 12px; }
-.order-customer { color: #aaa; font-size: 14px; margin-bottom: 8px; }
-.order-items { background: #1a0f0a; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+
+/* MAIN LAYOUT */
+.main-container { display: grid; grid-template-columns: 1fr 450px; flex: 1; overflow: hidden; }
+
+/* LEFT SIDE: ORDERS */
+.orders-panel { background: #1a0f0a; border-right: 3px solid #ff8c00; display: flex; flex-direction: column; overflow: hidden; }
+.panel-header { background: #0d0805; padding: 12px; border-bottom: 2px solid #ff8c00; text-align: center; flex-shrink: 0; }
+.panel-header h2 { color: #ff8c00; font-size: 18px; }
+.orders-scroll { flex: 1; overflow-y: auto; padding: 15px; }
+
+/* ORDER CARDS */
+.order-card { background: #0d0805; border: 2px solid #ff8c00; border-radius: 10px; padding: 15px; margin-bottom: 15px; position: relative; }
+.order-card.status-processing { border-color: #ffc107; }
+.order-card.status-done { border-color: #6c757d; opacity: 0.8; }
+
+.order-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px dashed #ff8c00; padding-bottom: 8px; }
+.order-id { color: #ffd700; font-weight: bold; font-size: 18px; }
+.order-timer { color: #ff8c00; font-weight: bold; font-size: 16px; }
+.order-customer { color: #aaa; font-size: 14px; margin-bottom: 10px; }
+.order-items { background: #1a0f0a; padding: 10px; border-radius: 6px; margin-bottom: 10px; max-height: 150px; overflow-y: auto; }
 .order-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; color: #ccc; }
-.order-total { text-align: right; font-size: 18px; font-weight: bold; color: #28a745; }
-.order-status { display: inline-block; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; margin-top: 8px; background: #28a745; color: white; }
+.order-total { text-align: right; font-size: 18px; font-weight: bold; color: #28a745; margin-bottom: 10px; }
+
+/* ACTION BUTTONS */
+.action-btns { display: flex; gap: 10px; }
+.btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; color: white; }
+.btn-process { background: #ffc107; color: black; }
+.btn-done { background: #28a745; }
+.btn-delete { background: #dc3545; flex: 0.5; }
+
+/* RIGHT SIDE: MENU CONTROLS */
 .controls-panel { background: #0d0805; overflow-y: auto; }
-.controls-header { background: #0d0805; padding: 15px; border-bottom: 2px solid #ff8c00; text-align: center; }
-.controls-header h2 { color: #ff8c00; font-size: 18px; }
-.controls-content { padding: 15px; }
+.controls-scroll { padding: 15px; }
 .control-category { margin-bottom: 25px; }
 .control-category h3 { color: #ffd700; font-size: 14px; margin-bottom: 12px; padding-left: 10px; border-left: 4px solid #ff8c00; }
 .control-item { background: #1a0f0a; border-radius: 8px; padding: 12px; margin-bottom: 10px; border: 1px solid #333; }
@@ -39,33 +56,44 @@ body { background: #1a0f0a; color: #ffd700; font-family: 'Segoe UI', sans-serif;
 .light-green { background: #28a745; }
 .light-yellow { background: #ffc107; color: black; }
 .light-red { background: #dc3545; }
+
 .waiting { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>️ MAMA'S MANAGER BOARD</h1>
+  <h1>🍽️ MAMA'S MANAGER BOARD</h1>
   <div class="status-badge">● LIVE</div>
 </div>
 
 <div class="main-container">
+  <!-- LEFT: ORDERS -->
   <div class="orders-panel">
-    <div class="orders-header"><h2> INCOMING ORDERS</h2></div>
-    <div class="orders-list" id="orders-list"><div class="waiting">Waiting for orders...</div></div>
+    <div class="panel-header"><h2> ACTIVE ORDERS</h2></div>
+    <div class="orders-scroll" id="active-orders-list">
+      <div class="waiting">Waiting for orders...</div>
+    </div>
   </div>
+
+  <!-- RIGHT: MENU CONTROLS -->
   <div class="controls-panel">
-    <div class="controls-header"><h2>🚦 MENU AVAILABILITY</h2></div>
-    <div class="controls-content" id="controls-content"><div class="waiting">Loading menu...</div></div>
+    <div class="panel-header"><h2>🚦 MENU AVAILABILITY</h2></div>
+    <div class="controls-scroll" id="controls-content">
+      <div class="waiting">Loading menu...</div>
+    </div>
   </div>
 </div>
 
 <script>
-// UNIQUE variable name to prevent conflicts
-const mamaSupabaseClient = window.supabase.createClient(
-  'https://mkvpuawmkudezotbhmxl.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE'
-);
+// ==========================================
+// CONFIGURATION
+// ==========================================
+const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
+
+// Unique variable name to prevent conflicts
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const MENU_CATEGORIES = {
   'Appetizers': ['Lumpia Shanghai Pork (12pc)', 'Lumpia Shanghai Chicken (12pc)', 'Lumpia Gulay (1pc)', 'Lumpia Sariwa (2pc)'],
@@ -73,40 +101,163 @@ const MENU_CATEGORIES = {
   'Entrees': ['Chicken Adobo', 'Pork Adobo', 'Chicken Curry']
 };
 
-async function loadOrders() {
-  const { data, error } = await mamaSupabaseClient.from('orders').select('*').order('created_at', { ascending: false }).limit(20);
-  if (error) { console.error('Error:', error); return; }
-  const list = document.getElementById('orders-list');
-  if (!data || data.length === 0) { list.innerHTML = '<div class="waiting">Waiting for orders...</div>'; return; }
-  list.innerHTML = data.map(o => `
-    <div class="order-card">
-      <div class="order-header"><span class="order-id">#${o.id}</span><span class="order-time">${new Date(o.created_at).toLocaleTimeString()}</span></div>
-      <div class="order-customer">👤 ${o.customer_name || 'Customer'} | 📞 ${o.phone || 'N/A'}</div>
-      <div class="order-items">${(o.items||[]).map(i => `<div class="order-item"><span>${i.qty}x ${i.name}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>`).join('')}</div>
-      <div class="order-total">Total: $${parseFloat(o.total||0).toFixed(2)}</div>
-      <span class="order-status">${o.status || 'new'}</span>
-    </div>`).join('');
+let knownOrderIds = new Set();
+let ordersData = [];
+
+// ==========================================
+// SOUND ALARM
+// ==========================================
+function playAlarm() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.frequency.value = 880; // A5 note
+  osc.type = 'square';
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.8);
 }
 
+// ==========================================
+// LOAD ORDERS & TIMER
+// ==========================================
+async function loadOrders() {
+  const { data, error } = await supabaseClient
+    .from('orders')
+    .select('*')
+    .neq('status', 'deleted') // Hide deleted orders
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error('Order Error:', error); return; }
+
+  // Check for new orders to play sound
+  data.forEach(o => {
+    if (!knownOrderIds.has(o.id) && o.status === 'new') {
+      playAlarm();
+      knownOrderIds.add(o.id);
+    }
+  });
+
+  ordersData = data || [];
+  renderOrders();
+}
+
+function renderOrders() {
+  const activeList = document.getElementById('active-orders-list');
+  const activeOrders = ordersData.filter(o => o.status !== 'done');
+  const doneOrders = ordersData.filter(o => o.status === 'done');
+
+  if (activeOrders.length === 0 && doneOrders.length === 0) {
+    activeList.innerHTML = '<div class="waiting">Waiting for orders...</div>';
+    return;
+  }
+
+  let html = '';
+  
+  // Render Active Orders
+  activeOrders.forEach(o => {
+    html += createOrderCard(o);
+  });
+
+  // Render History (Done Orders)
+  if (doneOrders.length > 0) {
+    html += '<div style="margin-top:30px; border-top:2px dashed #555; padding-top:20px;"><h3 style="color:#888; text-align:center; margin-bottom:15px;">📜 ORDER HISTORY</h3>';
+    doneOrders.forEach(o => {
+      html += createOrderCard(o);
+    });
+    html += '</div>';
+  }
+
+  activeList.innerHTML = html;
+}
+
+function createOrderCard(o) {
+  const timeAgo = getTimeAgo(new Date(o.created_at));
+  const items = o.items || [];
+  const total = o.total || 0;
+  
+  let actionButtons = '';
+  if (o.status === 'new') {
+    actionButtons = `<button class="btn btn-process" onclick="updateStatus(${o.id}, 'processing')">▶ Start Processing</button>`;
+  } else if (o.status === 'processing') {
+    actionButtons = `<button class="btn btn-done" onclick="updateStatus(${o.id}, 'done')">✓ Mark Done</button>`;
+  }
+
+  // Always show delete button for history
+  const deleteBtn = o.status === 'done' ? `<button class="btn btn-delete" onclick="deleteOrder(${o.id})">🗑️</button>` : '';
+
+  return `
+    <div class="order-card status-${o.status}">
+      <div class="order-top">
+        <span class="order-id">#${o.id} <span style="font-size:12px; color:#888">(${o.status})</span></span>
+        <span class="order-timer">⏱️ ${timeAgo}</span>
+      </div>
+      <div class="order-customer">👤 ${o.customer_name || 'Customer'} | 📞 ${o.phone || 'N/A'} | 🕒 ${o.pickup_time || 'ASAP'}</div>
+      <div class="order-items">
+        ${items.map(i => `<div class="order-item"><span>${i.qty}x ${i.name}</span><span>$${(i.price * i.qty).toFixed(2)}</span></div>`).join('')}
+      </div>
+      <div class="order-total">Total: $${parseFloat(total).toFixed(2)}</div>
+      <div class="action-btns">
+        ${actionButtons}
+        ${deleteBtn}
+      </div>
+    </div>
+  `;
+}
+
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ago`;
+}
+
+// ==========================================
+// UPDATE STATUS & DELETE
+// ==========================================
+window.updateStatus = async (id, status) => {
+  await supabaseClient.from('orders').update({ status }).eq('id', id);
+  loadOrders();
+};
+
+window.deleteOrder = async (id) => {
+  if(confirm('Permanently delete order #' + id + '?')) {
+    await supabaseClient.from('orders').update({ status: 'deleted' }).eq('id', id);
+    loadOrders();
+  }
+};
+
+// ==========================================
+// MENU CONTROLS (Right Side)
+// ==========================================
 async function loadMenu() {
-  const { data, error } = await mamaSupabaseClient.from('menu_status').select('*').order('item_name');
-  if (error) { console.error('Error:', error); return; }
+  const { data, error } = await supabaseClient.from('menu_status').select('*').order('item_name');
+  if (error) { console.error('Menu Error:', error); return; }
+  
   const div = document.getElementById('controls-content');
   div.innerHTML = '';
+  
   Object.keys(MENU_CATEGORIES).forEach(cat => {
     const catDiv = document.createElement('div');
     catDiv.className = 'control-category';
     catDiv.innerHTML = `<h3>${cat}</h3>`;
+    
     MENU_CATEGORIES[cat].forEach(name => {
       const item = data.find(m => m.item_name === name);
       if (!item) return;
+      
       catDiv.innerHTML += `
         <div class="control-item">
           <div class="control-name">${name}</div>
           <div class="traffic-lights">
-            <button class="light-btn light-green ${item.status==='green'?'active':''}" onclick="update('${name}','green')">🟢 Avail</button>
-            <button class="light-btn light-yellow ${item.status==='yellow'?'active':''}" onclick="update('${name}','yellow')">🟡 Low</button>
-            <button class="light-btn light-red ${item.status==='red'?'active':''}" onclick="update('${name}','red')">🔴 Sold</button>
+            <button class="light-btn light-green ${item.status==='green'?'active':''}" onclick="updateMenu('${name}','green')"> Avail</button>
+            <button class="light-btn light-yellow ${item.status==='yellow'?'active':''}" onclick="updateMenu('${name}','yellow')"> Low</button>
+            <button class="light-btn light-red ${item.status==='red'?'active':''}" onclick="updateMenu('${name}','red')"> Sold</button>
           </div>
         </div>`;
     });
@@ -114,15 +265,21 @@ async function loadMenu() {
   });
 }
 
-async function update(name, status) {
-  await mamaSupabaseClient.from('menu_status').update({status, updated_at: new Date()}).eq('item_name', name);
+window.updateMenu = async (name, status) => {
+  await supabaseClient.from('menu_status').update({status, updated_at: new Date()}).eq('item_name', name);
   loadMenu();
-}
+};
 
+// ==========================================
+// INITIAL LOAD & REFRESH
+// ==========================================
 loadOrders();
 loadMenu();
+
+// Refresh every 5 seconds
 setInterval(loadOrders, 5000);
-setInterval(loadMenu, 5000);
+setInterval(loadMenu, 10000);
+setInterval(renderOrders, 1000); // Update timers every second
 </script>
 
 </body>
