@@ -11,18 +11,65 @@
   h1{color:var(--gold);text-align:center;letter-spacing:4px;margin:14px 0 4px}
   .sub{color:var(--dim);text-align:center;font-size:.85rem;margin-bottom:16px}
   h3{color:var(--gold);letter-spacing:2px;margin:18px 0 8px;font-size:.95rem}
+  
   .row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid rgba(255,183,3,.2);border-radius:10px;padding:10px 12px;margin-bottom:8px;gap:8px}
+  .item-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+  .item-info { display: flex; flex-direction: column; }
   .row .n{font-size:.95rem}
-  .row .p{color:var(--gold);font-weight:700;font-size:.85rem;margin-left:8px}
+  .row .p{color:var(--gold);font-weight:700;font-size:.85rem;margin-top:4px}
+  
+  .thumb { 
+    width: 55px; height: 55px; 
+    object-fit: cover; 
+    border-radius: 8px; 
+    border: 2px solid var(--gold); 
+    cursor: pointer; 
+    transition: transform 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:active { transform: scale(0.95); box-shadow: 0 0 10px rgba(255,183,3,0.5); }
+
   .qty{display:flex;gap:8px;align-items:center}
   .qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:800;cursor:pointer;font-size:1.2rem}
   .qty span{min-width:18px;text-align:center;font-weight:800;font-size:1.1rem}
+  
   input,select,textarea{width:100%;background:var(--card);border:1px solid rgba(255,183,3,.3);color:var(--cream);border-radius:10px;padding:12px;margin-bottom:10px;font-size:1rem}
   .send{width:100%;background:linear-gradient(135deg,var(--gold),#fb8500);border:none;color:#140b06;font-weight:800;letter-spacing:1px;padding:16px;border-radius:30px;font-size:1.05rem;cursor:pointer;box-shadow:0 0 22px rgba(255,183,3,.5);margin-top:10px}
   .send:disabled{opacity:0.6;cursor:not-allowed}
   #msg{text-align:center;margin:14px 0;font-weight:700;min-height:24px}
   
-  /* CONFIRMATION SCREEN STYLES */
+  #img-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+  }
+  #img-modal img {
+    max-width: 90%;
+    max-height: 85%;
+    border-radius: 12px;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 40px rgba(255,183,3,0.4);
+    object-fit: contain;
+  }
+  .close-modal {
+    position: absolute;
+    top: 20px; right: 30px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    background: rgba(0,0,0,0.5);
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+  }
+  
   #confirmation-screen {
     display: none;
     text-align: center;
@@ -54,7 +101,6 @@
 </head>
 <body>
 
-<!-- ORDER FORM SECTION -->
 <div id="order-form">
   <h1>TITO MEL'S</h1>
   <div class="sub">ORDER FOR PICKUP · PAY AT THE COUNTER</div>
@@ -75,7 +121,6 @@
   <div id="msg"></div>
 </div>
 
-<!-- CONFIRMATION SCREEN (Hidden until order is sent) -->
 <div id="confirmation-screen">
   <div style="font-size: 4rem; margin-bottom: 10px;">✅</div>
   <h2>ORDER ACCEPTED!</h2>
@@ -86,35 +131,85 @@
   <a href="/" class="btn-home">← BACK TO HOME</a>
 </div>
 
+<div id="img-modal" onclick="closeImage()">
+  <div class="close-modal">&times;</div>
+  <img id="modal-img" src="" alt="Food Preview">
+</div>
+
 <script>
-// ==========================================
-// CONFIGURATION
-// ==========================================
 const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
 const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE";
 
 const $=id=>document.getElementById(id);
 
-// THE MENU
 const MENU=[
-  {cat:"APPETIZERS",items:[["Lumpia Shanghai Pork (12pc)",11.99],["Lumpia Shanghai Chicken (12pc)",11.99],["Lumpia Gulay (1pc)",1.50],["Lumpia Sariwa (2pc)",10.99]]},
-  {cat:"SPECIALS & BBQ",items:[["Lechon Kawali",10.99],["Pork Sisig",10.99],["Chicken BBQ Stick (2pc)",7.99],["Pork BBQ Stick",7.99]]},
-  {cat:"ENTREES",items:[["Chicken Adobo",8.99],["Pork Adobo",8.99],["Chicken Curry",8.99],["Menudo",8.99],["Bicol Express",8.99],["Kaldereta",10.25],["Chicken Tinola",8.99],["Pork Sinigang",8.99],["Pork Dinuguan",8.99]]},
-  {cat:"NOODLES & COMBO",items:[["Pancit Bihon",10.99],["Palabok",11.99],["Combo (2 entrees + side)",14.99]]},
-  {cat:"SIDES",items:[["Plain Rice",1.99],["Adobo Rice",2.99],["Plantains",2.99],["Stir Fry Vegetables",4.99]]},
-  {cat:"DRINKS & DESSERTS",items:[["Buko Pandan Juice",6.25],["Mango / Taro Boba",6.75],["Smoothies",6.00],["Halo-Halo",6.50],["Ube Biko",5.99]]}
+  {cat:"APPETIZERS",items:[
+    ["Lumpia Shanghai Pork (12pc)",11.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/lumpia.png?raw=true"],
+    ["Lumpia Shanghai Chicken (12pc)",11.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/lumpia.png?raw=true"],
+    ["Lumpia Gulay (1pc)",1.50, "https://github.com/reynier2/cnd-cindy-app/blob/main/lumpia.png?raw=true"],
+    ["Lumpia Sariwa (2pc)",10.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/lumpia.png?raw=true"]
+  ]},
+  {cat:"SPECIALS & BBQ",items:[
+    ["Lechon Kawali",10.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/specials.png?raw=true"],
+    ["Pork Sisig",10.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/specials.png?raw=true"],
+    ["Chicken BBQ Stick (2pc)",7.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/specials.png?raw=true"],
+    ["Pork BBQ Stick",7.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/specials.png?raw=true"]
+  ]},
+  {cat:"ENTREES",items:[
+    ["Chicken Adobo",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/entrees.png?raw=true"],
+    ["Pork Adobo",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/entrees.png?raw=true"],
+    ["Chicken Curry",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/entrees.png?raw=true"],
+    ["Menudo",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/entrees.png?raw=true"],
+    ["Bicol Express",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/entrees.png?raw=true"],
+    ["Kaldereta",10.25, "https://github.com/reynier2/cnd-cindy-app/blob/main/entrees.png?raw=true"],
+    ["Chicken Tinola",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/entrees.png?raw=true"],
+    ["Pork Sinigang",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/entrees.png?raw=true"],
+    ["Pork Dinuguan",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/entrees.png?raw=true"]
+  ]},
+  {cat:"NOODLES & COMBO",items:[
+    ["Pancit Bihon",10.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/noodles.png?raw=true"],
+    ["Palabok",11.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/noodles.png?raw=true"],
+    ["Combo (2 entrees + side)",14.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/noodles.png?raw=true"]
+  ]},
+  {cat:"SIDES",items:[
+    ["Plain Rice",1.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/titomel.png?raw=true"],
+    ["Adobo Rice",2.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/titomel.png?raw=true"],
+    ["Plantains",2.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/titomel.png?raw=true"],
+    ["Stir Fry Vegetables",4.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/titomel.png?raw=true"]
+  ]},
+  {cat:"DRINKS & DESSERTS",items:[
+    ["Buko Pandan Juice",6.25, "https://github.com/reynier2/cnd-cindy-app/blob/main/desserts.png?raw=true"],
+    ["Mango / Taro Boba",6.75, "https://github.com/reynier2/cnd-cindy-app/blob/main/desserts.png?raw=true"],
+    ["Smoothies",6.00, "https://github.com/reynier2/cnd-cindy-app/blob/main/desserts.png?raw=true"],
+    ["Halo-Halo",6.50, "https://github.com/reynier2/cnd-cindy-app/blob/main/desserts.png?raw=true"],
+    ["Ube Biko",5.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/desserts.png?raw=true"]
+  ]}
 ];
 
 const FLAT=[];
 MENU.forEach(c=>c.items.forEach(i=>FLAT.push(i)));
 const qty={};
 
-// RENDER MENU
 $("menu").innerHTML = MENU.map(c=>{
   let html='<h3>'+c.cat+'</h3>';
   c.items.forEach(i=>{
     const key=FLAT.indexOf(i);
-    html+='<div class="row"><span class="n">'+i[0]+' <span class="p">$'+i[1].toFixed(2)+'</span></span><span class="qty"><button onclick="add('+key+',-1)">−</button><span id="q_'+key+'">0</span><button onclick="add('+key+',1)">+</button></span></div>';
+    const imgUrl = i[2] || '';
+    html+=`
+      <div class="row">
+        <div class="item-left">
+          ${imgUrl ? `<img src="${imgUrl}" class="thumb" onclick="openImage('${imgUrl}')" alt="${i[0]}">` : ''}
+          <div class="item-info">
+            <span class="n">${i[0]}</span>
+            <span class="p">$${i[1].toFixed(2)}</span>
+          </div>
+        </div>
+        <span class="qty">
+          <button onclick="add(${key},-1)">−</button>
+          <span id="q_${key}">0</span>
+          <button onclick="add(${key},1)">+</button>
+        </span>
+      </div>`;
   });
   return html;
 }).join("");
@@ -124,7 +219,14 @@ function add(key,d){
   $("q_"+key).textContent=qty[key];
 }
 
-// SEND ORDER
+window.openImage = function(url) {
+  $("modal-img").src = url;
+  $("img-modal").style.display = "flex";
+}
+window.closeImage = function() {
+  $("img-modal").style.display = "none";
+}
+
 $("send").onclick=async()=>{
   const items=FLAT.map((i,idx)=>{
     const q = qty[idx]||0;
@@ -132,7 +234,7 @@ $("send").onclick=async()=>{
   }).filter(x=>x!==null);
 
   if(!items.length){
-    $("msg").textContent="⚠️ Please add at least one item 🙂";
+    $("msg").textContent="️ Please add at least one item 🙂";
     $("msg").style.color = "var(--red)";
     return;
   }
@@ -149,7 +251,7 @@ $("send").onclick=async()=>{
   const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
   $("send").disabled = true;
-  $("send").textContent = "⏳ Sending to kitchen...";
+  $("send").textContent = " Sending to kitchen...";
   $("msg").textContent = "";
 
   try{
@@ -178,7 +280,6 @@ $("send").onclick=async()=>{
       const result = await r.json();
       const orderId = result[0].id;
       
-      // HIDE FORM, SHOW CONFIRMATION
       $("order-form").style.display = "none";
       $("conf-order-id").textContent = "Order #" + orderId;
       $("conf-pickup").textContent = $("cpickup").value;
