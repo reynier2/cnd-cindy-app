@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tito Mel's — Order for Pickup</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍜</text></svg>">
 <style>
 :root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#e63946;--cream:#fff3e0;--dim:#c9a27a}
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
@@ -125,18 +126,14 @@ font-size: 1rem;
 <img id="modal-img" src="" alt="Food Preview">
 </div>
 <script>
-// FIXED: This now matches your actual Supabase project ID
 const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
 const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE";
-
-// FIXED: Changed from hnwrhbehhjijoxavwuyq to mkvpuawmkudezotbhmxl
-const IMG = "https://mkvpuawmkudezotbhmxl.supabase.co/storage/v1/object/public/menu-images/";
-
+const IMG = "https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/";
 const $=id=>document.getElementById(id);
 const MENU=[
 {cat:"APPETIZERS",items:[
 ["Lumpia Shanghai Pork (12pc)",11.99, IMG + "lumpia.jpg"],
-["Lumpia Shanghai Chicken (12pc)",11.99, IMG + "Lumpia%20Shanghai%20Chicken%202.jpg"],
+["Lumpia Shanghai Chicken (12pc)",11.99, IMG + "Lumpia%20Shanghai%20Chicken%201.jpg"],
 ["Lumpia Gulay (1pc)",1.50, IMG + "Lumpia%20Gulay%203.jpg"],
 ["Lumpia Sariwa (2pc)",10.99, IMG + "lumpiang-sariwa%204.jpg"]
 ]},
@@ -147,7 +144,7 @@ const MENU=[
 ["Pork BBQ Stick",7.99, IMG + "Pork%20BBQ%20Stick%208.jpg"]
 ]},
 {cat:"ENTREES",items:[
-["Chicken Adobo",8.99, IMG + "Chicken%20Adobo%209.webp"],
+["Chicken Adobo",8.99, IMG + "Chicken%20Adobo%209%20(1).webp"],
 ["Pork Adobo",8.99, IMG + "pork-adobo%2010.jpg"],
 ["Chicken Curry",8.99, IMG + "Filipino-Chicken-Curry%2011.jpg"],
 ["Menudo",8.99, IMG + "menudo%2012.jpg"],
@@ -160,20 +157,20 @@ const MENU=[
 {cat:"NOODLES & COMBO",items:[
 ["Pancit Bihon",10.99, IMG + "pancit-bihon%2018.webp"],
 ["Palabok",11.99, IMG + "Palabok%2019.jpg"],
-["Combo (2 entrees + side)",14.99, IMG + "combo.jpg"]
+["Combo (2 entrees + side)",14.99, IMG + "combo%2020.png"]
 ]},
 {cat:"SIDES",items:[
-["Plain Rice",1.99, IMG + "plain-rice%2021.jpg"],
+["Plain Rice",1.99, IMG + "plain%20rice%2021.jpg"],
 ["Adobo Rice",2.99, IMG + "Adobo%20Rice%2022.jpg"],
 ["Plantains",2.99, IMG + "Plantains%2023.jpg"],
 ["Stir Fry Vegetables",4.99, IMG + "Stir%20Fry%20Vegetables%2024.jpg"]
 ]},
 {cat:"DRINKS & DESSERTS",items:[
 ["Buko Pandan Juice",6.25, IMG + "Buko%20Pandan%20Juice%2025.jpg"],
-["Mango / Taro Boba",6.75, IMG + "mango-taro-boba%2026.jpg"],
+["Mango / Taro Boba",6.75, IMG + "mango%20taro%20boba%2026.jpg"],
 ["Smoothies",6.00, IMG + "smoothies.jpg%2027.avif"],
 ["Halo-Halo",6.50, IMG + "Halo-Halo%2028.webp"],
-["Ube Biko",5.99, IMG + "ube-biko%2029.jpg"]
+["Ube Biko",5.99, IMG + "Ube%20Biko%2029.jpg"]
 ]}
 ];
 const FLAT=[];
