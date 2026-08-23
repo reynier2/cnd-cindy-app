@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tito Mel's - Filipino Cuisine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .category {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .category-title {
+            font-size: 2em;
+            color: #764ba2;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .menu-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .menu-item-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 3em;
+        }
+
+        .menu-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .menu-item-info {
+            padding: 20px;
+        }
+
+        .menu-item-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .menu-item-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .menu-item-price {
+            color: #764ba2;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .order-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .order-btn:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .category {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Tito Mel's</h1>
+            <p>Authentic Filipino Cuisine</p>
+        </div>
+
+        <!-- APPETIZERS -->
+        <div class="category">
+            <h2 class="category-title">Appetizers</h2>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="addToOrder(1)">
+                    <div class="menu-item-image">
+                        <img src="images/1.jpg" alt="Lumpia Shanghai Pork">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">1</div>
+                        <div class="menu-item-name">Lumpia Shanghai Pork (12pc)</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(2)">
+                    <div class="menu-item-image">
+                        <img src="images/2.jpg" alt="Lumpia Shanghai Chicken">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">2</div>
+                        <div class="menu-item-name">Lumpia Shanghai Chicken (12pc)</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(3)">
+                    <div class="menu-item-image">
+                        <img src="images/3.jpg" alt="Lumpia Gulay">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">3</div>
+                        <div class="menu-item-name">Lumpia Gulay (1pc)</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(4)">
+                    <div class="menu-item-image">
+                        <img src="images/4.jpg" alt="Lumpia Sariwa">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">4</div>
+                        <div class="menu-item-name">Lumpia Sariwa (2pc)</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SPECIALS & BBQ -->
+        <div class="category">
+            <h2 class="category-title">Specials & BBQ</h2>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="addToOrder(5)">
+                    <div class="menu-item-image">
+                        <img src="images/5.jpg" alt="Lechon Kawali">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">5</div>
+                        <div class="menu-item-name">Lechon Kawali</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(6)">
+                    <div class="menu-item-image">
+                        <img src="images/6.jpg" alt="Pork Sisig">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">6</div>
+                        <div class="menu-item-name">Pork Sisig</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(7)">
+                    <div class="menu-item-image">
+                        <img src="images/7.jpg" alt="Chicken BBQ Stick">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">7</div>
+                        <div class="menu-item-name">Chicken BBQ Stick (2pc)</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(8)">
+                    <div class="menu-item-image">
+                        <img src="images/8.jpg" alt="Pork BBQ Stick">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">8</div>
+                        <div class="menu-item-name">Pork BBQ Stick</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ENTREES -->
+        <div class="category">
+            <h2 class="category-title">Entrees</h2>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="addToOrder(9)">
+                    <div class="menu-item-image">
+                        <img src="images/9.jpg" alt="Chicken Adobo">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">9</div>
+                        <div class="menu-item-name">Chicken Adobo</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(10)">
+                    <div class="menu-item-image">
+                        <img src="images/10.jpg" alt="Pork Adobo">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">10</div>
+                        <div class="menu-item-name">Pork Adobo</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(11)">
+                    <div class="menu-item-image">
+                        <img src="images/11.jpg" alt="Chicken Curry">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">11</div>
+                        <div class="menu-item-name">Chicken Curry</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(12)">
+                    <div class="menu-item-image">
+                        <img src="images/12.jpg" alt="Menudo">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">12</div>
+                        <div class="menu-item-name">Menudo</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(13)">
+                    <div class="menu-item-image">
+                        <img src="images/13.jpg" alt="Bicol Express">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">13</div>
+                        <div class="menu-item-name">Bicol Express</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(14)">
+                    <div class="menu-item-image">
+                        <img src="images/14.jpg" alt="Kaldereta">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">14</div>
+                        <div class="menu-item-name">Kaldereta</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(15)">
+                    <div class="menu-item-image">
+                        <img src="images/15.jpg" alt="Chicken Tinola">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">15</div>
+                        <div class="menu-item-name">Chicken Tinola</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(16)">
+                    <div class="menu-item-image">
+                        <img src="images/16.jpg" alt="Pork Sinigang">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">16</div>
+                        <div class="menu-item-name">Pork Sinigang</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(17)">
+                    <div class="menu-item-image">
+                        <img src="images/17.jpg" alt="Pork Dinuguan">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">17</div>
+                        <div class="menu-item-name">Pork Dinuguan</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOODLES & COMBO -->
+        <div class="category">
+            <h2 class="category-title">Noodles & Combo</h2>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="addToOrder(18)">
+                    <div class="menu-item-image">
+                        <img src="images/18.jpg" alt="Pancit Bihon">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">18</div>
+                        <div class="menu-item-name">Pancit Bihon</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(19)">
+                    <div class="menu-item-image">
+                        <img src="images/19.jpg" alt="Palabok">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">19</div>
+                        <div class="menu-item-name">Palabok</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(20)">
+                    <div class="menu-item-image">
+                        <img src="images/20.jpg" alt="Combo">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">20</div>
+                        <div class="menu-item-name">Combo (2 entrees + side)</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDES -->
+        <div class="category">
+            <h2 class="category-title">Sides</h2>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="addToOrder(21)">
+                    <div class="menu-item-image">
+                        <img src="images/21.jpg" alt="Plain Rice">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">21</div>
+                        <div class="menu-item-name">Plain Rice</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(22)">
+                    <div class="menu-item-image">
+                        <img src="images/22.jpg" alt="Adobo Rice">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">22</div>
+                        <div class="menu-item-name">Adobo Rice</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(23)">
+                    <div class="menu-item-image">
+                        <img src="images/23.jpg" alt="Plantains">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">23</div>
+                        <div class="menu-item-name">Plantains</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(24)">
+                    <div class="menu-item-image">
+                        <img src="images/24.jpg" alt="Stir Fry Vegetables">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">24</div>
+                        <div class="menu-item-name">Stir Fry Vegetables</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DRINKS & DESSERTS -->
+        <div class="category">
+            <h2 class="category-title">Drinks & Desserts</h2>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="addToOrder(25)">
+                    <div class="menu-item-image">
+                        <img src="images/25.jpg" alt="Buko Pandan Juice">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">25</div>
+                        <div class="menu-item-name">Buko Pandan Juice</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(26)">
+                    <div class="menu-item-image">
+                        <img src="images/26.jpg" alt="Mango / Taro Boba">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">26</div>
+                        <div class="menu-item-name">Mango / Taro Boba</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(27)">
+                    <div class="menu-item-image">
+                        <img src="images/27.jpg" alt="Smoothies">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">27</div>
+                        <div class="menu-item-name">Smoothies</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(28)">
+                    <div class="menu-item-image">
+                        <img src="images/28.jpg" alt="Halo-Halo">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">28</div>
+                        <div class="menu-item-name">Halo-Halo</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+
+                <div class="menu-item" onclick="addToOrder(29)">
+                    <div class="menu-item-image">
+                        <img src="images/29.jpg" alt="Ube Biko">
+                    </div>
+                    <div class="menu-item-info">
+                        <div class="menu-item-number">29</div>
+                        <div class="menu-item-name">Ube Biko</div>
+                        <button class="order-btn">Add to Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addToOrder(itemId) {
+            console.log('Added item:', itemId);
+            alert('Item #' + itemId + ' added to order!');
+            // This will connect to your ordering system
+        }
+    </script>
+</body>
+</html>
