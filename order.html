@@ -108,7 +108,7 @@ font-size: 1rem;
 <option value="In 2 hours">In 2 hours</option>
 </select>
 <textarea id="cnote" rows="2" placeholder="Notes (no onions, extra sauce...)"></textarea>
-<button class="send" id="send"> SEND ORDER TO THE KITCHEN</button>
+<button class="send" id="send">🛒 SEND ORDER TO THE KITCHEN</button>
 <div id="msg"></div>
 </div>
 <div id="confirmation-screen">
@@ -130,45 +130,45 @@ const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi
 const $=id=>document.getElementById(id);
 const MENU=[
 {cat:"APPETIZERS",items:[
-["Lumpia Shanghai Pork (12pc)",11.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/lumpia.jpg?raw=true"],
-["Lumpia Shanghai Chicken (12pc)",11.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Lumpia%20Shanghai%20Chicken%202.jpg?raw=true"],
-["Lumpia Gulay (1pc)",1.50, "https://github.com/reynier2/cnd-cindy-app/blob/main/Lumpia%20Gulay%203.jpg?raw=true"],
-["Lumpia Sariwa (2pc)",10.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/lumpiang-sariwa%204.jpg?raw=true"]
+["Lumpia Shanghai Pork (12pc)",11.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/lumpia.jpg"],
+["Lumpia Shanghai Chicken (12pc)",11.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Lumpia%20Shanghai%20Chicken%202.jpg"],
+["Lumpia Gulay (1pc)",1.50, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Lumpia%20Gulay%203.jpg"],
+["Lumpia Sariwa (2pc)",10.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/lumpiang-sariwa%204.jpg"]
 ]},
 {cat:"SPECIALS & BBQ",items:[
-["Lechon Kawali",10.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Lechon%20Kawali%205.jpg?raw=true"],
-["Pork Sisig",10.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Pork%20Sisig%206.webp?raw=true"],
-["Chicken BBQ Stick (2pc)",7.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Chicken%20BBQ%20Stick%20(2pc)%207.jpg?raw=true"],
-["Pork BBQ Stick",7.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Pork%20BBQ%20Stick%208.jpg?raw=true"]
+["Lechon Kawali",10.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Lechon%20Kawali%205.jpg"],
+["Pork Sisig",10.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Pork%20Sisig%206.webp"],
+["Chicken BBQ Stick (2pc)",7.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Chicken%20BBQ%20Stick%20(2pc)%207.jpg"],
+["Pork BBQ Stick",7.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Pork%20BBQ%20Stick%208.jpg"]
 ]},
 {cat:"ENTREES",items:[
-["Chicken Adobo",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Chicken%20Adobo%209.webp?raw=true"],
-["Pork Adobo",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/pork-adobo%2010.jpg?raw=true"],
-["Chicken Curry",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Filipino-Chicken-Curry%2011.jpg?raw=true"],
-["Menudo",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/menudo%2012.jpg?raw=true"],
-["Bicol Express",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Bicol-Express%2013.jpg?raw=true"],
-["Kaldereta",10.25, "https://github.com/reynier2/cnd-cindy-app/blob/main/kaldereta%2014.jpg?raw=true"],
-["Chicken Tinola",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Classic-Chicken-Tinola%2015.webp?raw=true"],
-["Pork Sinigang",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Pork%20Sinigang%2016.webp?raw=true"],
-["Pork Dinuguan",8.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Pork%20Dinuguan%2017.jpg?raw=true"]
+["Chicken Adobo",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Chicken%20Adobo%209.webp"],
+["Pork Adobo",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/pork-adobo%2010.jpg"],
+["Chicken Curry",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Filipino-Chicken-Curry%2011.jpg"],
+["Menudo",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/menudo%2012.jpg"],
+["Bicol Express",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Bicol-Express%2013.jpg"],
+["Kaldereta",10.25, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/kaldereta%2014.jpg"],
+["Chicken Tinola",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Classic-Chicken-Tinola%2015.webp"],
+["Pork Sinigang",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Pork%20Sinigang%2016.webp"],
+["Pork Dinuguan",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Pork%20Dinuguan%2017.jpg"]
 ]},
 {cat:"NOODLES & COMBO",items:[
-["Pancit Bihon",10.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/pancit-bihon%2018.webp?raw=true"],
-["Palabok",11.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Palabok%2019.jpg?raw=true"],
-["Combo (2 entrees + side)",14.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/combo.jpg?raw=true"]
+["Pancit Bihon",10.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/pancit-bihon%2018.webp"],
+["Palabok",11.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Palabok%2019.jpg"],
+["Combo (2 entrees + side)",14.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/combo.jpg"]
 ]},
 {cat:"SIDES",items:[
-["Plain Rice",1.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/plain-rice%2021.jpg?raw=true"],
-["Adobo Rice",2.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Adobo%20Rice%2022.jpg?raw=true"],
-["Plantains",2.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Plantains%2023.jpg?raw=true"],
-["Stir Fry Vegetables",4.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/Stir%20Fry%20Vegetables%2024.jpg?raw=true"]
+["Plain Rice",1.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/plain-rice%2021.jpg"],
+["Adobo Rice",2.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Adobo%20Rice%2022.jpg"],
+["Plantains",2.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Plantains%2023.jpg"],
+["Stir Fry Vegetables",4.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Stir%20Fry%20Vegetables%2024.jpg"]
 ]},
 {cat:"DRINKS & DESSERTS",items:[
-["Buko Pandan Juice",6.25, "https://github.com/reynier2/cnd-cindy-app/blob/main/Buko%20Pandan%20Juice%2025.jpg?raw=true"],
-["Mango / Taro Boba",6.75, "https://github.com/reynier2/cnd-cindy-app/blob/main/mango-taro-boba%2026.jpg?raw=true"],
-["Smoothies",6.00, "https://github.com/reynier2/cnd-cindy-app/blob/main/smoothies.jpg%2027.avif?raw=true"],
-["Halo-Halo",6.50, "https://github.com/reynier2/cnd-cindy-app/blob/main/Halo-Halo%2028.webp?raw=true"],
-["Ube Biko",5.99, "https://github.com/reynier2/cnd-cindy-app/blob/main/ube-biko%2029.jpg?raw=true"]
+["Buko Pandan Juice",6.25, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Buko%20Pandan%20Juice%2025.jpg"],
+["Mango / Taro Boba",6.75, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/mango-taro-boba%2026.jpg"],
+["Smoothies",6.00, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/smoothies.jpg%2027.avif"],
+["Halo-Halo",6.50, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Halo-Halo%2028.webp"],
+["Ube Biko",5.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/ube-biko%2029.jpg"]
 ]}
 ];
 const FLAT=[];
@@ -262,7 +262,7 @@ const t = await r.text();
 $("msg").textContent = "❌ Error: " + r.status + ". Please try again or call us.";
 $("msg").style.color = "var(--red)";
 $("send").disabled = false;
-$("send").textContent = " SEND ORDER TO THE KITCHEN";
+$("send").textContent = "🛒 SEND ORDER TO THE KITCHEN";
 }
 } catch(e){
 $("msg").textContent = "❌ Network error. Please check your connection.";
