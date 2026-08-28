@@ -82,13 +82,15 @@
 
 <section>
   <h3>🍽️ THE MENU</h3>
-  <div id="menuGrid" class="grid"></div>
+  <div id="menuGrid" class="grid">
+    <div style="text-align:center; color:var(--dim); padding:20px; grid-column: 1/-1;">Loading delicious menu...</div>
+  </div>
 </section>
 
 <section class="order-row">
   <h3>🛒 READY TO EAT?</h3>
   <a class="host-btn" href="order.html" target="_blank"> ORDER ONLINE</a>
-  <a class="call-btn" href="tel:+18048922862">📞 CALL (804) 892-2862</a>
+  <a class="call-btn" href="tel:+18048922862"> CALL (804) 892-2862</a>
 </section>
 
 <footer>
@@ -100,14 +102,45 @@
 <script>
 const $=id=>document.getElementById(id);
 
-const MENU=[
-  {cat:"APPETIZERS",items:[["Lumpia Shanghai Pork (12pc)","$11.99"],["Lumpia Shanghai Chicken (12pc)","$11.99"],["Lumpia Gulay (1pc)","$1.50"],["Lumpia Sariwa (2pc)","$10.99"]]},
-  {cat:"SPECIALS & BBQ",items:[["Lechon Kawali","from $10.99"],["Pork Sisig","from $10.99"],["Chicken BBQ Stick (2pc · weekends)","$7.99"],["Pork BBQ Stick","$7.99"]]},
-  {cat:"ENTREES",items:[["Chicken Adobo","from $8.99"],["Pork Adobo","from $8.99"],["Chicken Curry","from $8.99"],["Menudo","from $8.99"],["Bicol Express","from $8.99"],["Kaldereta","from $10.25"],["Chicken Tinola","from $8.99"],["Pork Sinigang","from $8.99"],["Pork Dinuguan","from $8.99"]]},
-  {cat:"NOODLES & COMBO",items:[["Pancit Bihon","$10.99"],["Palabok","$11.99"],["Combo (2 entrees + side)","$14.99"]]},
-  {cat:"SIDES",items:[["Plain Rice","from $1.99"],["Adobo Rice","from $2.99"],["Plantains","from $2.99"],["Stir Fry Vegetables","from $4.99"]]},
-  {cat:"DRINKS & DESSERTS",items:[["Buko Pandan Juice","$6.25"],["Mango / Taro Boba","$6.75"],["Smoothies","$6.00"],["Halo-Halo","ask in store"],["Ube Biko","ask in store"]]}
-];
+// --- SUPABASE CONNECTION ---
+const SUPA_URL = "https://mkvpuawmkudezotbhmxl.supabase.co";
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE";
+
+// --- FETCH MENU FROM DATABASE ---
+async function loadMenu() {
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/menu_items?order=category.asc,name.asc`, {
+      headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY }
+    });
+    const data = await res.json();
+
+    if (data.length === 0) {
+      $("menuGrid").innerHTML = '<div style="text-align:center; color:var(--dim); padding:20px; grid-column: 1/-1;">Menu coming soon!</div>';
+      return;
+    }
+
+    // Group items by category
+    const grouped = {};
+    data.forEach(item => {
+      if (!grouped[item.category]) grouped[item.category] = [];
+      grouped[item.category].push({ name: item.name, price: parseFloat(item.price).toFixed(2) });
+    });
+
+    // Render the HTML
+    let html = "";
+    for (const [cat, items] of Object.entries(grouped)) {
+      html += `<div class="mcard"><h4>${cat}</h4>`;
+      items.forEach(i => {
+        html += `<div class="mrow"><span>${i.name}</span><span class="p">$${i.price}</span></div>`;
+      });
+      html += `</div>`;
+    }
+    $("menuGrid").innerHTML = html;
+  } catch (err) {
+    console.error("Menu load error:", err);
+    $("menuGrid").innerHTML = '<div style="text-align:center; color:var(--red); padding:20px; grid-column: 1/-1;">Could not load menu. Please refresh.</div>';
+  }
+}
 
 const SCENES=[
  {who:"maria",img:"welcome.png",
@@ -200,7 +233,7 @@ function show(i){
   speakHuman(s[lang], s.who==="mel", ()=>{
     if(!playing) return;
     if(idx<SCENES.length-1){ setTimeout(()=>{ if(playing) show(idx+1); },400); }
-    else{ playing=false; $("btnTour").textContent="↺ REPLAY TOUR"; }
+    else{ playing=false; $("btnTour").textContent=" REPLAY TOUR"; }
   });
 }
 $("btnTour").onclick=()=>{
@@ -221,9 +254,10 @@ function setLang(l){
 $("btnEN").onclick=()=>setLang("en");
 $("btnES").onclick=()=>setLang("es");
 
-$("menuGrid").innerHTML=MENU.map(c=>'<div class="mcard"><h4>'+c.cat+'</h4>'+c.items.map(i=>'<div class="mrow"><span>'+i[0]+'</span><span class="p">'+i[1]+'</span></div>').join("")+'</div>').join("");
+// --- RENDER SPECIALS & LOAD MENU ---
 $("specialsList").innerHTML=[" Lechon Kawali — crispy fried pork belly (from $10.99)","🍚 Pork Sisig — crispy chopped pork, chili & onions (from $10.99)","🍢 Chicken BBQ on a Stick — WEEKENDS ONLY ($7.99)"].map(s=>'<li>'+s+'</li>').join("");
 renderDots();
+loadMenu(); // <--- THIS PULLS THE LIVE MENU FROM SUPABASE
 </script>
 </body>
 </html>
