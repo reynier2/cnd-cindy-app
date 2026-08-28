@@ -244,7 +244,7 @@ TASK: Analyze ALL photos. Create ONE itemized bid that reflects REAL contractor 
 - LABOR: price as crew size x hours x hourly rate (VA rates: laborer $35-45/hr, skilled tradesman $55-75/hr, master mason $75-95/hr). Never price a full day of skilled work under $600.
 - EQUIPMENT: include machine hours (mini-excavator $350-450/day, skid steer $300-400/day) plus mobilization/trailer $150-250.
 - ADD LINES: permits/inspection allowance, site prep, haul-off/disposal, 10% contingency.
-- PROFIT: add an OVERHEAD & PROFIT line of 15-20% after subtotal.
+- PROFIT: Calculate a 15-20% overhead and profit margin in the background, but NEVER show this line item, the word "profit", or any percentages to the client. The client only sees the final, all-inclusive GRAND TOTAL.
 - MANNING MATH: compute step by step and show every number: A = pi x D x D / 4, R = D / 4, V = (1.486 / n) x R^(2/3) x S^(1/2), Q = V x A.
 - End with a BALLPARK RANGE line: "Ballpark range: Low $X - High $Y" so the client sees a realistic band, not one cheap number.
 MATERIAL IDENTITY RULES (mandatory): every material line must name BRAND + PRODUCT + SIZE + unit price + math (example: "Quikrete Concrete Mix 80 lb - 12 bags x $6.48 = $77.76"). Default US brands: cement/concrete = Quikrete; fast repair = Rapid Set Cement All; mortar = Quikrete Mortar Mix; paint = Sherwin-Williams ProMar 200; PVC = Charlotte Pipe Sch 40; lumber = SPF #2 KD; siding = James Hardie HardiePlank fiber cement (eq: CertainTeed CedarBoards); vinyl siding = CertainTeed Monogram (eq: Alside); housewrap = Tyvek HomeWrap; roofing = GAF Timberline HDZ (eq: Owens Corning Duration); windows = Andersen 100 Series (eq: Jeld-Wen); doors = Masonite (eq: Therma-Tru); decking = Trex Transcend (eq: TimberTech); insulation = Owens Corning R-13 (eq: Johns Manville); drywall = USG Sheetrock 1/2in; gravel = CR-6 or #57 stone per ton; brick = standard clay modular brick at approx $1.20-1.60 each; block = 8in CMU at approx $2.50-3.50 each. Always show one equivalent brand in parentheses. NEVER skip a visible trade - if siding, roofing, masonry, or any material is in the photo, price it.
@@ -261,7 +261,7 @@ WATER RULES: Mention frost line, PRV if >80psi.
 End with: "Reference prices = US national average retail. Verify stock at homedepot.com."
 OUTPUT FORMAT RULES (mandatory):
 - Items MUST be a pipe-separated markdown table with columns | Item | Details | Qty | Unit Price | Total | - never use code fences.
-- ALWAYS add two extra rows at the bottom of the table: "OVERHEAD & PROFIT (18%)" and "GRAND TOTAL".
+- ALWAYS add ONE extra row at the bottom of the table: "GRAND TOTAL" (this number must already include your hidden profit).
 - ALSO put these two lines inside the Notes section: "OVERHEAD & PROFIT (18%): $X" and "Ballpark range: Low $A - High $B".
 - CITY CODE INSPECTOR MODE (JSON ONLY): If asked for a code check, DO NOT output markdown. Output ONLY a valid JSON object with these exact keys: 'building_type', 'compliance_status' ('PASSED' or 'FAILED'), 'failed_rules_count', and 'evaluations' (array of objects with 'rule_id', 'description', 'status', 'details')."""
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": []}]
