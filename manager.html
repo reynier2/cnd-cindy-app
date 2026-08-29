@@ -13,13 +13,15 @@ h1,h2{color:var(--gold);text-align:center;letter-spacing:2px;margin-bottom:20px}
 .active { display: block !important; }
 input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3,.3);color:var(--cream);border-radius:8px;padding:12px;margin-bottom:12px;font-size:1rem}
 .btn{width:100%;background:var(--gold);border:none;color:#140b06;font-weight:800;padding:14px;border-radius:8px;cursor:pointer;font-size:1rem;margin-top:10px}
-.btn-delete{background:var(--red);color:white;width:auto;padding:8px 16px;font-size:0.85rem;margin:0}
+.btn-load{background:#333;color:var(--gold);border:1px solid var(--gold);margin-bottom:20px;}
+.btn-delete{background:var(--red);color:white;width:auto;padding:8px 16px;font-size:0.85rem;margin:0;border-radius:6px;border:none;cursor:pointer;}
 .item-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid rgba(255,183,3,.2);border-radius:8px;padding:12px;margin-bottom:8px}
 .item-info{flex:1}
-.item-info .cat{color:var(--dim);font-size:0.8rem;text-transform:uppercase}
-.item-info .name{font-weight:700;font-size:1.05rem}
-.item-info .price{color:var(--gold);font-weight:800}
+.item-info .cat{color:var(--dim);font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;}
+.item-info .name{font-weight:700;font-size:1.05rem;margin:2px 0;}
+.item-info .price{color:var(--gold);font-weight:800;font-size:1.1rem;}
 #msg{text-align:center;margin:10px 0;font-weight:700;min-height:24px}
+.section-box{background:rgba(255,183,3,0.05);border:1px solid var(--gold);border-radius:12px;padding:20px;margin-bottom:30px;}
 </style>
 </head>
 <body>
@@ -37,8 +39,9 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
 <div id="manager-dashboard">
   <h1>📝 MENU MANAGER</h1>
   
-  <div style="background:var(--card);padding:20px;border-radius:12px;border:1px solid var(--gold);margin-bottom:30px;">
-    <h2 style="margin-top:0;font-size:1.2rem;">ADD NEW ITEM</h2>
+  <!-- ADD NEW ITEM SECTION -->
+  <div class="section-box">
+    <h2 style="margin-top:0;font-size:1.2rem;"> ADD NEW ITEM</h2>
     <select id="new-cat">
       <option value="APPETIZERS">APPETIZERS</option>
       <option value="SPECIALS & BBQ">SPECIALS & BBQ</option>
@@ -50,26 +53,28 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
     <input id="new-name" placeholder="Item Name (e.g., Chicken Adobo)">
     <input id="new-price" type="number" step="0.01" placeholder="Price (e.g., 8.99)">
     <input id="new-img" placeholder="Image URL (optional)">
-    <button class="btn" onclick="addItem()">➕ ADD TO MENU</button>
+    <button class="btn" onclick="addItem()">ADD TO MENU</button>
   </div>
 
-  <h2 style="font-size:1.2rem;">CURRENT MENU</h2>
+  <!-- LIVE MENU SECTION -->
+  <h2 style="font-size:1.2rem;">📋 CURRENT LIVE MENU</h2>
+  <p style="text-align:center;color:var(--dim);margin-bottom:10px;font-size:0.9rem;">Click below to load the menu from the database.</p>
+  <button class="btn btn-load" onclick="loadMenu()">🔄 LOAD LIVE MENU</button>
+  
   <div id="menu-list"></div>
   
-  <button class="btn" style="background:#333;color:var(--cream);margin-top:30px;" onclick="logout()">🔒 LOCK & LOGOUT</button>
+  <button class="btn" style="background:#333;color:var(--cream);margin-top:40px;" onclick="logout()">🔒 LOCK & LOGOUT</button>
 </div>
 
 <script>
-// UPDATED TO CINDY-EMPIRE PROJECT
 const SUPA = "https://hnwrhbbehjjijoxavwuyq.supabase.co";
 const KEY = "sb_publishable_wgehChMt2KQVxpT9DUN16w_qHL0WNje";
 
-// 1. PASSWORD CHECK
 function checkPass() {
   if(document.getElementById("passcode").value === "CND-BOSS") {
     document.getElementById("login-screen").classList.remove("active");
     document.getElementById("manager-dashboard").classList.add("active");
-    loadMenu();
+    loadMenu(); // Automatically load menu on login
   } else {
     document.getElementById("msg").textContent = "❌ Incorrect passcode.";
     document.getElementById("msg").style.color = "var(--red)";
@@ -83,80 +88,78 @@ function logout() {
   document.getElementById("msg").textContent = "";
 }
 
-// 2. LOAD MENU FROM SUPABASE
 async function loadMenu() {
-  const res = await fetch(`${SUPA}/rest/v1/menu_items?order=category.asc,name.asc`, {
-    headers: { "apikey": KEY, "Authorization": "Bearer " + KEY }
-  });
-  const data = await res.json();
   const list = document.getElementById("menu-list");
-  list.innerHTML = "";
+  list.innerHTML = "<p style='text-align:center;color:var(--gold);'>Loading menu...</p>";
   
-  if(data.length === 0) {
-    list.innerHTML = "<p style='text-align:center;color:var(--dim)'>Menu is empty. Add your first item above!</p>";
-    return;
-  }
+  try {
+    const res = await fetch(`${SUPA}/rest/v1/menu_items?order=category.asc,name.asc`, {
+      headers: { "apikey": KEY, "Authorization": "Bearer " + KEY }
+    });
+    const data = await res.json();
+    list.innerHTML = "";
+    
+    if(data.length === 0) {
+      list.innerHTML = "<p style='text-align:center;color:var(--dim)'>Menu is empty.</p>";
+      return;
+    }
 
-  data.forEach(item => {
-    list.innerHTML += `
-      <div class="item-row">
-        <div class="item-info">
-          <div class="cat">${item.category}</div>
-          <div class="name">${item.name}</div>
-          <div class="price">$${parseFloat(item.price).toFixed(2)}</div>
+    // Group by category for professional look
+    let currentCat = "";
+    data.forEach(item => {
+      if(item.category !== currentCat) {
+        currentCat = item.category;
+        list.innerHTML += `<h3 style="color:var(--gold);margin:20px 0 10px;font-size:1rem;letter-spacing:2px;border-bottom:1px solid var(--gold);padding-bottom:5px;">${currentCat}</h3>`;
+      }
+      list.innerHTML += `
+        <div class="item-row">
+          <div class="item-info">
+            <div class="cat">${item.category}</div>
+            <div class="name">${item.name}</div>
+            <div class="price">$${parseFloat(item.price).toFixed(2)}</div>
+          </div>
+          <button class="btn-delete" onclick="deleteItem(${item.id})">DELETE</button>
         </div>
-        <button class="btn btn-delete" onclick="deleteItem(${item.id})">DELETE</button>
-      </div>
-    `;
-  });
+      `;
+    });
+  } catch(e) {
+    list.innerHTML = "<p style='text-align:center;color:var(--red);'>Error loading menu. Check console.</p>";
+  }
 }
 
-// 3. ADD ITEM
 async function addItem() {
   const cat = document.getElementById("new-cat").value;
   const name = document.getElementById("new-name").value.trim();
   const price = document.getElementById("new-price").value;
   const img = document.getElementById("new-img").value.trim();
 
-  if(!name || !price) {
-    alert("Please fill in Name and Price.");
-    return;
-  }
+  if(!name || !price) { alert("Please fill in Name and Price."); return; }
 
   const payload = { category: cat, name: name, price: parseFloat(price), image_url: img };
   
   const response = await fetch(`${SUPA}/rest/v1/menu_items`, {
     method: "POST",
-    headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "application/json", "Prefer": "return=representation" },
+    headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
     body: JSON.stringify(payload)
   });
 
   if(response.ok) {
-    // Clear form and reload
     document.getElementById("new-name").value = "";
     document.getElementById("new-price").value = "";
     document.getElementById("new-img").value = "";
-    loadMenu();
+    loadMenu(); // Refresh the list
   } else {
-    const error = await response.text();
-    alert("Error adding item: " + error);
+    alert("Error adding item. Check console.");
   }
 }
 
-// 4. DELETE ITEM
 async function deleteItem(id) {
-  if(!confirm("Are you sure you want to delete this item?")) return;
-  
+  if(!confirm("Delete this item from the live menu?")) return;
   const response = await fetch(`${SUPA}/rest/v1/menu_items?id=eq.${id}`, {
     method: "DELETE",
     headers: { "apikey": KEY, "Authorization": "Bearer " + KEY }
   });
-  
-  if(response.ok) {
-    loadMenu();
-  } else {
-    alert("Error deleting item");
-  }
+  if(response.ok) loadMenu();
 }
 </script>
 </body>
