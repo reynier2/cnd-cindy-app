@@ -58,8 +58,8 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
 
   <!-- LIVE MENU SECTION -->
   <h2 style="font-size:1.2rem;">📋 CURRENT LIVE MENU</h2>
-  <p style="text-align:center;color:var(--dim);margin-bottom:10px;font-size:0.9rem;">Click below to load the menu from the database.</p>
-  <button class="btn btn-load" onclick="loadMenu()">🔄 LOAD LIVE MENU</button>
+  <p style="text-align:center;color:var(--dim);margin-bottom:10px;font-size:0.9rem;">Menu loads automatically. Click below to refresh.</p>
+  <button class="btn btn-load" onclick="loadMenu()">🔄 REFRESH MENU</button>
   
   <div id="menu-list"></div>
   
@@ -67,14 +67,15 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
 </div>
 
 <script>
+// CORRECT CREDENTIALS FOR CINDY-EMPIRE
 const SUPA = "https://hnwrhbbehjjijoxavwuyq.supabase.co";
-const KEY = "sb_publishable_wgehChMt2KQVxpT9DUN16w_qHL0WNje";
+const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhud3JoYmVoaGppam94YXZ3dXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3MzQ1MzMsImV4cCI6MjEwMDMxMDUzM30.7eh4bxe9_kIShIe-0m11jiTClbAld54GhTJaGzCdRfY";
 
 function checkPass() {
   if(document.getElementById("passcode").value === "CND-BOSS") {
     document.getElementById("login-screen").classList.remove("active");
     document.getElementById("manager-dashboard").classList.add("active");
-    loadMenu(); // Automatically load menu on login
+    loadMenu(); 
   } else {
     document.getElementById("msg").textContent = "❌ Incorrect passcode.";
     document.getElementById("msg").style.color = "var(--red)";
@@ -100,11 +101,10 @@ async function loadMenu() {
     list.innerHTML = "";
     
     if(data.length === 0) {
-      list.innerHTML = "<p style='text-align:center;color:var(--dim)'>Menu is empty.</p>";
+      list.innerHTML = "<p style='text-align:center;color:var(--dim)'>Menu is empty. Add items above!</p>";
       return;
     }
 
-    // Group by category for professional look
     let currentCat = "";
     data.forEach(item => {
       if(item.category !== currentCat) {
@@ -114,7 +114,6 @@ async function loadMenu() {
       list.innerHTML += `
         <div class="item-row">
           <div class="item-info">
-            <div class="cat">${item.category}</div>
             <div class="name">${item.name}</div>
             <div class="price">$${parseFloat(item.price).toFixed(2)}</div>
           </div>
@@ -123,7 +122,7 @@ async function loadMenu() {
       `;
     });
   } catch(e) {
-    list.innerHTML = "<p style='text-align:center;color:var(--red);'>Error loading menu. Check console.</p>";
+    list.innerHTML = "<p style='text-align:center;color:var(--red);'>Error loading menu.</p>";
   }
 }
 
@@ -147,9 +146,9 @@ async function addItem() {
     document.getElementById("new-name").value = "";
     document.getElementById("new-price").value = "";
     document.getElementById("new-img").value = "";
-    loadMenu(); // Refresh the list
+    loadMenu(); 
   } else {
-    alert("Error adding item. Check console.");
+    alert("Error adding item.");
   }
 }
 
