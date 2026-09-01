@@ -98,6 +98,13 @@ font-size: 1rem;
 <h1>TITO MEL'S</h1>
 <div class="sub">ORDER FOR PICKUP · PAY AT THE COUNTER</div>
 <div id="menu"></div>
+
+<div id="order-total" style="background: var(--card); border: 2px solid var(--gold); border-radius: 12px; padding: 16px; margin: 16px 0; text-align: center;">
+    <div style="color: var(--dim); font-size: 0.9rem; margin-bottom: 6px;">TOTAL ORDER AMOUNT</div>
+    <div style="color: var(--gold); font-size: 2.2rem; font-weight: 800;">$<span id="total-amount">0.00</span></div>
+    <div style="color: var(--dim); font-size: 0.8rem; margin-top: 6px;">Pay at the counter</div>
+</div>
+
 <h3>YOUR INFO</h3>
 <input id="cname" placeholder="Your name">
 <input id="cphone" placeholder="Phone number" type="tel">
@@ -200,6 +207,15 @@ return html;
 function add(key,d){
 qty[key]=Math.max(0,(qty[key]||0)+d);
 $("q_"+key).textContent=qty[key];
+updateTotal();
+}
+function updateTotal(){
+let total = 0;
+FLAT.forEach((item, idx) => {
+const q = qty[idx] || 0;
+total += item[1] * q;
+});
+$("total-amount").textContent = total.toFixed(2);
 }
 window.openImage = function(url) {
 $("modal-img").src = url;
@@ -214,7 +230,7 @@ const q = qty[idx]||0;
 return q > 0 ? {name:i[0], qty:q, price:i[1]} : null;
 }).filter(x=>x!==null);
 if(!items.length){
-$("msg").textContent="⚠️ Please add at least one item 🙂";
+$("msg").textContent="️ Please add at least one item 🙂";
 $("msg").style.color = "var(--red)";
 return;
 }
