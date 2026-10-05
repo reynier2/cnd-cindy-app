@@ -92,7 +92,6 @@ body { background: #1a0f0a; color: #ffd700; font-family: 'Segoe UI', sans-serif;
 const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
 
-// Unique variable name to prevent conflicts
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const MENU_CATEGORIES = {
@@ -113,7 +112,7 @@ function playAlarm() {
   const gain = ctx.createGain();
   osc.connect(gain);
   gain.connect(ctx.destination);
-  osc.frequency.value = 880; // A5 note
+  osc.frequency.value = 880; 
   osc.type = 'square';
   gain.gain.setValueAtTime(0.3, ctx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
@@ -127,13 +126,13 @@ function playAlarm() {
 async function loadOrders() {
   const { data, error } = await supabaseClient
     .from('orders')
+    .eq('restaurant', 'kusina') // <--- FIX 1: ONLY PULL KUSINA ORDERS
     .select('*')
-    .neq('status', 'deleted') // Hide deleted orders
+    .neq('status', 'deleted')
     .order('created_at', { ascending: false });
 
   if (error) { console.error('Order Error:', error); return; }
 
-  // Check for new orders to play sound
   data.forEach(o => {
     if (!knownOrderIds.has(o.id) && o.status === 'new') {
       playAlarm();
@@ -156,18 +155,11 @@ function renderOrders() {
   }
 
   let html = '';
-  
-  // Render Active Orders
-  activeOrders.forEach(o => {
-    html += createOrderCard(o);
-  });
+  activeOrders.forEach(o => { html += createOrderCard(o); });
 
-  // Render History (Done Orders)
   if (doneOrders.length > 0) {
     html += '<div style="margin-top:30px; border-top:2px dashed #555; padding-top:20px;"><h3 style="color:#888; text-align:center; margin-bottom:15px;">📜 ORDER HISTORY</h3>';
-    doneOrders.forEach(o => {
-      html += createOrderCard(o);
-    });
+    doneOrders.forEach(o => { html += createOrderCard(o); });
     html += '</div>';
   }
 
@@ -186,7 +178,6 @@ function createOrderCard(o) {
     actionButtons = `<button class="btn btn-done" onclick="updateStatus(${o.id}, 'done')">✓ Mark Done</button>`;
   }
 
-  // Always show delete button for history
   const deleteBtn = o.status === 'done' ? `<button class="btn btn-delete" onclick="deleteOrder(${o.id})">🗑️</button>` : '';
 
   return `
@@ -236,7 +227,12 @@ window.deleteOrder = async (id) => {
 // MENU CONTROLS (Right Side)
 // ==========================================
 async function loadMenu() {
-  const { data, error } = await supabaseClient.from('menu_status').select('*').order('item_name');
+  const { data, error } = await supabaseClient
+    .from('menu_status')
+    .eq('restaurant', 'kusina') // <--- FIX 2: ONLY PULL KUSINA MENU
+    .select('*')
+    .order('item_name');
+    
   if (error) { console.error('Menu Error:', error); return; }
   
   const div = document.getElementById('controls-content');
@@ -266,7 +262,11 @@ async function loadMenu() {
 }
 
 window.updateMenu = async (name, status) => {
-  await supabaseClient.from('menu_status').update({status, updated_at: new Date()}).eq('item_name', name);
+  await supabaseClient
+    .from('menu_status')
+    .update({status, updated_at: new Date()})
+    .eq('item_name', name)
+    .eq('restaurant', 'kusina'); // <--- FIX 3: ONLY UPDATE KUSINA MENU
   loadMenu();
 };
 
@@ -276,10 +276,9 @@ window.updateMenu = async (name, status) => {
 loadOrders();
 loadMenu();
 
-// Refresh every 5 seconds
 setInterval(loadOrders, 5000);
 setInterval(loadMenu, 10000);
-setInterval(renderOrders, 1000); // Update timers every second
+setInterval(renderOrders, 1000);
 </script>
 
 </body>
