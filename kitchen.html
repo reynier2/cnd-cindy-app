@@ -183,9 +183,12 @@ function createOrderCard(o) {
   return `
     <div class="order-card status-${o.status}">
       <div class="order-top">
-        <span class="order-id">#${o.id} <span style="font-size:12px; color:#888">(${o.status})</span></span>
-        <span class="order-timer">⏱️ ${timeAgo}</span>
-      </div>
+  <span class="order-id">#${o.id} <span style="font-size:12px; color:#888">(${o.status})</span></span>
+  <div style="text-align:right;">
+    <span class="order-timer">⏱️ ${timeAgo}</span><br>
+    <span style="font-size:11px; color:#ff8c00;">🕒 ${new Date(o.created_at).toLocaleString()}</span>
+  </div>
+</div>
       <div class="order-customer">👤 ${o.customer_name || 'Customer'} | 📞 ${o.phone || 'N/A'} | 🕒 ${o.pickup_time || 'ASAP'}</div>
       <div class="order-items">
         ${items.map(i => `<div class="order-item"><span>${i.qty}x ${i.name}</span><span>$${(i.price * i.qty).toFixed(2)}</span></div>`).join('')}
