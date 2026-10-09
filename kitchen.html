@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mama's Manager Board</title>
+<title>Luna Taqueria - Manager Board</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -63,14 +63,14 @@ body { background: #1a0f0a; color: #ffd700; font-family: 'Segoe UI', sans-serif;
 <body>
 
 <div class="header">
-  <h1>🍽️ MAMA'S MANAGER BOARD</h1>
+  <h1>🌮 LUNA TAQUERIA MANAGER BOARD</h1>
   <div class="status-badge">● LIVE</div>
 </div>
 
 <div class="main-container">
   <!-- LEFT: ORDERS -->
   <div class="orders-panel">
-    <div class="panel-header"><h2> ACTIVE ORDERS</h2></div>
+    <div class="panel-header"><h2>ACTIVE ORDERS</h2></div>
     <div class="orders-scroll" id="active-orders-list">
       <div class="waiting">Waiting for orders...</div>
     </div>
@@ -94,10 +94,13 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// UPDATED FOR LUNA TAQUERIA
 const MENU_CATEGORIES = {
-  'Appetizers': ['Lumpia Shanghai Pork (12pc)', 'Lumpia Shanghai Chicken (12pc)', 'Lumpia Gulay (1pc)', 'Lumpia Sariwa (2pc)'],
-  'Specials & BBQ': ['Lechon Kawali', 'Pork Sisig', 'Chicken BBQ Stick (2pc)', 'Pork BBQ Stick'],
-  'Entrees': ['Chicken Adobo', 'Pork Adobo', 'Chicken Curry']
+  'Tacos': ['Tacos'],
+  'Quesabirrias': ['Quesabirrias'],
+  'Gorditas & Sopes': ['Gorditas', 'Sopes'],
+  'Burritos': ['Burritos'],
+  'Specials': ['Pollo Frito Chapin', 'Flautas de Pollo']
 };
 
 let knownOrderIds = new Set();
@@ -126,7 +129,6 @@ function playAlarm() {
 async function loadOrders() {
   const { data, error } = await supabaseClient
     .from('orders')
-    .eq('restaurant', 'kusina') // <--- FIX 1: ONLY PULL KUSINA ORDERS
     .select('*')
     .neq('status', 'deleted')
     .order('created_at', { ascending: false });
@@ -227,11 +229,11 @@ window.deleteOrder = async (id) => {
 // MENU CONTROLS (Right Side)
 // ==========================================
 async function loadMenu() {
+  // Querying the 'menu' table we just populated
   const { data, error } = await supabaseClient
-    .from('menu_status')
-    .eq('restaurant', 'kusina') // <--- FIX 2: ONLY PULL KUSINA MENU
+    .from('menu')
     .select('*')
-    .order('item_name');
+    .order('category');
     
   if (error) { console.error('Menu Error:', error); return; }
   
@@ -244,16 +246,20 @@ async function loadMenu() {
     catDiv.innerHTML = `<h3>${cat}</h3>`;
     
     MENU_CATEGORIES[cat].forEach(name => {
-      const item = data.find(m => m.item_name === name);
+      const item = data.find(m => m.name === name);
       if (!item) return;
+      
+      // Note: If your 'menu' table doesn't have a 'status' column yet, 
+      // it will default to green. We can add it in Supabase if needed.
+      const currentStatus = item.status || 'green'; 
       
       catDiv.innerHTML += `
         <div class="control-item">
           <div class="control-name">${name}</div>
           <div class="traffic-lights">
-            <button class="light-btn light-green ${item.status==='green'?'active':''}" onclick="updateMenu('${name}','green')"> Avail</button>
-            <button class="light-btn light-yellow ${item.status==='yellow'?'active':''}" onclick="updateMenu('${name}','yellow')"> Low</button>
-            <button class="light-btn light-red ${item.status==='red'?'active':''}" onclick="updateMenu('${name}','red')"> Sold</button>
+            <button class="light-btn light-green ${currentStatus==='green'?'active':''}" onclick="updateMenu('${name}','green')"> Avail</button>
+            <button class="light-btn light-yellow ${currentStatus==='yellow'?'active':''}" onclick="updateMenu('${name}','yellow')"> Low</button>
+            <button class="light-btn light-red ${currentStatus==='red'?'active':''}" onclick="updateMenu('${name}','red')"> Sold</button>
           </div>
         </div>`;
     });
@@ -263,10 +269,9 @@ async function loadMenu() {
 
 window.updateMenu = async (name, status) => {
   await supabaseClient
-    .from('menu_status')
-    .update({status, updated_at: new Date()})
-    .eq('item_name', name)
-    .eq('restaurant', 'kusina'); // <--- FIX 3: ONLY UPDATE KUSINA MENU
+    .from('menu')
+    .update({status: status})
+    .eq('name', name);
   loadMenu();
 };
 
