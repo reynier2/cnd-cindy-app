@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tito Mel's — Order for Pickup</title>
+<title>Luna Taqueria — Order for Pickup</title>
 <style>
 :root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#e63946;--cream:#fff3e0;--dim:#c9a27a}
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
@@ -16,16 +16,6 @@ h3{color:var(--gold);letter-spacing:2px;margin:18px 0 8px;font-size:.95rem}
 .item-info { display: flex; flex-direction: column; }
 .row .n{font-size:.95rem}
 .row .p{color:var(--gold);font-weight:700;font-size:.85rem;margin-top:4px}
-.thumb {
-width: 55px; height: 55px;
-object-fit: cover;
-border-radius: 8px;
-border: 2px solid var(--gold);
-cursor: pointer;
-transition: transform 0.2s, box-shadow 0.2s;
-flex-shrink: 0;
-}
-.thumb:active { transform: scale(0.95); box-shadow: 0 0 10px rgba(255,183,3,0.5); }
 .qty{display:flex;gap:8px;align-items:center}
 .qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:800;cursor:pointer;font-size:1.2rem}
 .qty span{min-width:18px;text-align:center;font-weight:800;font-size:1.1rem}
@@ -33,37 +23,6 @@ input,select,textarea{width:100%;background:var(--card);border:1px solid rgba(25
 .send{width:100%;background:linear-gradient(135deg,var(--gold),#fb8500);border:none;color:#140b06;font-weight:800;letter-spacing:1px;padding:16px;border-radius:30px;font-size:1.05rem;cursor:pointer;box-shadow:0 0 22px rgba(255,183,3,.5);margin-top:10px}
 .send:disabled{opacity:0.6;cursor:not-allowed}
 #msg{text-align:center;margin:14px 0;font-weight:700;min-height:24px}
-#img-modal {
-display: none;
-position: fixed;
-z-index: 1000;
-left: 0; top: 0;
-width: 100%; height: 100%;
-background-color: rgba(0,0,0,0.9);
-justify-content: center;
-align-items: center;
-backdrop-filter: blur(5px);
-}
-#img-modal img {
-max-width: 90%;
-max-height: 85%;
-border-radius: 12px;
-border: 3px solid var(--gold);
-box-shadow: 0 0 40px rgba(255,183,3,0.4);
-object-fit: contain;
-}
-.close-modal {
-position: absolute;
-top: 20px; right: 30px;
-color: white;
-font-size: 40px;
-font-weight: bold;
-cursor: pointer;
-background: rgba(0,0,0,0.5);
-width: 50px; height: 50px;
-border-radius: 50%;
-display: flex; justify-content: center; align-items: center;
-}
 #confirmation-screen {
 display: none;
 text-align: center;
@@ -95,7 +54,7 @@ font-size: 1rem;
 </head>
 <body>
 <div id="order-form">
-<h1>TITO MEL'S</h1>
+<h1>LUNA TAQUERIA</h1>
 <div class="sub">ORDER FOR PICKUP · PAY AT THE COUNTER</div>
 <div id="menu"></div>
 
@@ -118,78 +77,56 @@ font-size: 1rem;
 <button class="send" id="send">🛒 SEND ORDER TO THE KITCHEN</button>
 <div id="msg"></div>
 </div>
+
 <div id="confirmation-screen">
 <div style="font-size: 4rem; margin-bottom: 10px;">✅</div>
 <h2>ORDER ACCEPTED!</h2>
 <div class="order-number" id="conf-order-id">Order #---</div>
 <p>The kitchen has received your order and is preparing it now.</p>
 <p>Pickup Time: <span class="highlight" id="conf-pickup">ASAP</span></p>
-<p style="color: var(--dim); font-size: 0.9rem; margin-top: 20px;">Please pay at the counter when you arrive.<br>Thank you for choosing Tito Mel's!</p>
+<p style="color: var(--dim); font-size: 0.9rem; margin-top: 20px;">Please pay at the counter when you arrive.<br>Thank you for choosing Luna Taqueria!</p>
 <a href="javascript:window.location.reload()" class="btn-home">← BACK TO MENU</a>
 </div>
-<div id="img-modal" onclick="closeImage()">
-<div class="close-modal">&times;</div>
-<img id="modal-img" src="" alt="Food Preview">
-</div>
+
 <script>
 const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
 const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE";
 const $=id=>document.getElementById(id);
+
 const MENU=[
-{cat:"APPETIZERS",items:[
-["Lumpia Shanghai Pork (12pc)",11.99, "https://www.rachelrecipe.com/wp-content/uploads/2025/10/knfplwufioltukgfdqu1.webp"],
-["Lumpia Shanghai Chicken (12pc)",11.99, "https://photos.bigoven.com/recipe/hero/lumpia-shanghai-2.jpg"],
-["Lumpia Gulay (1pc)",1.50, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Lumpia%20Gulay%203.jpg"],
-["Lumpia Sariwa (2pc)",10.99, "https://i.pinimg.com/originals/0d/07/d5/0d07d5f7313fe47a7853a9a80e68a260.jpg"]
+{cat:"TACOS & QUESABIRRIAS",items:[
+["Tacos (3pc)", 9.99, ""],
+["Quesabirria Taco (3pc)", 12.99, ""],
+["Quesabirria Combo (with Consomé)", 15.99, ""]
 ]},
-{cat:"SPECIALS & BBQ",items:[
-["Lechon Kawali",10.99, "https://www.seriouseats.com/thmb/4wkT0wFghCvD6DK8HQRbtt6ubko=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/__opt__aboutcom__coeus__resources__content_migration__serious_eats__seriouseats.com__images__2015__01__20150102-lechon-kawali-first-finished-joshua-bousel-ad06cbac80af4886a6183f9041a61d9e.jpg"],
-["Pork Sisig",10.99, "https://www.cookmunitybyajinomoto.com/wp-content/uploads/2021/08/Pork-Sisig-2-scaled.jpg"],
-["Chicken BBQ Stick (2pc)",7.99, "https://4.bp.blogspot.com/-MbRBxoKsNkQ/ThIHWX6I99I/AAAAAAAAERw/1lvjYtNqkwI/s1600/IMG_6777_picnik.jpg"],
-["Pork BBQ Stick",7.99, "https://th.bing.com/th/id/R.7f468e9021eeb3cb3874a9270e1051a6?rik=ahjndT4bL9w3ZA&riu=http%3a%2f%2f25.media.tumblr.com%2ftumblr_lfg90qVgPI1qc2zn8o1_500.jpg&ehk=0af5cM%2b3nPZEYYAWuxitSO9roNyFK8HUmExHMccqheA%3d&risl=&pid=ImgRaw&r=0"]
+{cat:"BURRITOS & GORDITAS",items:[
+["Burrito (Beef or Chicken)", 10.99, ""],
+["Gordita (Beef or Chicken)", 4.99, ""],
+["Gordita Combo (with Drink)", 8.99, ""]
 ]},
-{cat:"ENTREES",items:[
-["Chicken Adobo",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Chicken%20Adobo%209.webp"],
-["Pork Adobo",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/pork-adobo%2010.jpg"],
-["Chicken Curry",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Filipino-Chicken-Curry%2011.jpg"],
-["Menudo",8.99, "https://www.kawalingpinoy.com/wp-content/uploads/2016/12/filipino-chicken-menudo-1.jpg"],
-["Bicol Express",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Bicol-Express%2013.jpg"],
-["Kaldereta",10.25, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/kaldereta%2014.jpg"],
-["Chicken Tinola",8.99, "https://valentinarecipes.com/wp-content/uploads/2024/12/Chicken-Tinola-Recipe1-768x1152.png"],
-["Pork Sinigang",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Pork%20Sinigang%2016.webp"],
-["Pork Dinuguan",8.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Pork%20Dinuguan%2017.jpg"]
+{cat:"SIDES & EXTRAS",items:[
+["Chips & Salsa", 3.99, ""],
+["Chips & Guacamole", 5.99, ""],
+["Extra Consomé", 3.00, ""]
 ]},
-{cat:"NOODLES & COMBO",items:[
-["Pancit Bihon",10.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/pancit-bihon%2018.webp"],
-["Palabok",11.99, "https://www.foxyfolksy.com/wp-content/uploads/2015/07/palabok-t-1.jpg"],
-["Combo (2 entrees + side)", 12.99, ""]
-]},
-{cat:"SIDES",items:[
-["Plain Rice",1.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/plain-rice.jpg"],
-["Adobo Rice",2.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Adobo%20Rice%2022.jpg"],
-["Plantains",2.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Plantains%2023.jpg"],
-["Stir Fry Vegetables",4.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/images/stir-fry.jpg"],
-]},
-{cat:"DRINKS & DESSERTS",items:[
-["Buko Pandan Juice",6.25, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Buko%20Pandan%20Juice%2025.jpg"],
-["Mango / Taro Boba",6.75, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/images/mango-boba.jpg"],
-["Smoothies",6.00, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/smoothies.jpg"],
-["Halo-Halo",6.50, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/Halo-Halo%2028.webp"],
-["Ube Biko",5.99, "https://raw.githubusercontent.com/reynier2/cnd-cindy-app/main/ube-biko%2029.jpg"]
+{cat:"DRINKS",items:[
+["Soda", 2.50, ""],
+["Agua Fresca", 3.50, ""],
+["Jarritos", 3.00, ""]
 ]}
 ];
+
 const FLAT=[];
 MENU.forEach(c=>c.items.forEach(i=>FLAT.push(i)));
 const qty={};
+
 $("menu").innerHTML = MENU.map(c=>{
 let html='<h3>'+c.cat+'</h3>';
 c.items.forEach(i=>{
 const key=FLAT.indexOf(i);
-const imgUrl = i[2] || '';
 html+=`
 <div class="row">
 <div class="item-left">
-${imgUrl ? `<img src="${imgUrl}" class="thumb" onclick="openImage('${imgUrl}')" alt="${i[0]}">` : ''}
 <div class="item-info">
 <span class="n">${i[0]}</span>
 <span class="p">$${i[1].toFixed(2)}</span>
@@ -204,11 +141,13 @@ ${imgUrl ? `<img src="${imgUrl}" class="thumb" onclick="openImage('${imgUrl}')" 
 });
 return html;
 }).join("");
+
 function add(key,d){
 qty[key]=Math.max(0,(qty[key]||0)+d);
 $("q_"+key).textContent=qty[key];
 updateTotal();
 }
+
 function updateTotal(){
 let total = 0;
 FLAT.forEach((item, idx) => {
@@ -217,23 +156,19 @@ total += item[1] * q;
 });
 $("total-amount").textContent = total.toFixed(2);
 }
-window.openImage = function(url) {
-$("modal-img").src = url;
-$("img-modal").style.display = "flex";
-}
-window.closeImage = function() {
-$("img-modal").style.display = "none";
-}
+
 $("send").onclick=async()=>{
 const items=FLAT.map((i,idx)=>{
 const q = qty[idx]||0;
 return q > 0 ? {name:i[0], qty:q, price:i[1]} : null;
 }).filter(x=>x!==null);
+
 if(!items.length){
-$("msg").textContent="️ Please add at least one item 🙂";
+$("msg").textContent="⚠️ Please add at least one item 🙂";
 $("msg").style.color = "var(--red)";
 return;
 }
+
 const customer=$("cname").value.trim();
 const phone=$("cphone").value.trim();
 if(!customer||!phone){
@@ -241,10 +176,12 @@ $("msg").textContent="⚠️ Please add your name and phone number.";
 $("msg").style.color = "var(--red)";
 return;
 }
+
 const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
 $("send").disabled = true;
 $("send").textContent = "Sending to kitchen...";
 $("msg").textContent = "";
+
 try{
 const payload = {
 customer_name: customer,
@@ -255,6 +192,7 @@ items: items,
 total: total,
 status: "new"
 };
+
 const r = await fetch(SUPA + "/rest/v1/orders", {
 method: "POST",
 headers: {
@@ -265,6 +203,7 @@ Authorization: "Bearer " + KEY,
 },
 body: JSON.stringify(payload)
 });
+
 if(r.ok){
 const result = await r.json();
 const orderId = result[0].id;
