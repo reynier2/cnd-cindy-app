@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Manager Portal — Tito Mel's</title>
+<title>Manager Portal — Luna Taqueria</title>
 <style>
 :root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#e63946;--cream:#fff3e0;--dim:#c9a27a}
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
@@ -28,7 +28,7 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
 
 <!-- LOGIN SCREEN -->
 <div id="login-screen" class="active">
-  <h1>🔒 MANAGER PORTAL</h1>
+  <h1>🔒 LUNA TAQUERIA MANAGER</h1>
   <p style="text-align:center;color:var(--dim);margin-bottom:20px;">Enter passcode to manage the menu.</p>
   <input type="password" id="passcode" placeholder="Enter Passcode">
   <button class="btn" onclick="checkPass()">UNLOCK</button>
@@ -43,16 +43,13 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
   <div class="section-box">
     <h2 style="margin-top:0;font-size:1.2rem;"> ADD NEW ITEM</h2>
     <select id="new-cat">
-      <option value="APPETIZERS">APPETIZERS</option>
-      <option value="SPECIALS & BBQ">SPECIALS & BBQ</option>
-      <option value="ENTREES">ENTREES</option>
-      <option value="NOODLES & COMBO">NOODLES & COMBO</option>
-      <option value="SIDES">SIDES</option>
-      <option value="DRINKS & DESSERTS">DRINKS & DESSERTS</option>
+      <option value="TACOS & QUESABIRRIAS">TACOS & QUESABIRRIAS</option>
+      <option value="BURRITOS & GORDITAS">BURRITOS & GORDITAS</option>
+      <option value="SIDES & EXTRAS">SIDES & EXTRAS</option>
+      <option value="DRINKS">DRINKS</option>
     </select>
-    <input id="new-name" placeholder="Item Name (e.g., Chicken Adobo)">
-    <input id="new-price" type="number" step="0.01" placeholder="Price (e.g., 8.99)">
-    <input id="new-img" placeholder="Image URL (optional)">
+    <input id="new-name" placeholder="Item Name (e.g., Quesabirria Taco)">
+    <input id="new-price" type="number" step="0.01" placeholder="Price (e.g., 12.99)">
     <button class="btn" onclick="addItem()">ADD TO MENU</button>
   </div>
 
@@ -67,9 +64,9 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
 </div>
 
 <script>
-// CORRECT CREDENTIALS FOR CINDY-EMPIRE
-const SUPA = "https://hnwrhbbehjjijoxavwuyq.supabase.co";
-const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhud3JoYmVoaGppam94YXZ3dXlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3MzQ1MzMsImV4cCI6MjEwMDMxMDUzM30.7eh4bxe9_kIShIe-0m11jiTClbAld54GhTJaGzCdRfY";
+// CORRECT CREDENTIALS FOR LUNA TAQUERIA
+const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
+const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE";
 
 function checkPass() {
   if(document.getElementById("passcode").value === "CND-BOSS") {
@@ -94,7 +91,8 @@ async function loadMenu() {
   list.innerHTML = "<p style='text-align:center;color:var(--gold);'>Loading menu...</p>";
   
   try {
-    const res = await fetch(`${SUPA}/rest/v1/menu_items?order=category.asc,name.asc`, {
+    // Fetching from the correct 'menu' table
+    const res = await fetch(`${SUPA}/rest/v1/menu?order=category.asc,name.asc`, {
       headers: { "apikey": KEY, "Authorization": "Bearer " + KEY }
     });
     const data = await res.json();
@@ -115,7 +113,7 @@ async function loadMenu() {
         <div class="item-row">
           <div class="item-info">
             <div class="name">${item.name}</div>
-            <div class="price">$${parseFloat(item.price).toFixed(2)}</div>
+            <div class="price">$${parseFloat(item.price_s).toFixed(2)}</div>
           </div>
           <button class="btn-delete" onclick="deleteItem(${item.id})">DELETE</button>
         </div>
@@ -130,13 +128,12 @@ async function addItem() {
   const cat = document.getElementById("new-cat").value;
   const name = document.getElementById("new-name").value.trim();
   const price = document.getElementById("new-price").value;
-  const img = document.getElementById("new-img").value.trim();
 
   if(!name || !price) { alert("Please fill in Name and Price."); return; }
 
-  const payload = { category: cat, name: name, price: parseFloat(price), image_url: img };
+  const payload = { category: cat, name: name, price_s: parseFloat(price), status: 'green' };
   
-  const response = await fetch(`${SUPA}/rest/v1/menu_items`, {
+  const response = await fetch(`${SUPA}/rest/v1/menu`, {
     method: "POST",
     headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
     body: JSON.stringify(payload)
@@ -145,7 +142,6 @@ async function addItem() {
   if(response.ok) {
     document.getElementById("new-name").value = "";
     document.getElementById("new-price").value = "";
-    document.getElementById("new-img").value = "";
     loadMenu(); 
   } else {
     alert("Error adding item.");
@@ -154,7 +150,7 @@ async function addItem() {
 
 async function deleteItem(id) {
   if(!confirm("Delete this item from the live menu?")) return;
-  const response = await fetch(`${SUPA}/rest/v1/menu_items?id=eq.${id}`, {
+  const response = await fetch(`${SUPA}/rest/v1/menu?id=eq.${id}`, {
     method: "DELETE",
     headers: { "apikey": KEY, "Authorization": "Bearer " + KEY }
   });
