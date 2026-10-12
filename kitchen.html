@@ -268,11 +268,22 @@ async function loadMenu() {
 }
 
 window.updateMenu = async (name, status) => {
-  await supabaseClient
+  console.log("CLICK DETECTED! Updating:", name, "to", status);
+  alert("Updating: " + name + " to " + status);
+  
+  const { data, error } = await supabaseClient
     .from('menu')
-    .update({status: status})
-    .eq('name', name);
-  loadMenu();
+    .update({ status: status })
+    .eq('name', name)
+    .select();
+    
+  if (error) {
+    console.error("DATABASE ERROR:", error);
+    alert("Database Error: " + error.message);
+  } else {
+    console.log("SUCCESS! Updated:", data);
+    loadMenu();
+  }
 };
 
 // ==========================================
