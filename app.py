@@ -1,4 +1,4 @@
-# === CND CLOUD SHARE FINAL ===
+# === CND CLOUD SHARE FINAL (UPDATED WITH SHEETROCK & TRUE/FALSE FILTER) ===
 import streamlit as st
 import streamlit.components.v1 as components
 import os
@@ -29,7 +29,7 @@ INSPECTION_CRITERIA_MANUAL = {
     }
 }
 
-# === ENTERPRISE VAULT (locked features for big-company tier - DO NOT DELETE) ===
+# === ENTERPRISE VAULT ===
 MANAGER_PASSCODE = "CND-BOSS"
 
 def job_code_for(tech):
@@ -164,7 +164,7 @@ def log_trap_event(event, detail="", lat=0, lon=0):
         requests.post(url, json={"event": f"{event} {detail}".strip()[:160], "lat": lat, "lon": lon, "city": ""}, timeout=5)
     except Exception: pass
 
-# === CLOUD CODE INSPECTOR ENGINE (GPT-4o Vision) ===
+# === CLOUD CODE INSPECTOR ENGINE ===
 def execute_building_inspection(photo_paths, trade_domain, inspector_notes):
     api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key: return "Error: OpenAI API Key missing in Streamlit Secrets."
@@ -184,7 +184,7 @@ def execute_building_inspection(photo_paths, trade_domain, inspector_notes):
         "3. FIELD DEFICIENCY BREAKDOWN & CORRECTION WALKTHROUGH:\n"
         "   - List all observed deficiencies using code references.\n"
         "   - Detail the exact step-by-step correction instructions that the contractor must perform to clear the violation.\n\n"
-        "Format your output report precisely using bold headers: '📋 Official Inspection Status', '🔍 Observed Deficiencies & Code References', and '🛠️ Required Remediation Walkthrough Guidelines'."
+        "Format your output report precisely using bold headers: '📋 Official Inspection Status', ' Observed Deficiencies & Code References', and '️ Required Remediation Walkthrough Guidelines'."
     )
     
     user_prompt = f"Field Inspector Observations: {inspector_notes}" if inspector_notes else "Conduct full visual audit against code guidelines."
@@ -230,7 +230,7 @@ End with either 'OVERALL: GOOD TO GO' or 'OVERALL: SLOW DOWN - FIX THE FLAGGED I
         else: return f"AI Error: {response.text}"
     except Exception as e: return f"AI Error: {str(e)}"
 
-def analyze_photos_with_ai(photo_paths, zipcode, client_name=""):
+def analyze_photos_with_ai(photo_paths, zipcode, client_name="", reference_photo_paths=None):
     api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key: return "Error: OpenAI API Key missing in Streamlit Secrets."
     client_rule = f"- This report is PREPARED FOR: {client_name.upper()}. Start with this line." if client_name else "- No client name provided."
@@ -265,6 +265,19 @@ OUTPUT FORMAT RULES (mandatory):
 - ALSO put this line inside the Notes section: "Ballpark range: Low $A - High $B".
 - CITY CODE INSPECTOR MODE (JSON ONLY): If asked for a code check, DO NOT output markdown. Output ONLY a valid JSON object with these exact keys: 'building_type', 'compliance_status' ('PASSED' or 'FAILED'), 'failed_rules_count', and 'evaluations' (array of objects with 'rule_id', 'description', 'status', 'details')."""
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": []}]
+    
+    # === TRUE/FALSE DAMAGE FILTER LOGIC ===
+    if reference_photo_paths and len(reference_photo_paths) > 0:
+        ref_text = f"CRITICAL INSTRUCTION: You are provided with {len(reference_photo_paths)} REFERENCE DAMAGE PHOTOS. These represent the 'TRUE' condition. Look at the new job photos. ONLY estimate and price the areas that visually match the damage in these reference photos. Apply a strict TRUE/FALSE filter: TRUE = matches reference damage (price it). FALSE = healthy material (ignore it, do not price the whole wall)."
+        messages[1]["content"].append({"type": "text", "text": ref_text})
+        
+        for ref_path in reference_photo_paths:
+            try:
+                with open(ref_path, "rb") as f: 
+                    b64 = base64.b64encode(f.read()).decode('utf-8')
+                messages[1]["content"].append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}})
+            except Exception: pass
+
     messages[1]["content"].append({"type": "text", "text": f"Analyze {len(photo_paths)} photos. Zip: {zipcode}."})
     for path in photo_paths:
         try:
@@ -487,7 +500,7 @@ def build_pdf_fallback(result_text, lang, client_name="", photo_paths=[], extra_
 
 st.set_page_config(page_title="CND Real Estate Services", page_icon="cindy happy.png", layout="wide")
 st.title("CND Real Estate Services")
-# === NEON SHOWROOM SKIN (matches the website) ===
+# === NEON SHOWROOM SKIN ===
 NEON_SKIN = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
@@ -525,14 +538,14 @@ if st.session_state.get("inspector_mode"):
     
     selected_trade = st.selectbox("Select Inspection Discipline:", list(INSPECTION_CRITERIA_MANUAL.keys()))
     domain_guidelines = INSPECTION_CRITERIA_MANUAL.get(selected_trade, {})
-    st.info(f"📚 **Active Code Checklists:**\n" + "\n".join([f"- **{k}**: {v}" for k, v in domain_guidelines.items()]))
+    st.info(f" **Active Code Checklists:**\n" + "\n".join([f"- **{k}**: {v}" for k, v in domain_guidelines.items()]))
     
     inspector_field_notes = st.text_area("Inspector On-Site Observations (Optional):", placeholder="e.g., Checking mortar joint filling on northwest corner lead...")
     
     insp_files = st.file_uploader("Capture or upload audit field photo:", type=["jpg", "jpeg", "png"], accept_multiple_files=True, key="insp_photos")
     
     if insp_files:
-        if st.button("⚖️ Execute Structural Code Audit"):
+        if st.button("️ Execute Structural Code Audit"):
             with st.spinner("AI parsing pixel attributes against municipal code guidelines..."):
                 temp_dir = tempfile.mkdtemp()
                 paths = []
@@ -553,20 +566,20 @@ if st.session_state.get("inspector_mode"):
                 finally: shutil.rmtree(temp_dir, ignore_errors=True)
                 
     st.markdown("---")
-    if st.button("⬅️ Back to Home"):
+    if st.button("️ Back to Home"):
         st.session_state["inspector_mode"] = False
         st.rerun()
     st.stop()
 
 if not st.session_state.get("landed"):
     tp = st.query_params.get("trade")
-    if tp in ("electrical", "plumbing", "siding", "roofing", "concrete", "pipe", "masonry"):
+    if tp in ("electrical", "plumbing", "siding", "roofing", "concrete", "pipe", "masonry", "sheetrock"):
         st.session_state.trade_view = tp
     log_trap_event("LANDING", f"lang={lang} ref={ref_code or 'direct'} trade={st.session_state.get('trade_view') or 'home'}")
     c1, c2 = st.columns([1, 2])
     with c1:
         try: st.image("cindy happy.png", width=230)
-        except Exception: st.markdown("# 🧑‍🔧")
+        except Exception: st.markdown("# 🧑‍")
         st.caption("**Cindy** — your AI estimating partner")
     with c2:
         st.markdown("# 🏠 CND REAL ESTATE SERVICES")
@@ -580,13 +593,13 @@ if not st.session_state.get("landed"):
     st.markdown("---")
     TRADE_INFO = {
         "electrical": ("⚡ Electrical", "I spot panels, fixtures and conduit runs in your photos. I price Southwire wire, breaker panels and devices at real unit costs, add licensed electrician labor hours, and flag permit + inspection requirements so your bid passes the first time.", "Sample: Southwire 12/2 Romex 50 ft - 6 rolls x $38.50 = $231.00"),
-        "plumbing": ("🚿 Plumbing", "I trace supply and drain runs, price Charlotte Pipe PVC and fixtures, check water pressure (PRV if over 80 psi), note the frost line, and stamp drain slopes with Manning's Equation.", "Sample: Charlotte Pipe Sch 40 PVC 2in - 40 ft x $1.10/ft = $44.00"),
+        "plumbing": (" Plumbing", "I trace supply and drain runs, price Charlotte Pipe PVC and fixtures, check water pressure (PRV if over 80 psi), note the frost line, and stamp drain slopes with Manning's Equation.", "Sample: Charlotte Pipe Sch 40 PVC 2in - 40 ft x $1.10/ft = $44.00"),
         "siding": ("🏠 Siding", "I measure your wall area from the photo, price James Hardie HardiePlank by the square with Tyvek wrap, trim and fasteners, and add crew labor with full math.", "Sample: James Hardie HardiePlank - 8 squares x $412 = $3,296.00"),
         "roofing": ("🛠️ Roofing", "I count roof planes and stories, price GAF Timberline HDZ by the square with underlayment and drip edge, and include tear-off, haul-off and disposal.", "Sample: GAF Timberline HDZ - 24 sq x $145 = $3,480.00"),
         "concrete": ("🧱 Concrete", "I measure slabs and footings, price Quikrete bag math or ready-mix yardage with forms and rebar, and run the 30 PSI soil bearing check on foundations.", "Sample: Quikrete Concrete Mix 80 lb - 60 bags x $6.48 = $388.80"),
         "pipe": ("🚰 Pipe & Drain", "I run Manning's Equation on your pipe photos - diameter, slope, flow capacity - and stamp PASS or RED FLAG against city requirements. Municipal-grade compliance in 15 seconds.", "Sample: CITY PLAN COMPLIANCE CHECK - 12in PVC @ 1.5% | Flow 4.2 CFS vs Req 3.0 | STATUS: PASS"),
         "masonry": ("🧱 Masonry", "I read brick like a master mason - IRA suction test, mortar bleed and creep, crow's-foot lead layout, and Flemish/English bond logic. I match mortar grade to the structure (Type M, S, N, O) and flag weak bonds before they crack.", "Sample: Standard Clay Modular Brick - 500 bricks x $1.35 = $675.00"),
-                "sheetrock": ("📋 Sheetrock", "I measure your wall and ceiling areas from the photos, price USG Sheetrock panels by the sheet with joint compound, tape, corner beads, and fasteners. I include hanging, taping, mudding, sanding labor, plus texture and prime/paint if visible.", "Sample: USG Sheetrock 4x8 5/8in - 45 sheets x $18.50 = $832.50"),
+        "sheetrock": ("📋 Sheetrock", "I measure your wall and ceiling areas from the photos, price USG Sheetrock panels by the sheet with joint compound, tape, corner beads, and fasteners. I include hanging, taping, mudding, sanding labor, plus texture and prime/paint if visible.", "Sample: USG Sheetrock 4x8 5/8in - 45 sheets x $18.50 = $832.50"),
     }
     keys = list(TRADE_INFO.keys())
     for row_start in range(0, len(keys), 3):
@@ -601,7 +614,7 @@ if not st.session_state.get("landed"):
         label, pitch, sample = TRADE_INFO[tv]
         st.markdown("---")
         st.markdown(f"### {label} — {'Cindy explica:' if lang == 'es' else 'Cindy explains:'}")
-        st.markdown(f"> 💬 **Cindy:** {pitch}")
+        st.markdown(f">  **Cindy:** {pitch}")
         st.code(sample)
         if st.button("⬅️ Back / Atrás"):
             st.session_state.trade_view = None
@@ -620,9 +633,9 @@ if not st.session_state.get("landed"):
             st.rerun()
     st.stop()
 
-# === VAULT: JOB SITE CHECKUP MODE (hidden for now - flip the button back on when ready to charge) ===
+# === VAULT: JOB SITE CHECKUP MODE ===
 if st.session_state.get("safety_mode"):
-    st.subheader("🧪 Job Site Checkup — Smart Inspector")
+    st.subheader(" Job Site Checkup — Smart Inspector")
     st.info("Cindy is the inspector. Your phone is the eyes. Snap the site and get an instant read on what's good and what needs fixing.")
     tech_name = st.text_input("Who's on site? (optional):", value="", key="tech_name")
     s_files = st.file_uploader("Snap the site (wide shot + close-ups):", type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="safety_photos")
@@ -655,9 +668,9 @@ if st.session_state.get("safety_mode"):
     st.stop()
 
 if lang == "es":
-    T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": "🎁 BETA ABIERTA — todos los presupuestos son 100% GRATIS por ahora. Sin tarjeta, sin trampas. Tome fotos y reciba su presupuesto.", "step2": "### 📸 Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": "📄 Descargar Presupuesto PDF Profesional", "client": "👤 Nombre del cliente (opcional, sale en el reporte)", "geo_hint": "📍 Toca el botón para usar tu ubicación y fijar precios locales."}
+    T = {"sub": "Con tecnología de Cindy AI", "intro": "Suba fotos ilimitadas del proyecto y Cindy generará un presupuesto profesional al instante.", "free_banner": " BETA ABIERTA — todos los presupuestos son 100% GRATIS por ahora. Sin tarjeta, sin trampas. Tome fotos y reciba su presupuesto.", "step2": "### 📸 Suba sus fotos", "tip": "💡 **Consejo:** En su teléfono, toque 'Choose files' y seleccione **'Take Photo'** o **'Camera'** del menú.", "uploader": "Elija imágenes", "uploaded": "foto(s) subida(s)!", "generate": "🚀 Generar Presupuesto", "spinner": "Cindy está analizando las fotos... esto toma unos 15 segundos...", "success": "¡Presupuesto Generado!", "download": " Descargar Presupuesto PDF Profesional", "client": " Nombre del cliente (opcional, sale en el reporte)", "geo_hint": "📍 Toca el botón para usar tu ubicación y fijar precios locales."}
 else:
-    T = {"sub": "Powered by Cindy AI Estimator", "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.", "free_banner": "🎁 BETA OPEN — every estimate is 100% FREE right now. No card, no catch. Snap photos, get your bid.", "step2": "### 📸 Upload your photos", "tip": "💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!", "uploader": "Choose images", "uploaded": "photo(s) uploaded!", "generate": "🚀 Generate Estimate", "spinner": "Cindy is analyzing the photos... this takes about 15 seconds...", "success": "Estimate Generated!", "download": "📄 Download Professional PDF Bid", "client": "👤 Client name (optional, printed on the report)", "geo_hint": "📍 Tap the button to use your location and lock in local prices."}
+    T = {"sub": "Powered by Cindy AI Estimator", "intro": "Upload unlimited project photos of the repair job, and Cindy will generate a professional bid instantly.", "free_banner": " BETA OPEN — every estimate is 100% FREE right now. No card, no catch. Snap photos, get your bid.", "step2": "### 📸 Upload your photos", "tip": "💡 **Tip:** On your phone, tap 'Choose files' and select **'Take Photo'** or **'Camera'** from the menu!", "uploader": "Choose images", "uploaded": "photo(s) uploaded!", "generate": "🚀 Generate Estimate", "spinner": "Cindy is analyzing the photos... this takes about 15 seconds...", "success": "Estimate Generated!", "download": "📄 Download Professional PDF Bid", "client": "👤 Client name (optional, printed on the report)", "geo_hint": "📍 Tap the button to use your location and lock in local prices."}
 st.subheader(T["sub"])
 st.write(T["intro"])
 st.success(T["free_banner"])
@@ -673,7 +686,7 @@ st.markdown(T["step2"]); st.info(T["tip"])
 if lang == "es":
     st.warning("📶 **¿Señal mala en la obra?** No pasa nada. 1) Tome las fotos con su cámara normal (quedan guardadas en su teléfono). 2) Cuando tenga buena señal o Wi-Fi, regrese aquí y toque 'Choose files'. 3) Elija las fotos de su galería. 4) Presione Generar. ¡Sus fotos lo esperan!")
 else:
-    st.warning("📶 **Bad signal out here?** No problem. 1) Take your photos with your regular camera app (they save on your phone). 2) When you're back at good signal or Wi-Fi, come back and tap 'Choose files'. 3) Pick your photos from the gallery. 4) Hit Generate. Your photos wait for you!")
+    st.warning(" **Bad signal out here?** No problem. 1) Take your photos with your regular camera app (they save on your phone). 2) When you're back at good signal or Wi-Fi, come back and tap 'Choose files'. 3) Pick your photos from the gallery. 4) Hit Generate. Your photos wait for you!")
 
 st.caption(T["geo_hint"])
 pin_html = f"""
@@ -691,7 +704,7 @@ function grabPin() {{
       headers: {{'Content-Type': 'text/plain;charset=utf-8'}},
       body: JSON.stringify({{event: 'PIN lang={lang} ref={ref_code or 'direct'}', lat: pos.coords.latitude, lon: pos.coords.longitude, city: ''}})
     }}).then(function() {{
-      msg.style.display='block'; msg.textContent='📍 Location locked — you are on the map!';
+      msg.style.display='block'; msg.textContent=' Location locked — you are on the map!';
     }}).catch(function() {{
       msg.style.display='block'; msg.style.color='#c00'; msg.textContent='Could not send the pin. Try again.';
     }});
@@ -703,12 +716,20 @@ function grabPin() {{
 """
 components.html(pin_html, height=90)
 
-zip_code = st.text_input("📍 ZIP code (local prices + nearest store)", value="23015", key="zip_field")
+zip_code = st.text_input(" ZIP code (local prices + nearest store)", value="23015", key="zip_field")
 log_trap_event("VISIT", f"lang={lang} ref={ref_code or 'direct'} zip={zip_code}")
 client_name = st.text_input(T["client"], value="", key="client_name_field")
+
+# === SURGICAL TWEAK: TRUE/FALSE DAMAGE REFERENCE IMPORT ===
+st.markdown("### 🎯 Trainer Mode: Import Reference Damage Pictures")
+st.info("Upload your 'bad' pictures here. Cindy will use these as the 'TRUE' condition. She will ONLY estimate repairs that match this specific damage, ignoring healthy areas ('FALSE').")
+reference_files = st.file_uploader("📂 Import Reference Damage Photos", type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="ref_damage_photos")
+
+st.markdown("---")
+st.markdown(T["step2"]); st.info(T["tip"])
 uploaded_files = st.file_uploader(T["uploader"], type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="mobile_camera_fix_v3")
 
-# === AUTO PIN: drop a dot the moment a GPS photo is uploaded (no button needed) ===
+# === AUTO PIN ===
 if uploaded_files and not st.session_state.get("photo_pin_logged"):
     try:
         ap_dir = tempfile.mkdtemp()
@@ -738,6 +759,15 @@ if uploaded_files:
                     file_name = os.path.join(temp_dir, f"photo_{i}_{uploaded_file.name}")
                     with open(file_name, "wb") as f: f.write(uploaded_file.getbuffer())
                     saved_paths.append(file_name)
+                
+                # Process reference photos if uploaded
+                ref_saved_paths = []
+                if reference_files:
+                    for i, ref_file in enumerate(reference_files):
+                        ref_name = os.path.join(temp_dir, f"ref_damage_{i}_{ref_file.name}")
+                        with open(ref_name, "wb") as f: f.write(ref_file.getbuffer())
+                        ref_saved_paths.append(ref_name)
+
                 property_line = ""
                 photo_lat = photo_lon = None
                 if saved_paths:
@@ -757,7 +787,9 @@ if uploaded_files:
                     store_line = find_nearest_home_depot(s_lat, s_lon) or ""
                 if not store_line:
                     store_line = ai_store_lookup(zip_code)
-                result_text = analyze_photos_with_ai(saved_paths, zip_code, client_name)
+                
+                result_text = analyze_photos_with_ai(saved_paths, zip_code, client_name, reference_photo_paths=ref_saved_paths)
+                
                 result_text = lock_manning_math(result_text)
                 pipe_tag = ""
                 if "CITY PLAN COMPLIANCE CHECK" in result_text:
@@ -781,8 +813,8 @@ if uploaded_files:
                 else:
                     share_title = "🔗 Share Cindy with your crew!"
                     share_desc = "Know a contractor or handyman? Send them the link so they can get free bids too."
-                    share_btn = "📱 Share App"
-                    copy_btn = "📋 Copy Link"
+                    share_btn = " Share App"
+                    copy_btn = " Copy Link"
                     copy_msg = "✅ Link copied!"
                     share_text_js = "Check out Cindy AI - Free 15-second contractor estimates. Just snap a photo! "
                 share_html = f"""
