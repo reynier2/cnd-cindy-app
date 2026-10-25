@@ -586,6 +586,7 @@ if not st.session_state.get("landed"):
         "concrete": ("🧱 Concrete", "I measure slabs and footings, price Quikrete bag math or ready-mix yardage with forms and rebar, and run the 30 PSI soil bearing check on foundations.", "Sample: Quikrete Concrete Mix 80 lb - 60 bags x $6.48 = $388.80"),
         "pipe": ("🚰 Pipe & Drain", "I run Manning's Equation on your pipe photos - diameter, slope, flow capacity - and stamp PASS or RED FLAG against city requirements. Municipal-grade compliance in 15 seconds.", "Sample: CITY PLAN COMPLIANCE CHECK - 12in PVC @ 1.5% | Flow 4.2 CFS vs Req 3.0 | STATUS: PASS"),
         "masonry": ("🧱 Masonry", "I read brick like a master mason - IRA suction test, mortar bleed and creep, crow's-foot lead layout, and Flemish/English bond logic. I match mortar grade to the structure (Type M, S, N, O) and flag weak bonds before they crack.", "Sample: Standard Clay Modular Brick - 500 bricks x $1.35 = $675.00"),
+                "sheetrock": ("📋 Sheetrock", "I measure your wall and ceiling areas from the photos, price USG Sheetrock panels by the sheet with joint compound, tape, corner beads, and fasteners. I include hanging, taping, mudding, sanding labor, plus texture and prime/paint if visible.", "Sample: USG Sheetrock 4x8 5/8in - 45 sheets x $18.50 = $832.50"),
     }
     keys = list(TRADE_INFO.keys())
     for row_start in range(0, len(keys), 3):
