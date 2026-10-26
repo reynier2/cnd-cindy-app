@@ -590,8 +590,8 @@ if not st.session_state.get("landed"):
             st.markdown("### Professional repair estimates in 15 seconds — free.")
             st.markdown("Cindy reads your job photos, prices every material with brand, unit price & full math, and hands you a professional PDF with engineering stamps and your nearest store. Tap your trade and Cindy will show you what she does for YOU.")
         st.markdown("🌐 [**Official website**](https://reynier2.github.io/cnd-cindy-app/) · 📧 **cndrealestateservices@gmail.com** · [📘 Facebook](https://www.facebook.com/search/pages/?q=cnd%20real%20estate%20services) · [🎵 TikTok](https://www.tiktok.com/search?q=cnd%20real%20estate%20services)")
-       st.markdown("---")
-        TRADE_INFO = {
+        st.markdown("---")
+    TRADE_INFO = {
         "electrical": ("⚡ Electrical", "I spot panels, fixtures and conduit runs in your photos. I price Southwire wire, breaker panels and devices at real unit costs, add licensed electrician labor hours, and flag permit + inspection requirements so your bid passes the first time.", "Sample: Southwire 12/2 Romex 50 ft - 6 rolls x $38.50 = $231.00"),
         "plumbing": ("🚿 Plumbing", "I trace supply and drain runs, price Charlotte Pipe PVC and fixtures, check water pressure (PRV if over 80 psi), note the frost line, and stamp drain slopes with Manning's Equation.", "Sample: Charlotte Pipe Sch 40 PVC 2in - 40 ft x $1.10/ft = $44.00"),
         "siding": ("🏠 Siding", "I measure your wall area from the photo, price James Hardie HardiePlank by the square with Tyvek wrap, trim and fasteners, and add crew labor with full math.", "Sample: James Hardie HardiePlank - 8 squares x $412 = $3,296.00"),
@@ -602,7 +602,7 @@ if not st.session_state.get("landed"):
         "sheetrock": ("📋 Sheetrock", "I measure your wall and ceiling areas from the photos, price USG Sheetrock panels by the sheet with joint compound, tape, corner beads, and fasteners. I include hanging, taping, mudding, sanding labor, plus texture and prime/paint if visible.", "Sample: USG Sheetrock 4x8 5/8in - 45 sheets x $18.50 = $832.50"),
         "glass": ("🪟 Glass & Glazing", "I measure window and door glass panes from the photos, price tempered or standard glass by the square foot, include glazing compound, framing, and sealant. I add labor for safe removal of old glass and installation of new panes.", "Sample: Tempered Glass 1/4in - 15 sq ft x $12.50/sq ft = $187.50"),
         "brick": ("🧱 Brick & Block Repair", "I count brick courses and estimate bricks per square foot (approx 7 per sq ft for standard run). I price standard clay modular brick, mortar (Type N or S), and include labor for laying, pointing, tuckpointing, and cleanup.", "Sample: Standard Clay Modular Brick - 500 bricks x $1.35 = $675.00"),
-    }
+    } 
 s = list(TRADE_INFO.keys())
     for row_start in range(0, len(keys), 3):
         cols = st.columns(3)
