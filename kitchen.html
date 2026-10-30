@@ -4,7 +4,67 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Luna Taqueria - Manager Board</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></scipt>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></scipt><style>
+  /* Base Layout */
+  body {
+    font-family: sans-serif;
+    background: #1a1a1a;
+    color: white;
+    margin: 0;
+    padding: 10px;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #2d2d2d;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+
+  .status-badge {
+    color: #00ff00;
+    font-weight: bold;
+  }
+
+  /* Desktop Side-by-Side Default */
+  .main-container {
+    display: flex;
+    gap: 20px;
+  }
+
+  .orders-panel, .controls-panel {
+    flex: 1;
+    background: #252525;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 400px;
+  }
+
+  /* THE MOBILE DRESS: Stack Vertically on Phones */
+  @media (max-width: 768px) {
+    .main-container {
+      flex-direction: column; /* Forces vertical stacking */
+    }
+    
+    .orders-panel, .controls-panel {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    /* Fat Finger Friendly Buttons */
+    .btn, .light-btn {
+      padding: 14px !important;
+      font-size: 16px !important;
+      width: 100% !important;
+      margin: 5px 0 !important;
+      touch-action: manipulation; /* Prevents double-tap zoom delays */
+    }
+  }
+</style>
+  
 </head>
 <body>
 
