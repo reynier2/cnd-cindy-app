@@ -2,230 +2,204 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CND — Order for Pickup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CND - The Eyes (Live 3D Stream)</title>
+<!-- Three.js & OrbitControls -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-:root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#e63946;--cream:#fff3e0;--dim:#c9a27a}
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-body{background:var(--bg);color:var(--cream);padding:16px;max-width:640px;margin:0 auto;padding-bottom:80px}
-h1{color:var(--gold);text-align:center;letter-spacing:4px;margin:14px 0 4px}
-.sub{color:var(--dim);text-align:center;font-size:.85rem;margin-bottom:16px}
-h3{color:var(--gold);letter-spacing:2px;margin:18px 0 8px;font-size:.95rem}
-.row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid rgba(255,183,3,.2);border-radius:10px;padding:10px 12px;margin-bottom:8px;gap:8px}
-.item-left { display: flex; align-items: center; gap: 12px; flex: 1; }
-.item-info { display: flex; flex-direction: column; }
-.row .n{font-size:.95rem}
-.row .p{color:var(--gold);font-weight:700;font-size:.85rem;margin-top:4px}
-.qty{display:flex;gap:8px;align-items:center}
-.qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:800;cursor:pointer;font-size:1.2rem}
-.qty span{min-width:18px;text-align:center;font-weight:800;font-size:1.1rem}
-input,select,textarea{width:100%;background:var(--card);border:1px solid rgba(255,183,3,.3);color:var(--cream);border-radius:10px;padding:12px;margin-bottom:10px;font-size:1rem}
-.send{width:100%;background:linear-gradient(135deg,var(--gold),#fb8500);border:none;color:#140b06;font-weight:800;letter-spacing:1px;padding:16px;border-radius:30px;font-size:1.05rem;cursor:pointer;box-shadow:0 0 22px rgba(255,183,3,.5);margin-top:10px}
-.send:disabled{opacity:0.6;cursor:not-allowed}
-#msg{text-align:center;margin:14px 0;font-weight:700;min-height:24px}
-#confirmation-screen {
-display: none;
-text-align: center;
-padding: 40px 20px;
-background: var(--card);
-border: 3px solid #28a745;
-border-radius: 20px;
-margin-top: 20px;
-box-shadow: 0 0 30px rgba(40, 167, 69, 0.3);
-animation: fadeIn 0.5s ease;
-}
-@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-#confirmation-screen h2 { color: #28a745; font-size: 2rem; margin-bottom: 10px; }
-#confirmation-screen .order-number { color: var(--gold); font-size: 1.5rem; font-weight: bold; margin: 15px 0; }
-#confirmation-screen p { color: var(--cream); font-size: 1.1rem; line-height: 1.6; margin-bottom: 10px; }
-#confirmation-screen .highlight { color: var(--gold); font-weight: bold; }
-#confirmation-screen .btn-home {
-display: inline-block;
-margin-top: 25px;
-padding: 14px 30px;
-background: var(--gold);
-color: #140b06;
-text-decoration: none;
-font-weight: 800;
-border-radius: 30px;
-font-size: 1rem;
-}
+  body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; }
+  #canvas-container { width: 100vw; height: 100vh; display: block; }
+  
+  /* Minimal UI Overlay */
+  #ui-overlay {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    pointer-events: none; 
+    z-index: 10;
+  }
+  #ui-overlay h1 {
+    color: #ffb703;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    margin: 0;
+    text-shadow: 0 0 10px #000;
+  }
+  #ui-overlay p {
+    color: #888;
+    font-size: 0.8rem;
+    margin: 5px 0 0 0;
+  }
+  #live-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #00ff00;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #00ff00;
+    margin-right: 5px;
+  }
 </style>
 </head>
 <body>
-<div id="order-form">
-<h1>CND</h1>
-<div class="sub">SERVICE REQUEST · PAYMENT ON COMPLETION</div>
-<div id="menu"></div>
 
-<div id="order-total" style="background: var(--card); border: 2px solid var(--gold); border-radius: 12px; padding: 16px; margin: 16px 0; text-align: center;">
-    <div style="color: var(--dim); font-size: 0.9rem; margin-bottom: 6px;">TOTAL ORDER AMOUNT</div>
-    <div style="color: var(--gold); font-size: 2.2rem; font-weight: 800;">$<span id="total-amount">0.00</span></div>
-    <div style="color: var(--dim); font-size: 0.8rem; margin-top: 6px;">Pay at the counter</div>
+<div id="ui-overlay">
+  <h1>CND DIGITAL TWIN</h1>
+  <p><span id="live-dot"></span> LIVE STREAM ACTIVE</p>
 </div>
 
-<h3>YOUR INFO</h3>
-<input id="cname" placeholder="Your name">
-<input id="cphone" placeholder="Phone number" type="tel">
-<select id="cpickup">
-<option value="ASAP">Pickup: ASAP</option>
-<option value="In 30 min">In 30 minutes</option>
-<option value="In 1 hour">In 1 hour</option>
-<option value="In 2 hours">In 2 hours</option>
-</select>
-<textarea id="cnote" rows="2" placeholder="Notes (no onions, extra sauce...)"></textarea>
-<button class="send" id="send">🛒 SUBMIT REQUEST TO CND</button>
-<div id="msg"></div>
-</div>
-
-<div id="confirmation-screen">
-<div style="font-size: 4rem; margin-bottom: 10px;">✅</div>
-<h2>ORDER ACCEPTED!</h2>
-<div class="order-number" id="conf-order-id">Order #---</div>
-<p>The kitchen has received your order and is preparing it now.</p>
-<p>Pickup Time: <span class="highlight" id="conf-pickup">ASAP</span></p>
-<p style="color: var(--dim); font-size: 0.9rem; margin-top: 20px;">Payment will be processed upon completion.<br>Thank you for choosing CND!</p>
-<a href="javascript:window.location.reload()" class="btn-home">← BACK TO MENU</a>
-</div>
+<div id="canvas-container"></div>
 
 <script>
-const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
-const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE";
-const $=id=>document.getElementById(id);
+// ==========================================
+// CONFIGURATION
+// ==========================================
+const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const MENU=[
-{cat:"CORE SERVICES",items:[
-["Standard Service Unit", 9.99, ""],
-["Premium Service Unit", 12.99, ""],
-["Service Combo Package", 15.99, ""]
-]},
-{cat:"SECONDARY SERVICES",items:[
-["Standard Task", 10.99, ""],
-["Basic Task", 4.99, ""],
-["Task Package", 8.99, ""]
-]},
-{cat:"MATERIALS & ADD-ONS",items:[
-["Basic Material", 3.99, ""],
-["Chips & Guacamole", 5.99, ""],
-["Additional Resource", 3.00, ""]
-]},
-{cat:"MISCELLANEOUS",items:[
-["Standard Supply", 2.50, ""],
-["Premium Supply", 3.50, ""],
-["Specialty Supply", 3.00, ""]
-]}
-];
-
-const FLAT=[];
-MENU.forEach(c=>c.items.forEach(i=>FLAT.push(i)));
-const qty={};
-
-$("menu").innerHTML = MENU.map(c=>{
-let html='<h3>'+c.cat+'</h3>';
-c.items.forEach(i=>{
-const key=FLAT.indexOf(i);
-html+=`
-<div class="row">
-<div class="item-left">
-<div class="item-info">
-<span class="n">${i[0]}</span>
-<span class="p">$${i[1].toFixed(2)}</span>
-</div>
-</div>
-<span class="qty">
-<button onclick="add(${key},-1)">−</button>
-<span id="q_${key}">0</span>
-<button onclick="add(${key},1)">+</button>
-</span>
-</div>`;
-});
-return html;
-}).join("");
-
-function add(key,d){
-qty[key]=Math.max(0,(qty[key]||0)+d);
-$("q_"+key).textContent=qty[key];
-updateTotal();
-}
-
-function updateTotal(){
-let total = 0;
-FLAT.forEach((item, idx) => {
-const q = qty[idx] || 0;
-total += item[1] * q;
-});
-$("total-amount").textContent = total.toFixed(2);
-}
-
-$("send").onclick=async()=>{
-const items=FLAT.map((i,idx)=>{
-const q = qty[idx]||0;
-return q > 0 ? {name:i[0], qty:q, price:i[1]} : null;
-}).filter(x=>x!==null);
-
-if(!items.length){
-$("msg").textContent="⚠️ Please add at least one item 🙂";
-$("msg").style.color = "var(--red)";
-return;
-}
-
-const customer=$("cname").value.trim();
-const phone=$("cphone").value.trim();
-if(!customer||!phone){
-$("msg").textContent="⚠️ Please add your name and phone number.";
-$("msg").style.color = "var(--red)";
-return;
-}
-
-const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-$("send").disabled = true;
-$("send").textContent = "Submitting to CND...";
-$("msg").textContent = "";
-
-try{
-const payload = {
-customer_name: customer,
-phone: phone,
-pickup_time: $("cpickup").value,
-notes: $("cnote").value.trim(),
-items: items,
-total: total,
-status: "new"
+// THE KITCHEN BLUEPRINT (Exact match to Manager Board)
+const KITCHEN_LAYOUT = {
+  'Prep Counter': { x: -6, z: -2, w: 4, d: 2, color: 0x444444, items: ['Tacos', 'Gorditas', 'Sopes'] },
+  'The Grill (Comal)': { x: 0, z: -2, w: 5, d: 2, color: 0x222222, items: ['Quesabirrias', 'Burritos', 'Pollo Frito Chapin'] },
+  'The Fryer': { x: 6, z: -2, w: 3, d: 2, color: 0x333333, items: ['Flautas de Pollo'] },
+  'Pickup Window': { x: 0, z: 4, w: 8, d: 1, color: 0x1a1a1a, items: [] }
 };
 
-const r = await fetch(SUPA + "/rest/v1/orders", {
-method: "POST",
-headers: {
-apikey: KEY,
-Authorization: "Bearer " + KEY,
-"Content-Type": "application/json",
-"Prefer": "return=representation"
-},
-body: JSON.stringify(payload)
+let itemMarkers = {}; 
+
+// ==========================================
+// 3D WORLD SETUP (The Eyes)
+// ==========================================
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0a0a);
+scene.fog = new THREE.Fog(0x0a0a0a, 10, 40);
+
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 8, 12); 
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
+container.appendChild(renderer.domElement);
+
+// OrbitControls: Allows 360 looking around
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.maxPolarAngle = Math.PI / 2 - 0.1; 
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(5, 15, 5);
+dirLight.castShadow = true;
+scene.add(dirLight);
+
+// Floor & Grid
+const floorGeo = new THREE.PlaneGeometry(30, 20);
+const floorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
+scene.add(new THREE.GridHelper(30, 30, 0x333333, 0x222222));
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-if(r.ok){
-const result = await r.json();
-const orderId = result[0].id;
-$("order-form").style.display = "none";
-$("conf-order-id").textContent = "Order #" + orderId;
-$("conf-pickup").textContent = $("cpickup").value;
-$("confirmation-screen").style.display = "block";
-window.scrollTo(0, 0);
-} else {
-const t = await r.text();
-$("msg").textContent = "❌ Error: " + r.status + ". Please try again or call us.";
-$("msg").style.color = "var(--red)";
-$("send").disabled = false;
-$("send").textContent = "🛒 SUBMIT REQUEST TO CND";
+// ==========================================
+// BUILD THE 3D KITCHEN
+// ==========================================
+function buildKitchen() {
+  Object.keys(KITCHEN_LAYOUT).forEach(stationName => {
+    const s = KITCHEN_LAYOUT[stationName];
+    
+    const geo = new THREE.BoxGeometry(s.w, 1, s.d);
+    const mat = new THREE.MeshStandardMaterial({ color: s.color, roughness: 0.7 });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(s.x, 0.5, s.z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+
+    s.items.forEach((itemName, index) => {
+      const markerGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 32);
+      const markerMat = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x004400, metalness: 0.5 });
+      const marker = new THREE.Mesh(markerGeo, markerMat);
+      
+      const spacing = s.w / (s.items.length + 1);
+      marker.position.set(s.x - (s.w/2) + (spacing * (index + 1)), 1.15, s.z);
+      marker.castShadow = true;
+      scene.add(marker);
+      
+      itemMarkers[itemName] = marker;
+    });
+  });
 }
-} catch(e){
-$("msg").textContent = "❌ Network error. Please check your connection.";
-$("msg").style.color = "var(--red)";
-$("send").disabled = false;
-$("send").textContent = "🛒 SUBMIT REQUEST TO CND";
+
+// ==========================================
+// UPDATE 3D OBJECTS
+// ==========================================
+function updateMarkerColor(name, status) {
+  if (itemMarkers[name]) {
+    let color = 0x00ff00; 
+    let emissive = 0x004400;
+    
+    if (status === 'yellow') { color = 0xffb703; emissive = 0x442200; }
+    if (status === 'red') { color = 0xe63946; emissive = 0x440000; }
+    
+    itemMarkers[name].material.color.setHex(color);
+    itemMarkers[name].material.emissive.setHex(emissive);
+  }
 }
-};
+
+// ==========================================
+// THE LIVE STREAM (Supabase Realtime)
+// ==========================================
+async function initStream() {
+  // 1. Get initial state
+  const { data } = await supabaseClient.from('menu').select('*');
+  if (data) {
+    data.forEach(item => updateMarkerColor(item.name, item.status));
+  }
+
+  // 2. Open the Realtime WebSocket Stream
+  const channel = supabaseClient
+    .channel('kitchen-stream')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'menu' }, (payload) => {
+      // THIS IS THE MAGIC: The moment the Kitchen Board changes, this fires instantly.
+      console.log('Stream received:', payload.new.name, payload.new.status);
+      updateMarkerColor(payload.new.name, payload.new.status);
+    })
+    .subscribe();
+}
+
+// ==========================================
+// INITIALIZE
+// ==========================================
+buildKitchen();
+initStream();
+
 </script>
 </body>
 </html>
