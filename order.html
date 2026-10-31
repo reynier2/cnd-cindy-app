@@ -74,7 +74,7 @@ font-size: 1rem;
 <option value="In 2 hours">In 2 hours</option>
 </select>
 <textarea id="cnote" rows="2" placeholder="Notes (no onions, extra sauce...)"></textarea>
-<button class="send" id="send">🛒 SEND ORDER TO THE KITCHEN</button>
+<button class="send" id="send">🛒 SUBMIT REQUEST TO CND</button>
 <div id="msg"></div>
 </div>
 
@@ -217,13 +217,13 @@ const t = await r.text();
 $("msg").textContent = "❌ Error: " + r.status + ". Please try again or call us.";
 $("msg").style.color = "var(--red)";
 $("send").disabled = false;
-$("send").textContent = "🛒 SEND ORDER TO THE KITCHEN";
+$("send").textContent = "🛒 SUBMIT REQUEST TO CND";
 }
 } catch(e){
 $("msg").textContent = "❌ Network error. Please check your connection.";
 $("msg").style.color = "var(--red)";
 $("send").disabled = false;
-$("send").textContent = "🛒 SEND ORDER TO THE KITCHEN";
+$("send").textContent = "🛒 SUBMIT REQUEST TO CND";
 }
 };
 </script>
