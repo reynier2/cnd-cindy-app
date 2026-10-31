@@ -2,201 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tito Mel's - Filipino Cuisine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CND Digital - 3D Environment</title>
     <style>
+        /* Strip out all restaurant styling. Reset to a clean, full-screen 3D canvas. */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { text-align: center; color: white; margin-bottom: 40px; padding: 30px; }
-        .header h1 { font-size: 3em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .header p { font-size: 1.2em; opacity: 0.9; }
-        .category { background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .category-title { font-size: 2em; color: #764ba2; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 3px solid #667eea; text-transform: uppercase; letter-spacing: 2px; }
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-        .menu-item { background: #f8f9fa; border-radius: 12px; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; }
-        .menu-item:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .menu-item-image { width: 100%; height: 220px; object-fit: cover; background: #ddd; }
-        .menu-item-image img { width: 100%; height: 100%; object-fit: cover; }
-        .menu-item-info { padding: 20px; }
-        .menu-item-number { display: inline-block; background: #667eea; color: white; width: 35px; height: 35px; border-radius: 50%; text-align: center; line-height: 35px; font-weight: bold; margin-bottom: 10px; }
-        .menu-item-name { font-size: 1.2em; font-weight: 600; color: #2d3748; margin-bottom: 15px; }
-        .order-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 5px; font-size: 1em; font-weight: 600; cursor: pointer; transition: opacity 0.3s ease; }
-        .order-btn:hover { opacity: 0.9; }
-        @media (max-width: 768px) { .header h1 { font-size: 2em; } .menu-grid { grid-template-columns: 1fr; } .category { padding: 20px; } }
+        body, html { 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            background-color: #1a1a1a; /* Dark background for 3D contrast */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* This is the container where Cindy will render the 3D world */
+        #cnd-3d-world {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Optional: A subtle UI overlay for connection status */
+        #cnd-ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            pointer-events: none; /* Let clicks pass through to the 3D world */
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>️ Tito Mel's</h1>
-            <p>Authentic Filipino Cuisine</p>
-        </div>
 
-        <!-- APPETIZERS -->
-        <div class="category">
-            <h2 class="category-title">Appetizers</h2>
-            <div class="menu-grid">
-                <div class="menu-item" onclick="addToOrder(1)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/lumpia.jpg" alt="Lumpia Shanghai Pork"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">1</div><div class="menu-item-name">Lumpia Shanghai Pork (12pc)</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(2)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Lumpia%20Shanghai%20Chicken%201.jpg" alt="Lumpia Shanghai Chicken"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">2</div><div class="menu-item-name">Lumpia Shanghai Chicken (12pc)</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(3)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Lumpia%20Gulay%203.jpg" alt="Lumpia Gulay"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">3</div><div class="menu-item-name">Lumpia Gulay (1pc)</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(4)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/lumpiang-sariwa%204.jpg" alt="Lumpia Sariwa"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">4</div><div class="menu-item-name">Lumpia Sariwa (2pc)</div><button class="order-btn">Add to Order</button></div>
-                </div>
-            </div>
-        </div>
+    <!-- The 3D Canvas Container -->
+    <div id="cnd-3d-world"></div>
 
-        <!-- SPECIALS & BBQ -->
-        <div class="category">
-            <h2 class="category-title">Specials & BBQ</h2>
-            <div class="menu-grid">
-                <div class="menu-item" onclick="addToOrder(5)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Lechon%20Kawali%205.jpg" alt="Lechon Kawali"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">5</div><div class="menu-item-name">Lechon Kawali</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(6)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Pork%20Sisig%206.webp" alt="Pork Sisig"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">6</div><div class="menu-item-name">Pork Sisig</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(7)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Chicken%20BBQ%20Stick%20(2pc)%207.jpg" alt="Chicken BBQ Stick"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">7</div><div class="menu-item-name">Chicken BBQ Stick (2pc)</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(8)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Pork%20BBQ%20Stick%208.jpg" alt="Pork BBQ Stick"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">8</div><div class="menu-item-name">Pork BBQ Stick</div><button class="order-btn">Add to Order</button></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ENTREES -->
-        <div class="category">
-            <h2 class="category-title">Entrees</h2>
-            <div class="menu-grid">
-                <div class="menu-item" onclick="addToOrder(9)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Chicken%20Adobo%209%20(1).webp" alt="Chicken Adobo"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">9</div><div class="menu-item-name">Chicken Adobo</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(10)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/pork-adobo%2010.jpg" alt="Pork Adobo"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">10</div><div class="menu-item-name">Pork Adobo</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(11)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Filipino-Chicken-Curry%2011.jpg" alt="Chicken Curry"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">11</div><div class="menu-item-name">Chicken Curry</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(12)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/menudo%2012.jpg" alt="Menudo"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">12</div><div class="menu-item-name">Menudo</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(13)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Bicol-Express%2013.jpg" alt="Bicol Express"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">13</div><div class="menu-item-name">Bicol Express</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(14)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/kaldereta%2014.jpg" alt="Kaldereta"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">14</div><div class="menu-item-name">Kaldereta</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(15)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Classic-Chicken-Tinola%2015.webp" alt="Chicken Tinola"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">15</div><div class="menu-item-name">Chicken Tinola</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(16)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Pork%20Sinigang%2016.webp" alt="Pork Sinigang"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">16</div><div class="menu-item-name">Pork Sinigang</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(17)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Pork%20Dinuguan%2017.jpg" alt="Pork Dinuguan"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">17</div><div class="menu-item-name">Pork Dinuguan</div><button class="order-btn">Add to Order</button></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- NOODLES & COMBO -->
-        <div class="category">
-            <h2 class="category-title">Noodles & Combo</h2>
-            <div class="menu-grid">
-                <div class="menu-item" onclick="addToOrder(18)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/pancit-bihon%2018.webp" alt="Pancit Bihon"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">18</div><div class="menu-item-name">Pancit Bihon</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(19)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Palabok%2019.jpg" alt="Palabok"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">19</div><div class="menu-item-name">Palabok</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(20)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/combo%2020.png" alt="Combo"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">20</div><div class="menu-item-name">Combo (2 entrees + side)</div><button class="order-btn">Add to Order</button></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SIDES -->
-        <div class="category">
-            <h2 class="category-title">Sides</h2>
-            <div class="menu-grid">
-                <div class="menu-item" onclick="addToOrder(21)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/plain%20rice%2021.jpg" alt="Plain Rice"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">21</div><div class="menu-item-name">Plain Rice</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(22)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Adobo%20Rice%2022.jpg" alt="Adobo Rice"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">22</div><div class="menu-item-name">Adobo Rice</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(23)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Plantains%2023.jpg" alt="Plantains"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">23</div><div class="menu-item-name">Plantains</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(24)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Stir%20Fry%20Vegetables%2024.jpg" alt="Stir Fry Vegetables"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">24</div><div class="menu-item-name">Stir Fry Vegetables</div><button class="order-btn">Add to Order</button></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- DRINKS & DESSERTS -->
-        <div class="category">
-            <h2 class="category-title">Drinks & Desserts</h2>
-            <div class="menu-grid">
-                <div class="menu-item" onclick="addToOrder(25)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Buko%20Pandan%20Juice%2025.jpg" alt="Buko Pandan Juice"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">25</div><div class="menu-item-name">Buko Pandan Juice</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(26)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/mango%20taro%20boba%2026.jpg" alt="Mango / Taro Boba"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">26</div><div class="menu-item-name">Mango / Taro Boba</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(27)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/smoothies.jpg%2027.avif" alt="Smoothies"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">27</div><div class="menu-item-name">Smoothies</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(28)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Halo-Halo%2028.webp" alt="Halo-Halo"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">28</div><div class="menu-item-name">Halo-Halo</div><button class="order-btn">Add to Order</button></div>
-                </div>
-                <div class="menu-item" onclick="addToOrder(29)">
-                    <div class="menu-item-image"><img src="https://hnwrhbehhjijoxavwuyq.supabase.co/storage/v1/object/public/menu-images/Ube%20Biko%2029.jpg" alt="Ube Biko"></div>
-                    <div class="menu-item-info"><div class="menu-item-number">29</div><div class="menu-item-name">Ube Biko</div><button class="order-btn">Add to Order</button></div>
-                </div>
-            </div>
-        </div>
+    <!-- Simple Status Overlay -->
+    <div id="cnd-ui-overlay">
+        CND Digital Environment: <span id="connection-status">Initializing...</span>
     </div>
 
+    <!-- The Seed: Connection and Rendering Logic will go here -->
     <script>
-        function addToOrder(itemId) {
-            console.log('Added item:', itemId);
-            alert('Item #' + itemId + ' added to order!');
-        }
+        // This is where we will inject the Three.js setup and the phone connection logic.
+        // For now, it's a clean slate.
+        console.log("CND 3D Environment initialized. Ready for spatial data.");
+        
+        document.getElementById('connection-status').innerText = "Awaiting Phone Connection...";
     </script>
+
 </body>
 </html>
