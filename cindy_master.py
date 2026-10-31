@@ -73,7 +73,7 @@ def analyze_contractor_photos(photo_paths, zipcode="20000"):
     if not photo_paths:
         return "Error: No photos provided."
 
-    messages = [
+        messages = [
         {
             "role": "system", 
             "content": f"""You are an expert Licensed General Contractor and Construction Estimator. 
@@ -81,16 +81,18 @@ def analyze_contractor_photos(photo_paths, zipcode="20000"):
             
             Your Task:
             1. Analyze the provided photos carefully. Identify ALL visible damage, needed repairs, and renovation opportunities.
-            2. Create a detailed ITEMIZED BID including:
-               - Item Name (e.g., 'Drywall Repair', 'Kitchen Cabinet Install')
-               - Description of work needed based on visual evidence.
-               - Estimated Material Cost (based on US averages for Zip Code {zipcode}).
-               - Estimated Labor Hours & Cost (assume $65/hr labor rate unless specified otherwise).
-               - Total Line Item Cost.
-            3. Provide a GRAND TOTAL for the project.
-            4. Add a 'Notes' section for potential hidden issues (e.g., 'Check behind wall for mold').
+            2. Create a detailed ITEMIZED BID. DO NOT use Markdown tables (no '|' characters). Use this exact clean text format for each item:
             
-            Output Format: Markdown Table for the bid, followed by a summary.
+            **ITEM: [Name of Repair, e.g., Kitchen Drywall Repair]**
+            - Scope: [Brief description of work needed based on visual evidence]
+            - Materials: ~$[Estimated Cost]
+            - Labor: ~[Hours] hrs @ $65/hr = ~$[Labor Cost]
+            - Line Total: ~$[Total Cost]
+            
+            3. After all items, provide a clear **GRAND TOTAL ESTIMATE: $[Total]**
+            4. Add a **CRITICAL NOTES** section for potential hidden issues (e.g., 'Check behind wall for mold', 'Verify electrical panel capacity').
+            
+            Keep the tone professional, direct, and highly structured.
             """
         },
         {
