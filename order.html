@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CND - Split Screen Navigation</title>
+<title>CND - The City Block</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,26 +11,41 @@
 <style>
   body { margin: 0; padding: 0; background: #050505; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
   
-  /* TOP HALF: THE EYES (3D WORLD) */
+  /* TOP HALF: THE EYES */
   #top-view { 
     height: 55vh; width: 100%; position: relative; background: #000;
     border-bottom: 2px solid #ffb703;
   }
   #canvas-container { width: 100%; height: 100%; display: block; }
   
-  /* BOTTOM HALF: THE HANDS (NAVIGATION) */
+  /* UI OVERLAY */
+  #ui-overlay {
+    position: absolute; top: 15px; left: 0; width: 100%; text-align: center;
+    pointer-events: none; z-index: 10;
+  }
+  #ui-overlay h1 {
+    color: #ffb703; font-size: 1.2rem; letter-spacing: 3px; margin: 0;
+    text-shadow: 0 0 10px #000;
+  }
+  #ui-overlay p { color: #888; font-size: 0.8rem; margin: 5px 0 0 0; }
+  #live-dot {
+    display: inline-block; width: 8px; height: 8px; background: #00ff00;
+    border-radius: 50%; box-shadow: 0 0 8px #00ff00; margin-right: 5px;
+  }
+  #coords {
+    position: absolute; bottom: 10px; right: 10px; color: #00ff00; 
+    font-family: monospace; font-size: 0.8rem; z-index: 10;
+  }
+  
+  /* BOTTOM HALF: THE HANDS */
   #bottom-controls { 
     height: 45vh; width: 100%; background: #111; 
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: 15px; box-sizing: border-box;
   }
-  
   h2 { color: #ffb703; margin: 0 0 20px 0; font-size: 1.2rem; letter-spacing: 2px; text-align: center; }
   
-  /* D-PAD LAYOUT */
-  .dpad {
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
-  }
+  .dpad { display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .dpad-row { display: flex; gap: 10px; }
   
   .dpad-btn {
@@ -43,26 +58,21 @@
   .dpad-btn:active, .dpad-btn.active {
     background: #ffb703; color: #000; box-shadow: 0 0 20px #ffb703; transform: scale(0.95);
   }
-
-  #live-dot {
-    position: absolute; top: 10px; left: 10px; width: 8px; height: 8px;
-    background: #00ff00; border-radius: 50%; box-shadow: 0 0 8px #00ff00; z-index: 10;
-  }
-  #coords {
-    position: absolute; bottom: 10px; right: 10px; color: #00ff00; font-family: monospace; font-size: 0.8rem; z-index: 10;
-  }
 </style>
 </head>
 <body>
 
-<!-- TOP HALF: THE EYES -->
+<!-- TOP HALF -->
 <div id="top-view">
-  <div id="live-dot"></div>
-  <div id="coords">X: 0 | Z: 0</div>
+  <div id="ui-overlay">
+    <h1>CND CITY BLOCK</h1>
+    <p><span id="live-dot"></span> LIVE STREAM ACTIVE</p>
+  </div>
+  <div id="coords">X: 0.0 | Z: 0.0</div>
   <div id="canvas-container"></div>
 </div>
 
-<!-- BOTTOM HALF: THE GAS PEDAL -->
+<!-- BOTTOM HALF -->
 <div id="bottom-controls">
   <h2>NAVIGATE THE WORLD</h2>
   <div class="dpad">
@@ -77,28 +87,22 @@
 
 <script>
 // ==========================================
-// CONFIGURATION & SUPABASE
+// CONFIGURATION
 // ==========================================
 const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const KITCHEN_LAYOUT = {
-  'Prep Counter': { x: -6, z: -2, w: 4, d: 2, color: 0x444444 },
-  'The Grill (Comal)': { x: 0, z: -2, w: 5, d: 2, color: 0x222222 },
-  'The Fryer': { x: 6, z: -2, w: 3, d: 2, color: 0x333333 }
-};
-
 // ==========================================
-// 3D WORLD (TOP HALF)
+// 3D WORLD SETUP
 // ==========================================
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0a0a);
-scene.fog = new THREE.Fog(0x0a0a0a, 10, 40);
+scene.background = new THREE.Color(0x050508); // Deep night sky
+scene.fog = new THREE.Fog(0x050508, 15, 60);
 
 const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-camera.position.set(0, 5, 10); // Starting position
+camera.position.set(0, 12, 18); // Higher up to see the buildings
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(container.clientWidth, container.clientHeight);
@@ -109,31 +113,82 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.1;
 controls.maxPolarAngle = Math.PI / 2 - 0.1; 
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-dirLight.position.set(5, 15, 5);
+// Lighting (Night time city vibe)
+const ambientLight = new THREE.AmbientLight(0x404040, 0.6); // Soft moonlight
+scene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+dirLight.position.set(10, 20, 10);
 scene.add(dirLight);
 
-// Floor & Grid
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 20), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 }));
+// Ground
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 }));
 floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
 scene.add(floor);
-scene.add(new THREE.GridHelper(30, 30, 0x333333, 0x222222));
-
-// Build Kitchen Objects (The Walls/Boundaries)
-Object.keys(KITCHEN_LAYOUT).forEach(stationName => {
-  const s = KITCHEN_LAYOUT[stationName];
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(s.w, 1, s.d), new THREE.MeshStandardMaterial({ color: s.color }));
-  mesh.position.set(s.x, 0.5, s.z);
-  scene.add(mesh);
-});
+scene.add(new THREE.GridHelper(100, 100, 0x333333, 0x222222));
 
 // ==========================================
-// NAVIGATION & BOUNDARIES (THE GAS PEDAL)
+// BUILD THE APARTMENTS
+// ==========================================
+function createApartment(x, z, baseColor) {
+  const buildingGroup = new THREE.Group();
+
+  // 1. Main Structure (Varying heights for realism)
+  const height = 5 + Math.random() * 4; 
+  const width = 4;
+  const depth = 4;
+  const bodyGeo = new THREE.BoxGeometry(width, height, depth);
+  const bodyMat = new THREE.MeshStandardMaterial({ color: baseColor, roughness: 0.8 });
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.position.y = height / 2;
+  body.castShadow = true;
+  body.receiveShadow = true;
+  buildingGroup.add(body);
+
+  // 2. Roof
+  const roofGeo = new THREE.BoxGeometry(width + 0.6, 0.5, depth + 0.6);
+  const roofMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+  const roof = new THREE.Mesh(roofGeo, roofMat);
+  roof.position.y = height + 0.25;
+  roof.castShadow = true;
+  buildingGroup.add(roof);
+
+  // 3. Door
+  const doorGeo = new THREE.BoxGeometry(1, 1.5, 0.1);
+  const doorMat = new THREE.MeshStandardMaterial({ color: 0x4a3018 }); // Dark wood
+  const door = new THREE.Mesh(doorGeo, doorMat);
+  door.position.set(0, 0.75, depth / 2 + 0.05);
+  buildingGroup.add(door);
+
+  // 4. Glowing Windows
+  const windowGeo = new THREE.BoxGeometry(0.6, 0.8, 0.1);
+  const windowMat = new THREE.MeshStandardMaterial({ color: 0xffdd00, emissive: 0xffaa00, emissiveIntensity: 0.8 });
+  const rows = Math.floor((height - 2) / 1.5);
+  const cols = 2;
+  
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const win = new THREE.Mesh(windowGeo, windowMat);
+      win.position.set((c - 0.5) * 1.5, 2 + r * 1.5, depth / 2 + 0.05);
+      buildingGroup.add(win);
+    }
+  }
+
+  buildingGroup.position.set(x, 0, z);
+  scene.add(buildingGroup);
+}
+
+// Spawn the three apartment buildings
+createApartment(-6, -2, 0x556677); // Blue-gray building
+createApartment(0, -2, 0x776655);  // Brown-gray building
+createApartment(6, -2, 0x667766);  // Green-gray building
+
+// ==========================================
+// NAVIGATION & BOUNDARIES
 // ==========================================
 const moveState = { up: false, down: false, left: false, right: false };
-const speed = 0.15; // The "Gas" speed
-const bounds = { xMin: -14, xMax: 14, zMin: -9, zMax: 9 }; // The Walls
+const speed = 0.2; 
+const bounds = { xMin: -20, xMax: 20, zMin: -15, zMax: 15 }; 
 
 function setupDpad() {
   const buttons = {
@@ -145,7 +200,6 @@ function setupDpad() {
 
   Object.keys(buttons).forEach(dir => {
     const btn = buttons[dir];
-    // Handle both touch and mouse
     const startMove = (e) => { e.preventDefault(); moveState[dir] = true; btn.classList.add('active'); };
     const stopMove = (e) => { e.preventDefault(); moveState[dir] = false; btn.classList.remove('active'); };
     
@@ -158,36 +212,29 @@ function setupDpad() {
 }
 
 function updateMovement() {
-  let dx = 0;
-  let dz = 0;
-
+  let dx = 0, dz = 0;
   if (moveState.up) dz -= speed;
   if (moveState.down) dz += speed;
   if (moveState.left) dx -= speed;
   if (moveState.right) dx += speed;
 
-  // Apply movement to camera AND the controls target (so you don't spin out)
-  camera.position.x += dx;
-  camera.position.z += dz;
-  controls.target.x += dx;
-  controls.target.z += dz;
+  camera.position.x += dx; camera.position.z += dz;
+  controls.target.x += dx; controls.target.z += dz;
 
-  // BOUNDARY CHECK (Hit the wall and stop)
   camera.position.x = Math.max(bounds.xMin, Math.min(bounds.xMax, camera.position.x));
   camera.position.z = Math.max(bounds.zMin, Math.min(bounds.zMax, camera.position.z));
   controls.target.x = Math.max(bounds.xMin, Math.min(bounds.xMax, controls.target.x));
   controls.target.z = Math.max(bounds.zMin, Math.min(bounds.zMax, controls.target.z));
 
-  // Update UI Coordinates
   document.getElementById('coords').innerText = `X: ${camera.position.x.toFixed(1)} | Z: ${camera.position.z.toFixed(1)}`;
 }
 
 // ==========================================
-// ANIMATION LOOP & STREAM
+// ANIMATION LOOP
 // ==========================================
 function animate() {
   requestAnimationFrame(animate);
-  updateMovement(); // The Gas Pedal
+  updateMovement(); 
   controls.update();
   renderer.render(scene, camera);
 }
@@ -199,14 +246,6 @@ window.addEventListener('resize', () => {
   renderer.setSize(container.clientWidth, container.clientHeight);
 });
 
-// Keep the Supabase stream alive in the background
-supabaseClient.channel('kitchen-stream')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'menu' }, (payload) => {
-    console.log('World updated:', payload);
-  })
-  .subscribe();
-
-// Initialize D-Pad
 setupDpad();
 
 </script>
