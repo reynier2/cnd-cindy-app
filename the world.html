@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CND - Kitchen Command Board (3D)</title>
+<title>CND - world Command Board (3D)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -184,7 +184,7 @@ function createDetailedBuilding(name, height, color, xPos, zPos) {
 // ==========================================
 // SYNC WITH SUPABASE
 // ==========================================
-async function syncKitchenProjection() {
+async function syncworldProjection() {
   const { data, error } = await supabaseClient.from('menu').select('*').order('category');
   if (error) {
     console.error("Error fetching menu:", error);
@@ -295,8 +295,8 @@ window.addEventListener('resize', () => {
 setupDpad();
 
 // 🔄 INITIAL SYNC AND LIVE UPDATES
-syncKitchenProjection();
-setInterval(syncKitchenProjection, 5000);
+syncworldProjection();
+setInterval(syncworldProjection, 5000);
 </script>
 </body>
 </html>
