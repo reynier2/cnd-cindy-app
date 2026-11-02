@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CND - Real Map Projection</title>
+<title>CND - Phone Controller</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<!-- STEP 2: GLTF Loader for Real 3D Models -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -23,10 +22,7 @@
     position: absolute; top: 15px; left: 0; width: 100%; text-align: center;
     pointer-events: none; z-index: 10;
   }
-  #ui-overlay h1 {
-    color: #ffb703; font-size: 1.2rem; letter-spacing: 3px; margin: 0;
-    text-shadow: 0 0 10px #000;
-  }
+  #ui-overlay h1 { color: #ffb703; font-size: 1.2rem; letter-spacing: 3px; margin: 0; text-shadow: 0 0 10px #000; }
   #ui-overlay p { color: #888; font-size: 0.8rem; margin: 5px 0 0 0; }
   #live-dot {
     display: inline-block; width: 8px; height: 8px; background: #00ff00;
@@ -63,8 +59,8 @@
 
 <div id="top-view">
   <div id="ui-overlay">
-    <h1>CND REAL MAP PROJECTION</h1>
-    <p><span id="live-dot"></span> LIVE 3D MODEL SYNC</p>
+    <h1>CND PHONE CONTROLLER</h1>
+    <p><span id="live-dot"></span> LIVE 3D GENERATION</p>
   </div>
   <div id="coords">X: 0.0 | Z: 0.0</div>
   <div id="canvas-container"></div>
@@ -83,9 +79,6 @@
 </div>
 
 <script>
-// ==========================================
-// CONFIGURATION
-// ==========================================
 const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -98,9 +91,6 @@ const MENU_CATEGORIES = {
   'Specials': ['Pollo Frito Chapin', 'Flautas de Pollo']
 };
 
-// ==========================================
-// 3D MAP SETUP
-// ==========================================
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x1a1a1a); 
@@ -119,86 +109,62 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.1;
 controls.maxPolarAngle = Math.PI / 2 - 0.1;
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
 scene.add(ambientLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
 dirLight.position.set(10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
+const textureLoader = new THREE.TextureLoader();
+const satelliteMapUrl = 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'; // REPLACE WITH YOUR GITHUB SATELLITE IMAGE LINK
+
 const floorGeo = new THREE.PlaneGeometry(100, 100);
-const floorMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.9 });
+const floorMat = new THREE.MeshStandardMaterial({ map: textureLoader.load(satelliteMapUrl), roughness: 0.8 });
 const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-const gridHelper = new THREE.GridHelper(100, 50, 0x444444, 0x333333);
-scene.add(gridHelper);
-
 let map3DObjects = {};
-const gltfLoader = new THREE.GLTFLoader();
 
-// ==========================================
-// STEP 2: REAL 3D MODEL LOADER
-// ==========================================
-function loadRealModel(name, xPos, zPos, modelUrl) {
-  // If you have a real GLB file (like a Google Maps export or Cindy scan), 
-  // pass its URL here. For now, we use a placeholder to prove the loader works.
-  
-  gltfLoader.load(modelUrl, function (gltf) {
-    const model = gltf.scene;
-    model.position.set(xPos, 0, zPos);
-    model.scale.set(1, 1, 1); // Adjust scale based on your real model
-    model.castShadow = true;
-    model.receiveShadow = true;
-    model.userData = { name: name };
-    
-    scene.add(model);
-    map3DObjects[name] = model;
-  }, undefined, function (error) {
-    console.error('Error loading 3D model for ' + name, error);
-  });
+function createRealisticBuilding(name, xPos, zPos, imageUrl) {
+  const width = 3; const height = 4; const depth = 3;
+  const geometry = new THREE.BoxGeometry(width, height, depth);
+  const buildingTexture = textureLoader.load(imageUrl);
+  const material = new THREE.MeshStandardMaterial({ map: buildingTexture, roughness: 0.7 });
+  const building = new THREE.Mesh(geometry, material);
+  building.position.set(xPos, height / 2, zPos);
+  building.castShadow = true;
+  building.receiveShadow = true;
+  building.userData = { name: name };
+  scene.add(building);
+  map3DObjects[name] = building;
 }
 
-// ==========================================
-// LIVE SYNC
-// ==========================================
 async function syncMapProjection() {
   const { data, error } = await supabaseClient.from('menu').select('*').order('category');
   if (error) return;
 
-  // Clear old models
   Object.values(map3DObjects).forEach(mesh => scene.remove(mesh));
   map3DObjects = {};
 
-  let xPos = -6;
-  let zPos = -2;
-
-  // This is where you will eventually map the Supabase data to real GLB file URLs
-  // For now, we load a standard test model to verify the GLTF pipeline works.
-  const testModelUrl = 'https://threejs.org/examples/models/gltf/DamagedHelmet/glTF/DamagedHelmet.gltf';
+  let xPos = -6; let zPos = -2;
 
   Object.keys(MENU_CATEGORIES).forEach((cat, catIndex) => {
     MENU_CATEGORIES[cat].forEach((name, itemIndex) => {
       const item = data.find(m => m.name === name);
       if (!item) return;
       
-      // In Step 2, we load the real model instead of building a fake box
-      loadRealModel(name, xPos, zPos, testModelUrl);
+      const propertyImageUrl = item.image_url || 'https://threejs.org/examples/textures/crate.gif'; 
+      createRealisticBuilding(name, xPos, zPos, propertyImageUrl);
       
       xPos += 4;
-      if (xPos > 6) {
-        xPos = -6;
-        zPos += 4;
-      }
+      if (xPos > 6) { xPos = -6; zPos += 4; }
     });
   });
 }
 
-// ==========================================
-// NAVIGATION CONTROLS
-// ==========================================
 const moveState = { up: false, down: false, left: false, right: false };
 const speed = 0.3; 
 const bounds = { xMin: -20, xMax: 20, zMin: -15, zMax: 15 }; 
@@ -250,7 +216,6 @@ window.addEventListener('resize', () => {
 });
 
 setupDpad();
-
 syncMapProjection();
 setInterval(syncMapProjection, 5000);
 </script>
