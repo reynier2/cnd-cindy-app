@@ -3,22 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CND - The World Mirror</title>
+<title>CND - Real Map Projection</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<!-- GLTF Loader ready for Step 2 (Real Google Maps 3D Models) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-  body { margin: 0; padding: 0; background: #050505; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+  body { margin: 0; padding: 0; background: #0a0a0a; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
   
-  /* TOP HALF: THE EYES (LIVE 3D MIRROR) */
+  /* TOP HALF: THE MAP PROJECTION */
   #top-view { 
-    height: 55vh; width: 100%; position: relative; background: #050505;
+    height: 55vh; width: 100%; position: relative; background: #1a1a1a;
     border-bottom: 2px solid #ffb703;
   }
   #canvas-container { width: 100%; height: 100%; display: block; }
   
-  /* UI OVERLAY */
   #ui-overlay {
     position: absolute; top: 15px; left: 0; width: 100%; text-align: center;
     pointer-events: none; z-index: 10;
@@ -34,10 +35,10 @@
   }
   #coords {
     position: absolute; bottom: 10px; right: 10px; color: #00ff00; 
-    font-family: monospace; font-size: 0.8rem; z-index: 10;
+    font-family: monospace; font-size: 0.8rem; z-index: 10; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px;
   }
   
-  /* BOTTOM HALF: THE HANDS (NAVIGATION) */
+  /* BOTTOM HALF: NAVIGATION CONTROLS */
   #bottom-controls { 
     height: 45vh; width: 100%; background: #111; 
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -62,19 +63,17 @@
 </head>
 <body>
 
-<!-- TOP HALF: LIVE 3D PROJECTION -->
 <div id="top-view">
   <div id="ui-overlay">
-    <h1>CND THE WORLD</h1>
-    <p><span id="live-dot"></span> LIVE MIRROR ACTIVE</p>
+    <h1>CND MAP PROJECTION</h1>
+    <p><span id="live-dot"></span> LIVE SYNC ACTIVE</p>
   </div>
   <div id="coords">X: 0.0 | Z: 0.0</div>
   <div id="canvas-container"></div>
 </div>
 
-<!-- BOTTOM HALF: NAVIGATION CONTROLS -->
 <div id="bottom-controls">
-  <h2>NAVIGATE THE WORLD</h2>
+  <h2>NAVIGATE THE MAP</h2>
   <div class="dpad">
     <button id="btn-up" class="dpad-btn">▲</button>
     <div class="dpad-row">
@@ -102,15 +101,15 @@ const MENU_CATEGORIES = {
 };
 
 // ==========================================
-// 3D WORLD SETUP (EXACT MATCH TO KITCHEN)
+// 3D MAP SETUP
 // ==========================================
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x050505);
-scene.fog = new THREE.Fog(0x050505, 15, 60);
+scene.background = new THREE.Color(0x1a1a1a); // Dark map background
+scene.fog = new THREE.Fog(0x1a1a1a, 20, 80);
 
 const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-camera.position.set(0, 12, 18);
+camera.position.set(0, 15, 20); // Higher angle, like a map view
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(container.clientWidth, container.clientHeight);
@@ -122,82 +121,74 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.1;
 controls.maxPolarAngle = Math.PI / 2 - 0.1;
 
-// Lighting
-const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+// Lighting (Bright, like daytime satellite view)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
 scene.add(ambientLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 dirLight.position.set(10, 20, 10);
+dirLight.castShadow = true;
 scene.add(dirLight);
 
-// Grid Floor
-const gridHelper = new THREE.GridHelper(100, 100, 0x333333, 0x222222);
-scene.add(gridHelper);
-
-const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(100, 100),
-  new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 })
-);
+// Ground (Map Base)
+const floorGeo = new THREE.PlaneGeometry(100, 100);
+const floorMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.9 });
+const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-let menu3DObjects = {};
+// Map Grid (Like a professional mapping tool)
+const gridHelper = new THREE.GridHelper(100, 50, 0x444444, 0x333333);
+scene.add(gridHelper);
+
+let map3DObjects = {};
 
 // ==========================================
-// CREATE BUILDING FUNCTION (EXACT MATCH TO KITCHEN)
+// REALISTIC MAP EXTRUSION GENERATOR (Step 1)
 // ==========================================
-function createBuildingTexture(baseColorHex) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 64; canvas.height = 128;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#' + new THREE.Color(baseColorHex).getHexString();
-  ctx.fillRect(0, 0, 64, 128);
-  
-  // Add windows
-  for(let y = 10; y < 110; y += 20) {
-    for(let x = 8; x < 56; x += 18) {
-      ctx.fillStyle = Math.random() > 0.4 ? '#ffeeaa' : '#1a1a2e';
-      ctx.fillRect(x, y, 12, 15);
-    }
-  }
-  
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.magFilter = THREE.NearestFilter;
-  return tex;
-}
-
-function createDetailedBuilding(name, height, color, xPos, zPos) {
-  const width = 1.5;
-  const depth = 1.5;
-  const texture = createBuildingTexture(color);
-  const material = new THREE.MeshLambertMaterial({ map: texture });
+function createMapBuilding(name, height, color, xPos, zPos) {
+  // Clean, flat-roofed buildings like Google Maps 3D
+  const width = 2;
+  const depth = 2;
   const geometry = new THREE.BoxGeometry(width, height, depth);
+  
+  // Subtle outline effect for map look
+  const material = new THREE.MeshStandardMaterial({ 
+    color: color, 
+    roughness: 0.6,
+    metalness: 0.1
+  });
+  
   const building = new THREE.Mesh(geometry, material);
   building.position.set(xPos, height / 2, zPos);
   building.castShadow = true;
   building.receiveShadow = true;
   building.userData = { name: name };
+  
+  // Add a subtle white outline/edge to make it pop like a map
+  const edges = new THREE.EdgesGeometry(geometry);
+  const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.3, transparent: true }));
+  building.add(line);
+  
   scene.add(building);
   return building;
 }
 
 // ==========================================
-// SYNC WITH THE KITCHEN (LIVE MIRROR)
+// LIVE SYNC (Mirrors the Kitchen)
 // ==========================================
-async function syncWorldProjection() {
+async function syncMapProjection() {
   const { data, error } = await supabaseClient.from('menu').select('*').order('category');
-  if (error) {
-    console.error("Error fetching menu:", error);
-    return;
-  }
+  if (error) return;
 
   // Clear old buildings
-  Object.values(menu3DObjects).forEach(mesh => scene.remove(mesh));
-  menu3DObjects = {};
+  Object.values(map3DObjects).forEach(mesh => scene.remove(mesh));
+  map3DObjects = {};
 
   let xPos = -6;
   let zPos = -2;
-  const buildingColors = [0x556677, 0x776655, 0x667766, 0x665577, 0x775566];
+  // Map-style colors
+  const buildingColors = [0x4a90e2, 0x50c878, 0x9b59b6, 0xe67e22, 0x34495e];
 
   Object.keys(MENU_CATEGORIES).forEach((cat, catIndex) => {
     MENU_CATEGORIES[cat].forEach((name, itemIndex) => {
@@ -205,14 +196,14 @@ async function syncWorldProjection() {
       if (!item) return;
       
       const currentStatus = item.status || 'green';
-      // Green = Tall (5), Yellow = Medium (4), Red = Short (3)
-      const height = currentStatus === 'green' ? 5 : (currentStatus === 'yellow' ? 4 : 3);
+      // Map extrusion heights: Green=Tall, Yellow=Medium, Red=Short
+      const height = currentStatus === 'green' ? 6 : (currentStatus === 'yellow' ? 4 : 2);
       const color = buildingColors[(catIndex * 3 + itemIndex) % buildingColors.length];
       
-      const building = createDetailedBuilding(name, height, '#' + new THREE.Color(color).getHexString(), xPos, zPos);
-      menu3DObjects[name] = building;
+      const building = createMapBuilding(name, height, color, xPos, zPos);
+      map3DObjects[name] = building;
       
-      xPos += 2.5;
+      xPos += 3;
       if (xPos > 6) {
         xPos = -6;
         zPos += 3;
@@ -222,25 +213,18 @@ async function syncWorldProjection() {
 }
 
 // ==========================================
-// NAVIGATION & BOUNDARIES
+// NAVIGATION CONTROLS
 // ==========================================
 const moveState = { up: false, down: false, left: false, right: false };
-const speed = 0.2; 
+const speed = 0.3; 
 const bounds = { xMin: -20, xMax: 20, zMin: -15, zMax: 15 }; 
 
 function setupDpad() {
-  const buttons = {
-    up: document.getElementById('btn-up'),
-    down: document.getElementById('btn-down'),
-    left: document.getElementById('btn-left'),
-    right: document.getElementById('btn-right')
-  };
-
+  const buttons = { up: document.getElementById('btn-up'), down: document.getElementById('btn-down'), left: document.getElementById('btn-left'), right: document.getElementById('btn-right') };
   Object.keys(buttons).forEach(dir => {
     const btn = buttons[dir];
     const startMove = (e) => { e.preventDefault(); moveState[dir] = true; btn.classList.add('active'); };
     const stopMove = (e) => { e.preventDefault(); moveState[dir] = false; btn.classList.remove('active'); };
-    
     btn.addEventListener('mousedown', startMove);
     btn.addEventListener('touchstart', startMove, {passive: false});
     btn.addEventListener('mouseup', stopMove);
@@ -267,9 +251,6 @@ function updateMovement() {
   document.getElementById('coords').innerText = `X: ${camera.position.x.toFixed(1)} | Z: ${camera.position.z.toFixed(1)}`;
 }
 
-// ==========================================
-// ANIMATION LOOP
-// ==========================================
 function animate() {
   requestAnimationFrame(animate);
   updateMovement(); 
@@ -286,9 +267,9 @@ window.addEventListener('resize', () => {
 
 setupDpad();
 
-// 🔄 INITIAL SYNC AND LIVE UPDATES (Mirrors the kitchen every 5 seconds)
-syncWorldProjection();
-setInterval(syncWorldProjection, 5000);
+// 🔄 INITIAL SYNC AND LIVE UPDATES
+syncMapProjection();
+setInterval(syncMapProjection, 5000);
 </script>
 </body>
 </html>
