@@ -1,353 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CND City - Detailed Aerial View</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #000; }
-        #info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            z-index: 100;
-            pointer-events: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CND - Kitchen Command Board (3D)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; margin: 0; padding: 10px; }
+  .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #1a1a1a; border-radius: 8px; margin-bottom: 15px; border-bottom: 2px solid #ffb703; }
+  .header h1 { margin: 0; font-size: 1.5rem; color: #ffb703; letter-spacing: 2px; }
+  .status-badge { color: #00ff00; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+  .status-dot { width: 10px; height: 10px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00; }
+  #viewport-3d { width: 100%; height: 350px; background: #050505; border-radius: 12px; border: 1px solid #333; margin-bottom: 20px; position: relative; overflow: hidden; }
+  #viewport-label { position: absolute; top: 10px; left: 15px; color: #ffb703; font-weight: bold; letter-spacing: 1px; z-index: 10; pointer-events: none; }
+  .main-container { display: flex; gap: 20px; }
+  .orders-panel, .controls-panel { flex: 1; background: #1a1a1a; padding: 15px; border-radius: 8px; min-height: 400px; border: 1px solid #333; }
+  .panel-header h2 { color: #ffb703; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 0; }
+  .order-card { background: #252525; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ffb703; }
+  .order-card.status-processing { border-left-color: #00ff00; }
+  .order-card.status-done { border-left-color: #555; opacity: 0.6; }
+  .order-top { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; }
+  .order-items { font-size: 0.9rem; color: #ccc; margin: 10px 0; }
+  .order-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #333; }
+  .order-total { font-weight: bold; color: #ffb703; text-align: right; margin-top: 8px; }
+  .btn { width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 8px; transition: 0.2s; }
+  .btn-process { background: #ffb703; color: #000; }
+  .btn-done { background: #00ff00; color: #000; }
+  .btn-delete { background: #e63946; color: #fff; width: auto; padding: 5px 10px; font-size: 0.8rem; }
+  .control-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #252525; border-radius: 6px; margin-bottom: 8px; }
+  .traffic-lights { display: flex; gap: 5px; }
+  .light-btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; opacity: 0.4; transition: 0.2s; }
+  .light-btn.active { opacity: 1; transform: scale(1.1); box-shadow: 0 0 8px currentColor; }
+  .light-green { background: #00ff00; color: #000; }
+  .light-yellow { background: #ffb703; color: #000; }
+  .light-red { background: #e63946; color: #fff; }
+  @media (max-width: 768px) {
+    .main-container { flex-direction: column; }
+    #viewport-3d { height: 250px; }
+    .btn, .light-btn { padding: 12px !important; font-size: 16px !important; }
+  }
+</style>
 </head>
 <body>
-    <div id="info">CND City - Detailed Aerial View<br>Drag to rotate | Scroll to zoom</div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script>
-        // Scene setup
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xd4a373);
-        scene.fog = new THREE.FogExp2(0xd4a373, 0.002);
 
-        // Camera
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(60, 90, 60);
-        camera.lookAt(0, 0, 0);
+<div class="header">
+  <h1>️ CND KITCHEN COMMAND</h1>
+  <div class="status-badge"><div class="status-dot"></div> LIVE</div>
+</div>
 
-        // Renderer
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.body.appendChild(renderer.domElement);
+<div id="viewport-3d">
+  <div id="viewport-label"> THE BIG WORLD (3D PROJECTION)</div>
+</div>
 
-        // Controls
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.maxPolarAngle = Math.PI / 2.1;
-        controls.minDistance = 20;
-        controls.maxDistance = 250;
+<div class="main-container">
+  <div class="orders-panel">
+    <div class="panel-header"><h2>📋 ACTIVE ORDERS</h2></div>
+    <div id="active-orders-list"><div style="color:#888; text-align:center; padding:20px;">Waiting for orders...</div></div>
+  </div>
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffaa55, 0.6);
-        scene.add(ambientLight);
+  <div class="controls-panel">
+    <div class="panel-header"><h2>🚦 MENU AVAILABILITY</h2></div>
+    <div id="controls-content"><div style="color:#888; text-align:center; padding:20px;">Loading menu...</div></div>
+  </div>
+</div>
 
-        const dirLight = new THREE.DirectionalLight(0xffd700, 1.5);
-        dirLight.position.set(100, 120, 80);
-        dirLight.castShadow = true;
-        dirLight.shadow.camera.left = -150;
-        dirLight.shadow.camera.right = 150;
-        dirLight.shadow.camera.top = 150;
-        dirLight.shadow.camera.bottom = -150;
-        dirLight.shadow.mapSize.width = 4096;
-        dirLight.shadow.mapSize.height = 4096;
-        scene.add(dirLight);
+<script>
+const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Ground
-        const groundGeo = new THREE.PlaneGeometry(400, 400);
-        const groundMat = new THREE.MeshLambertMaterial({ color: 0x3a5f3a });
-        const ground = new THREE.Mesh(groundGeo, groundMat);
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
+const MENU_CATEGORIES = {
+  'TACOS & QUESABIRRIAS': ['Quesabirria Taco', 'Birria Taco', 'Suadero Taco'],
+  'BURRITOS & GORDITAS': ['Burrito Birria', 'Gordita', 'Burrito'],
+  'SIDES & EXTRAS': ['Consomé', 'Rice & Beans', 'Chips & Salsa'],
+  'DRINKS': ['Horchata', 'Jamaica', 'Soda']
+};
 
-        // Roads
-        function createRoad(x, z, width, length, rotation) {
-            const roadGeo = new THREE.PlaneGeometry(width, length);
-            const roadMat = new THREE.MeshLambertMaterial({ color: 0x333333 });
-            const road = new THREE.Mesh(roadGeo, roadMat);
-            road.rotation.x = -Math.PI / 2;
-            road.rotation.z = rotation;
-            road.position.set(x, 0.05, z);
-            road.receiveShadow = true;
-            scene.add(road);
+let knownOrderIds = new Set();
+let ordersData = [];
+let menu3DObjects = {};
 
-            const lineGeo = new THREE.PlaneGeometry(0.5, length);
-            const lineMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-            const line = new THREE.Mesh(lineGeo, lineMat);
-            line.rotation.x = -Math.PI / 2;
-            line.rotation.z = rotation;
-            line.position.set(x, 0.06, z);
-            scene.add(line);
-        }
+// ==========================================
+// 3D WORLD SETUP (Three.js)
+// ==========================================
+const viewport = document.getElementById('viewport-3d');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xd4a373);
+scene.fog = new THREE.FogExp2(0xd4a373, 0.002);
 
-        createRoad(0, 0, 14, 400, 0);
-        createRoad(0, 0, 14, 400, Math.PI / 2);
+const camera = new THREE.PerspectiveCamera(60, viewport.clientWidth / viewport.clientHeight, 0.1, 1000);
+camera.position.set(8, 10, 8);
+camera.lookAt(0, 0, 0);
 
-        // --- TEXTURE GENERATOR FOR WINDOWS & DOORS ---
-        function createBuildingTexture(baseColorHex, hasDoor) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 128; 
-            canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            
-            // Base wall color
-            ctx.fillStyle = '#' + new THREE.Color(baseColorHex).getHexString();
-            ctx.fillRect(0, 0, 128, 256);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+renderer.shadowMap.enabled = true;
+viewport.appendChild(renderer.domElement);
 
-            // Windows
-            for(let y = 20; y < 230; y += 35) {
-                for(let x = 15; x < 115; x += 35) {
-                    // Window frame
-                    ctx.fillStyle = '#222222';
-                    ctx.fillRect(x - 2, y - 2, 24, 29);
-                    
-                    // Glass (randomly lit or dark)
-                    const isLit = Math.random() > 0.4;
-                    ctx.fillStyle = isLit ? '#ffeeaa' : '#1a1a2e';
-                    ctx.fillRect(x, y, 20, 25);
-                }
-            }
+const ambientLight = new THREE.AmbientLight(0xffaa55, 0.6);
+scene.add(ambientLight);
 
-            // Door at the bottom
-            if (hasDoor) {
-                ctx.fillStyle = '#222222'; // Door frame
-                ctx.fillRect(40, 195, 48, 61);
-                ctx.fillStyle = '#4a3728'; // Door wood
-                ctx.fillRect(44, 199, 40, 57);
-            }
+const dirLight = new THREE.DirectionalLight(0xffd700, 1.5);
+dirLight.position.set(10, 12, 8);
+dirLight.castShadow = true;
+scene.add(dirLight);
 
-            const tex = new THREE.CanvasTexture(canvas);
-            tex.magFilter = THREE.NearestFilter; // Keeps it crisp
-            return tex;
-        }
+const groundGeo = new THREE.PlaneGeometry(40, 40);
+const groundMat = new THREE.MeshLambertMaterial({ color: 0x3a5f3a });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
 
-        // Expanded realistic color palette
-        const buildingColors = [
-            0xE8DCC4, // Beige
-            0xC2B280, // Sand
-            0xA0522D, // Terracotta
-            0x87CEEB, // Light Blue
-            0xF5F5DC, // Cream
-            0xD3D3D3, // Light Grey
-            0xBC8F8F  // Rosy Brown
-        ];
-        
-        function createBuilding(x, z, width, height, depth, color) {
-            const isStreetLevel = height < 20;
-            const texture = createBuildingTexture(color, isStreetLevel);
-            
-            const material = new THREE.MeshLambertMaterial({ map: texture });
-            const geometry = new THREE.BoxGeometry(width, height, depth);
-            const building = new THREE.Mesh(geometry, material);
-            
-            building.position.set(x, height / 2, z);
-            building.castShadow = true;
-            building.receiveShadow = true;
-            scene.add(building);
+function animate() {
+  requestAnimationFrame(animate);
+  scene.rotation.y += 0.0005;
+  renderer.render(scene, camera);
+}
+animate();
 
-            // Rooftop details
-            if (height > 25 && Math.random() > 0.3) {
-                const acGeo = new THREE.BoxGeometry(2, 1.5, 2);
-                const acMat = new THREE.MeshLambertMaterial({ color: 0xcccccc });
-                for(let i=0; i<3; i++) {
-                    const ac = new THREE.Mesh(acGeo, acMat);
-                    ac.position.set(
-                        x + (Math.random() - 0.5) * (width - 3), 
-                        height + 0.75, 
-                        z + (Math.random() - 0.5) * (depth - 3)
-                    );
-                    ac.castShadow = true;
-                    scene.add(ac);
-                }
-            }
-        }
+window.addEventListener('resize', () => {
+  camera.aspect = viewport.clientWidth / viewport.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+});
 
-        // Generate city
-        for (let i = 0; i < 120; i++) {
-            const x = (Math.random() - 0.5) * 250;
-            const z = (Math.random() - 0.5) * 250;
-            
-            if (Math.abs(x) < 30 && Math.abs(z) < 30) continue;
-            if (Math.abs(x) < 10 || Math.abs(z) < 10) continue; 
-            
-            const width = 8 + Math.random() * 10;
-            const height = 10 + Math.random() * 35;
-            const depth = 8 + Math.random() * 10;
-            const color = buildingColors[Math.floor(Math.random() * buildingColors.length)];
-            
-            createBuilding(x, z, width, height, depth, color);
-        }
+// --- DETAILED BUILDING GENERATOR ---
+function createBuildingTexture(baseColorHex) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64; canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#' + new THREE.Color(baseColorHex).getHexString();
+  ctx.fillRect(0, 0, 64, 128);
+  for(let y = 10; y < 110; y += 20) {
+    for(let x = 8; x < 56; x += 18) {
+      ctx.fillStyle = Math.random() > 0.4 ? '#ffeeaa' : '#1a1a2e';
+      ctx.fillRect(x, y, 12, 15);
+    }
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.magFilter = THREE.NearestFilter;
+  return tex;
+}
 
-        // Cathedral Plaza & Cathedral
-        function createCathedral() {
-            const plazaGeo = new THREE.PlaneGeometry(60, 60);
-            const plazaMat = new THREE.MeshLambertMaterial({ color: 0x999999 });
-            const plaza = new THREE.Mesh(plazaGeo, plazaMat);
-            plaza.rotation.x = -Math.PI / 2;
-            plaza.position.y = 0.08;
-            plaza.receiveShadow = true;
-            scene.add(plaza);
+function createDetailedBuilding(height, color, xPos) {
+  const width = 1.5;
+  const depth = 1.5;
+  const texture = createBuildingTexture(color);
+  const material = new THREE.MeshLambertMaterial({ map: texture });
+  const geometry = new THREE.BoxGeometry(width, height, depth);
+  const building = new THREE.Mesh(geometry, material);
+  building.position.set(xPos, height / 2, 0);
+  building.castShadow = true;
+  building.receiveShadow = true;
+  scene.add(building);
+  return building;
+}
+// ---------------------------------------
 
-            const cathedralGroup = new THREE.Group();
+function playAlarm() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.frequency.value = 880; osc.type = 'square';
+  gain.gain.setValueAtTime(0.2, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.5);
+}
 
-            const mainGeo = new THREE.BoxGeometry(22, 18, 35);
-            const mainMat = new THREE.MeshLambertMaterial({ color: 0xF5F5DC });
-            const main = new THREE.Mesh(mainGeo, mainMat);
-            main.position.y = 9;
-            main.castShadow = true;
-            main.receiveShadow = true;
-            cathedralGroup.add(main);
+async function loadOrders() {
+  const { data, error } = await supabaseClient.from('orders').select('*').neq('status', 'deleted').order('created_at', { ascending: false });
+  if (error) return;
+  data.forEach(o => {
+    if (!knownOrderIds.has(o.id) && o.status === 'new') { playAlarm(); knownOrderIds.add(o.id); }
+  });
+  ordersData = data || [];
+  renderOrders();
+}
 
-            const domeGeo = new THREE.SphereGeometry(9, 32, 32);
-            const domeMat = new THREE.MeshLambertMaterial({ color: 0xDDA0DD });
-            const dome = new THREE.Mesh(domeGeo, domeMat);
-            dome.position.set(0, 20, 0);
-            dome.scale.set(1, 0.6, 1);
-            dome.castShadow = true;
-            cathedralGroup.add(dome);
+function renderOrders() {
+  const activeList = document.getElementById('active-orders-list');
+  const activeOrders = ordersData.filter(o => o.status === 'new' || o.status === 'processing');
+  const doneOrders = ordersData.filter(o => o.status === 'done');
+  if (activeOrders.length === 0 && doneOrders.length === 0) {
+    activeList.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Waiting for orders...</div>';
+    return;
+  }
+  let html = '';
+  activeOrders.forEach(o => { html += createOrderCard(o); });
+  if (doneOrders.length > 0) {
+    html += '<div style="margin-top:30px; border-top:2px dashed #333; padding-top:20px;"><h3 style="color:#666; text-align:center;">📜 HISTORY</h3>';
+    doneOrders.forEach(o => { html += createOrderCard(o); });
+    html += '</div>';
+  }
+  activeList.innerHTML = html;
+}
 
-            const towerGeo = new THREE.BoxGeometry(5, 30, 5);
-            const towerMat = new THREE.MeshLambertMaterial({ color: 0xF5F5DC });
-            const leftTower = new THREE.Mesh(towerGeo, towerMat);
-            leftTower.position.set(-9, 15, 0);
-            leftTower.castShadow = true;
-            cathedralGroup.add(leftTower);
+function createOrderCard(o) {
+  const items = JSON.parse(o.items || '[]');
+  const timeAgo = getTimeAgo(new Date(o.created_at));
+  let actionButtons = '';
+  if (o.status === 'new') actionButtons = `<button class="btn btn-process" onclick="updateStatus(${o.id}, 'processing')">▶ START</button>`;
+  else if (o.status === 'processing') actionButtons = `<button class="btn btn-done" onclick="updateStatus(${o.id}, 'done')">✓ DONE</button>`;
+  const deleteBtn = o.status === 'done' ? `<button class="btn btn-delete" onclick="deleteOrder(${o.id})">🗑️</button>` : '';
+  return `
+    <div class="order-card status-${o.status}">
+      <div class="order-top"><span>#${o.id} (${o.status})</span><span>⏱️ ${timeAgo}</span></div>
+      <div style="font-size:0.9rem; color:#aaa;">👤 ${o.customer_name || 'Guest'} | 📞 ${o.phone || 'N/A'} | 🕒 ${o.pickup_time || 'ASAP'}</div>
+      <div class="order-items">${items.map(i => `<div class="order-item"><span>${i.qty}x ${i.name}</span><span>$${(i.price * i.qty).toFixed(2)}</span></div>`).join('')}</div>
+      <div class="order-total">Total: $${parseFloat(o.total || 0).toFixed(2)}</div>
+      <div style="display:flex; gap:10px;">${actionButtons} ${deleteBtn}</div>
+    </div>`;
+}
 
-            const rightTower = new THREE.Mesh(towerGeo, towerMat);
-            rightTower.position.set(9, 15, 0);
-            rightTower.castShadow = true;
-            cathedralGroup.add(rightTower);
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  return `${Math.floor(minutes / 60)}h`;
+}
 
-            const smallDomeGeo = new THREE.SphereGeometry(3, 16, 16);
-            const smallDomeMat = new THREE.MeshLambertMaterial({ color: 0xDDA0DD });
-            
-            const leftDome = new THREE.Mesh(smallDomeGeo, smallDomeMat);
-            leftDome.position.set(-9, 31, 0);
-            cathedralGroup.add(leftDome);
+window.updateStatus = async (id, status) => { await supabaseClient.from('orders').update({ status }).eq('id', id); loadOrders(); };
+window.deleteOrder = async (id) => { if(confirm('Delete order #' + id + '?')) { await supabaseClient.from('orders').update({ status: 'deleted' }).eq('id', id); loadOrders(); } };
 
-            const rightDome = new THREE.Mesh(smallDomeGeo, smallDomeMat);
-            rightDome.position.set(9, 31, 0);
-            cathedralGroup.add(rightDome);
+async function loadMenu() {
+  const { data, error } = await supabaseClient.from('menu').select('*').order('category');
+  if (error) return;
+  const div = document.getElementById('controls-content');
+  div.innerHTML = '';
+  Object.values(menu3DObjects).forEach(mesh => scene.remove(mesh));
+  menu3DObjects = {};
+  let xPos = -4;
+  
+  const buildingColors = [0xE8DCC4, 0xC2B280, 0xA0522D, 0x87CEEB, 0xF5F5DC, 0xD3D3D3];
+  
+  Object.keys(MENU_CATEGORIES).forEach(cat => {
+    const catDiv = document.createElement('div');
+    catDiv.innerHTML = `<h3 style="color:#ffb703; margin-bottom:10px;">${cat}</h3>`;
+    MENU_CATEGORIES[cat].forEach(name => {
+      const item = data.find(m => m.name === name);
+      if (!item) return;
+      const currentStatus = item.status || 'green';
+      
+      // --- CREATE DETAILED 3D BUILDING ---
+      const height = currentStatus === 'green' ? 3 : (currentStatus === 'yellow' ? 2 : 1.5);
+      const color = buildingColors[Math.floor(Math.random() * buildingColors.length)];
+      const building = createDetailedBuilding(height, '#' + new THREE.Color(color).getHexString(), xPos);
+      menu3DObjects[name] = building;
+      xPos += 2.2;
+      // ------------------------------------
+      
+      catDiv.innerHTML += `
+        <div class="control-item">
+          <div style="font-weight:bold;">${name}</div>
+          <div class="traffic-lights">
+            <button class="light-btn light-green ${currentStatus==='green'?'active':''}" onclick="updateMenu('${name}','green')">Avail</button>
+            <button class="light-btn light-yellow ${currentStatus==='yellow'?'active':''}" onclick="updateMenu('${name}','yellow')">Low</button>
+            <button class="light-btn light-red ${currentStatus==='red'?'active':''}" onclick="updateMenu('${name}','red')">Sold</button>
+          </div>
+        </div>`;
+    });
+    div.appendChild(catDiv);
+  });
+}
 
-            const crossMat = new THREE.MeshBasicMaterial({ color: 0xFFD700 });
-            [ [0, 24, 0], [-9, 33, 0], [9, 33, 0] ].forEach(pos => {
-                const v = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.5, 0.5), crossMat);
-                v.position.set(...pos);
-                cathedralGroup.add(v);
-                const h = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.5, 0.5), crossMat);
-                h.position.set(pos[0], pos[1] + 0.5, pos[2]);
-                cathedralGroup.add(h);
-            });
+window.updateMenu = async (name, status) => {
+  const { error } = await supabaseClient.from('menu').update({ status: status }).eq('name', name);
+  if (error) console.error(error);
+  else loadMenu();
+};
 
-            scene.add(cathedralGroup);
-        }
-        createCathedral();
-
-        // Streetlights
-        function createStreetlight(x, z) {
-            const poleGeo = new THREE.CylinderGeometry(0.2, 0.2, 8, 8);
-            const poleMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
-            const pole = new THREE.Mesh(poleGeo, poleMat);
-            pole.position.set(x, 4, z);
-            pole.castShadow = true;
-            scene.add(pole);
-
-            const bulbGeo = new THREE.SphereGeometry(0.8, 8, 8);
-            const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffeeaa });
-            const bulb = new THREE.Mesh(bulbGeo, bulbMat);
-            bulb.position.set(x, 8.5, z);
-            scene.add(bulb);
-
-            const light = new THREE.PointLight(0xffeeaa, 0.5, 15);
-            light.position.set(x, 8.5, z);
-            scene.add(light);
-        }
-
-        for (let i = -120; i <= 120; i += 20) {
-            if (Math.abs(i) > 15) {
-                createStreetlight(i, 8);
-                createStreetlight(i, -8);
-                createStreetlight(8, i);
-                createStreetlight(-8, i);
-            }
-        }
-
-        // Layered Mountains
-        function createMountains() {
-            const colors = [0x6B5B73, 0x5A4A63, 0x4A3A53];
-            const positions = [
-                { x: -180, z: -160, s: 1.2 }, { x: -100, z: -180, s: 1.5 }, 
-                { x: 0, z: -190, s: 1.8 }, { x: 100, z: -180, s: 1.5 }, 
-                { x: 180, z: -160, s: 1.2 },
-                { x: -140, z: -170, s: 1.0 }, { x: 140, z: -170, s: 1.0 }
-            ];
-
-            positions.forEach((pos, idx) => {
-                const mountainGeo = new THREE.ConeGeometry(50 * pos.s, 90 * pos.s, 5);
-                const mountainMat = new THREE.MeshLambertMaterial({ 
-                    color: colors[idx % 3],
-                    flatShading: true
-                });
-                const mountain = new THREE.Mesh(mountainGeo, mountainMat);
-                mountain.position.set(pos.x, 45 * pos.s, pos.z);
-                mountain.castShadow = true;
-                mountain.receiveShadow = true;
-                scene.add(mountain);
-            });
-        }
-        createMountains();
-
-        // Trees
-        function createTree(x, z) {
-            const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 2, 6);
-            const trunkMat = new THREE.MeshLambertMaterial({ color: 0x4A3728 });
-            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-            trunk.position.set(x, 1, z);
-            trunk.castShadow = true;
-            scene.add(trunk);
-
-            const leavesGeo = new THREE.ConeGeometry(2.5, 6, 8);
-            const leavesMat = new THREE.MeshLambertMaterial({ color: 0x228B22 });
-            const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-            leaves.position.set(x, 4.5, z);
-            leaves.castShadow = true;
-            scene.add(leaves);
-        }
-
-        for (let i = -120; i <= 120; i += 12) {
-            if (Math.abs(i) > 20) {
-                createTree(i + 10, -120);
-                createTree(i + 10, 120);
-                createTree(-120, i + 10);
-                createTree(120, i + 10);
-            }
-        }
-
-        // Animation
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+loadOrders();
+loadMenu();
+setInterval(loadOrders, 5000);
+setInterval(loadMenu, 10000);
+</script>
 </body>
 </html>
