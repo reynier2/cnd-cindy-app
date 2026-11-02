@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Manager Portal — Luna Taqueria</title>
+<!-- GPS Extraction Library -->
+<script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js"></script>
 <style>
 :root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#e63946;--cream:#fff3e0;--dim:#c9a27a}
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
@@ -22,6 +24,9 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
 .item-info .price{color:var(--gold);font-weight:800;font-size:1.1rem;}
 #msg{text-align:center;margin:10px 0;font-weight:700;min-height:24px}
 .section-box{background:rgba(255,183,3,0.05);border:1px solid var(--gold);border-radius:12px;padding:20px;margin-bottom:30px;}
+.gps-box { border-color: #00ff00; background: rgba(0, 255, 0, 0.05); }
+.gps-btn { background: #00ff00; color: #000; }
+#gps-result { text-align: center; margin-top: 10px; font-weight: bold; color: var(--gold); min-height: 24px; }
 </style>
 </head>
 <body>
@@ -29,7 +34,7 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
 <!-- LOGIN SCREEN -->
 <div id="login-screen" class="active">
   <h1>🔒 LUNA TAQUERIA MANAGER</h1>
-  <p style="text-align:center;color:var(--dim);margin-bottom:20px;">Enter passcode to manage the menu.</p>
+  <p style="text-align:center;color:var(--dim);margin-bottom:20px;">Enter passcode to manage the system.</p>
   <input type="password" id="passcode" placeholder="Enter Passcode">
   <button class="btn" onclick="checkPass()">UNLOCK</button>
   <div id="msg"></div>
@@ -37,11 +42,20 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
 
 <!-- DASHBOARD SCREEN -->
 <div id="manager-dashboard">
-  <h1>📝 MENU MANAGER</h1>
+  <h1>📝 MANAGER DASHBOARD</h1>
   
+  <!-- NEW: GPS & PROPERTY SCAN INTAKE -->
+  <div class="section-box gps-box">
+    <h2 style="margin-top:0;font-size:1.2rem; color: #00ff00;">📸 PROPERTY SCAN INTAKE</h2>
+    <p style="text-align:center;color:var(--dim);margin-bottom:15px;font-size:0.9rem;">Take or drop a property photo here. GPS will be extracted and sent to the Kitchen Board.</p>
+    <input type="file" id="property-photo" accept="image/*" capture="environment" style="padding: 15px; border: 2px dashed #00ff00; text-align: center; background: var(--card);">
+    <div id="gps-result">Waiting for photo...</div>
+    <button class="btn gps-btn" onclick="saveScanToSupabase()" style="margin-top: 15px;">💾 SEND GPS TO KITCHEN BOARD</button>
+  </div>
+
   <!-- ADD NEW ITEM SECTION -->
   <div class="section-box">
-    <h2 style="margin-top:0;font-size:1.2rem;"> ADD NEW ITEM</h2>
+    <h2 style="margin-top:0;font-size:1.2rem;"> ADD NEW MENU ITEM</h2>
     <select id="new-cat">
       <option value="TACOS & QUESABIRRIAS">TACOS & QUESABIRRIAS</option>
       <option value="BURRITOS & GORDITAS">BURRITOS & GORDITAS</option>
@@ -64,9 +78,11 @@ input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3
 </div>
 
 <script>
-// CORRECT CREDENTIALS FOR LUNA TAQUERIA
+// CORRECT CREDENTIALS
 const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
 const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE";
+
+let currentScanData = { lat: null, lon: null, address: "Waiting for photo..." };
 
 function checkPass() {
   if(document.getElementById("passcode").value === "CND-BOSS") {
@@ -86,12 +102,82 @@ function logout() {
   document.getElementById("msg").textContent = "";
 }
 
+// --- GPS EXTRACTION LOGIC ---
+document.getElementById("property-photo").addEventListener("change", async function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  document.getElementById("gps-result").textContent = "🔄 Extracting GPS data from photo...";
+  document.getElementById("gps-result").style.color = "var(--gold)";
+  
+  try {
+    // exifr reads the GPS directly from the image file in the browser
+    const output = await exifr.gps(file);
+    
+    if (output && output.latitude && output.longitude) {
+      currentScanData.lat = output.latitude.toFixed(6);
+      currentScanData.lon = output.longitude.toFixed(6);
+      
+      // Reverse geocode using OpenStreetMap
+      const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentScanData.lat}&lon=${currentScanData.lon}`);
+      const geoData = await geoRes.json();
+      const addr = geoData.address || {};
+      currentScanData.address = `${addr.house_number || ''} ${addr.road || ''}, ${addr.city || addr.town || ''}, ${addr.state || ''}`.trim() || "Coordinates locked";
+      
+      document.getElementById("gps-result").innerHTML = `📍 <span style="color:#00ff00">LOCKED:</span> ${currentScanData.address}<br><small>Lat: ${currentScanData.lat}, Lon: ${currentScanData.lon}</small>`;
+    } else {
+      currentScanData.address = "No GPS data found. Ensure location services were on.";
+      document.getElementById("gps-result").innerHTML = `⚠️ <span style="color:var(--red)">${currentScanData.address}</span>`;
+    }
+  } catch (err) {
+    console.error(err);
+    document.getElementById("gps-result").innerHTML = "⚠️ <span style='color:var(--red)'>Error reading photo data.</span>";
+  }
+});
+
+async function saveScanToSupabase() {
+  if (!currentScanData.lat || !currentScanData.lon) {
+    alert("No valid GPS data found. Please upload a photo with location enabled.");
+    return;
+  }
+
+  document.getElementById("gps-result").textContent = "🔄 Sending to Kitchen Board...";
+
+  // Save to the 'site_scans' table in Supabase
+  const payload = {
+    lat: parseFloat(currentScanData.lat),
+    lon: parseFloat(currentScanData.lon),
+    address: currentScanData.address,
+    timestamp: new Date().toISOString(),
+    status: 'pending_3d_build'
+  };
+
+  const response = await fetch(`${SUPA}/rest/v1/site_scans`, {
+    method: "POST",
+    headers: { 
+      "apikey": KEY, 
+      "Authorization": "Bearer " + KEY, 
+      "Content-Type": "application/json", 
+      "Prefer": "return=minimal" 
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (response.ok) {
+    document.getElementById("gps-result").innerHTML = "✅ <span style='color:#00ff00'>Scan sent to Kitchen Board successfully!</span>";
+    document.getElementById("property-photo").value = "";
+    currentScanData = { lat: null, lon: null, address: "Waiting for photo..." };
+  } else {
+    document.getElementById("gps-result").innerHTML = "❌ <span style='color:var(--red)'>Error sending to Supabase.</span>";
+  }
+}
+// ----------------------------
+
 async function loadMenu() {
   const list = document.getElementById("menu-list");
   list.innerHTML = "<p style='text-align:center;color:var(--gold);'>Loading menu...</p>";
   
   try {
-    // Fetching from the correct 'menu' table
     const res = await fetch(`${SUPA}/rest/v1/menu?order=category.asc,name.asc`, {
       headers: { "apikey": KEY, "Authorization": "Bearer " + KEY }
     });
