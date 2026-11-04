@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CND - Gyro Space Controller</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  body { margin: 0; padding: 0; background: #000000; overflow: hidden; height: 100vh; width: 100vw; }
+  #canvas-container { width: 100%; height: 100%; display: block; }
+  
+  /* Start button for iOS/Android motion permissions */
+  #start-btn {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    padding: 20px 40px; font-size: 1.5rem; background: #ffb703; color: #000;
+    border: none; border-radius: 10px; font-weight: bold; cursor: pointer; z-index: 100;
+    box-shadow: 0 0 20px #ffb703;
+  }
+  
+  #ui-overlay {
+    position: absolute; top: 15px; left: 0; width: 100%; text-align: center;
+    pointer-events: none; z-index: 10; display: none; 
+  }
+  #ui-overlay h1 { color: #ffb703; font-size: 1.2rem; letter-spacing: 3px; margin: 0; text-shadow: 0 0 10px #000; }
+  #ui-overlay p { color: #888; font-size: 0.8rem; margin: 5px 0 0 0; }
+  #live-dot {
+    display: inline-block; width: 8px; height: 8px; background: #00ff00;
+    border-radius: 50%; box-shadow: 0 0 8px #00ff00; margin-right: 5px;
+  }
+</style>
+</head>
+<body>
+
+<button id="start-btn">INITIALIZE GYRO CONTROLS</button>
+
+<div id="ui-overlay">
+  <h1>CND GYRO SPACE CONTROLLER</h1>
+  <p><span id="live-dot"></span> HEAD TRACKING ACTIVE</p>
+</div>
+
+<div id="canvas-container"></div>
+
+<script>
+// 1. Basic Three.js Setup
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000); 
+scene.fog = new THREE.FogExp2(0x000000, 0.015);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 0, 5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+// 2. The Infinite Starfield
+const starsGeometry = new THREE.BufferGeometry();
+const starsCount = 3000;
+const posArray = new Float32Array(starsCount * 3);
+for(let i = 0; i < starsCount * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 400;
+}
+starsGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+const starsMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xffffff });
+const starField = new THREE.Points(starsGeometry, starsMaterial);
+scene.add(starField);
+
+// 3. The Drifting Planets
+const planetTypes = [
+    { name: 'Mars', color: 0xff4500, size: 8 },
+    { name: 'Earth', color: 0x2244ff, size: 10 },
+    { name: 'Jupiter', color: 0xd2b48c, size: 20 }
+];
+let currentPlanetIndex = 0;
+let side = 1; 
+const planets = [];
+
+function spawnPlanet() {
+    const type = planetTypes[currentPlanetIndex % planetTypes.length];
+    const geometry = new THREE.SphereGeometry(type.size, 32, 32);
+    const material = new THREE.MeshBasicMaterial({ color: type.color });
+    const planet = new THREE.Mesh(geometry, material);
+
+    planet.position.x = side * 40; 
+    planet.position.y = (Math.random() - 0.5) * 20;
+    planet.position.z = -200; 
+
+    scene.add(planet);
+    planets.push(planet);
+    side *= -1; 
+    currentPlanetIndex++;
+}
+spawnPlanet();
+setInterval(spawnPlanet, 5000);
+
+// 4. Gyroscope / Head Tracking Logic
+let isGyroActive = false;
+
+document.getElementById('start-btn').addEventListener('click', () => {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(permissionState => {
+            if (permissionState === 'granted') {
+                enableGyro();
+            }
+        }).catch(console.error);
+    } else {
+        enableGyro();
+    }
+});
+
+function enableGyro() {
+    document.getElementById('start-btn').style.display = 'none';
+    document.getElementById('ui-overlay').style.display = 'block';
+    isGyroActive = true;
+    window.addEventListener('deviceorientation', handleOrientation);
+}
+
+function handleOrientation(event) {
+    if (!isGyroActive) return;
+    
+    const beta = event.beta;  
+    const gamma = event.gamma; 
+
+    if (beta !== null && gamma !== null) {
+        const pitch = THREE.MathUtils.degToRad(90 - beta); 
+        const yaw = THREE.MathUtils.degToRad(-gamma);
+
+        camera.rotation.order = 'YXZ'; 
+        camera.rotation.x = pitch;
+        camera.rotation.y = yaw;
+    }
+}
+
+// 5. Animation Loop
+function animate() {
+  requestAnimationFrame(animate);
+  
+  starField.position.z += 0.1;
+  if (starField.position.z > 50) starField.position.z = 0;
+
+  for (let i = planets.length - 1; i >= 0; i--) {
+      planets[i].position.z += 0.3; 
+      planets[i].rotation.y += 0.005; 
+
+      if (planets[i].position.z > 20) {
+          scene.remove(planets[i]);
+          planets.splice(i, 1);
+      }
+  }
+  
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
