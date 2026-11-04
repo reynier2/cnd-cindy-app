@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CND Digital - Outer Space World</title>
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* Clean, full-screen 3D canvas reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { 
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            background-color: #000000; /* Pure black for deep space */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* The container where Cindy renders the 3D world */
+        #cnd-3d-world {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Subtle UI overlay for connection status */
+        #cnd-ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            color: #00ff00; /* Matrix green for active status */
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: monospace;
+            pointer-events: none; /* Let clicks pass through to the 3D world */
+            border: 1px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- The 3D Canvas Container -->
+    <div id="cnd-3d-world"></div>
+
+    <!-- Simple Status Overlay -->
+    <div id="cnd-ui-overlay">
+        CND Environment: <span id="connection-status">Initializing Outer Space...</span>
+    </div>
+
+    <!-- The Seed: Connection and Rendering Logic -->
+    <script>
+        const container = document.getElementById('cnd-3d-world');
+        const statusText = document.getElementById('connection-status');
+
+        // 1. Scene Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+        scene.fog = new THREE.FogExp2(0x000000, 0.015); // Subtle fog for depth
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 0, 5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        statusText.innerText = "Outer Space World Active | Drift: ~2 MPH";
+
+        // 2. The Infinite Starfield
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsCount = 3000;
+        const posArray = new Float32Array(starsCount * 3);
+        for(let i = 0; i < starsCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 400;
+        }
+        starsGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const starsMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xffffff });
+        const starField = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(starField);
+
+        // 3. The Drifting Planets
+        const planetTypes = [
+            { name: 'Mars', color: 0xff4500, size: 8 },    // Reddish dirt
+            { name: 'Earth', color: 0x2244ff, size: 10 },  // Blue
+            { name: 'Jupiter', color: 0xd2b48c, size: 20 } // Tan/Large
+        ];
+        let currentPlanetIndex = 0;
+        let side = 1; // 1 for right, -1 for left
+        const planets = [];
+
+        function spawnPlanet() {
+            const type = planetTypes[currentPlanetIndex % planetTypes.length];
+            const geometry = new THREE.SphereGeometry(type.size, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ color: type.color });
+            const planet = new THREE.Mesh(geometry, material);
+
+            // Position: Far away (Z), alternating Left/Right (X), slight random height (Y)
+            planet.position.x = side * 40; 
+            planet.position.y = (Math.random() - 0.5) * 20;
+            planet.position.z = -200; // Start far in the distance
+
+            scene.add(planet);
+            planets.push(planet);
+
+            // Flip side and move to next planet type for next spawn
+            side *= -1; 
+            currentPlanetIndex++;
+        }
+
+        // Initial spawn
+        spawnPlanet();
+
+        // Spawn a new planet every 5 seconds (5000 ms)
+        setInterval(spawnPlanet, 5000);
+
+        // 4. Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Slow forward drift of the starfield to simulate ~2 MPH movement
+            starField.position.z += 0.1;
+            if (starField.position.z > 50) starField.position.z = 0;
+
+            // Move planets past the camera (The "Fly-by" effect)
+            for (let i = planets.length - 1; i >= 0; i--) {
+                planets[i].position.z += 0.3; // Slow drift speed
+                planets[i].rotation.y += 0.005; // Slow rotation of the planet itself
+
+                // Remove planet if it passes behind the camera to save memory
+                if (planets[i].position.z > 20) {
+                    scene.remove(planets[i]);
+                    planets.splice(i, 1);
+                }
+            }
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        console.log("CND 3D Environment initialized. Outer Space world loaded.");
+    </script>
+</body>
+</html>
