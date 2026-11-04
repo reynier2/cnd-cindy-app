@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CND - Outer Space World</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  body { margin: 0; padding: 0; background: #000000; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; }
+  #canvas-container { width: 100vw; height: 100vh; display: block; }
+  #ui-overlay {
+    position: absolute; top: 20px; left: 0; width: 100%; text-align: center;
+    pointer-events: none; z-index: 10;
+  }
+  #ui-overlay h1 { 
+    color: #ffb703; font-size: 1.5rem; letter-spacing: 4px; margin: 0; 
+    text-shadow: 0 0 15px #ffb703; 
+  }
+  #ui-overlay p { color: #888; font-size: 0.9rem; margin: 5px 0 0 0; }
+  #live-dot {
+    display: inline-block; width: 10px; height: 10px; background: #00ff00;
+    border-radius: 50%; box-shadow: 0 0 10px #00ff00; margin-right: 5px;
+  }
+</style>
+</head>
+<body>
+
+<div id="ui-overlay">
+  <h1>CND OUTER SPACE WORLD</h1>
+  <p><span id="live-dot"></span> LIVE PROJECTION ACTIVE</p>
+</div>
+
+<div id="canvas-container"></div>
+
+<script>
+// Supabase setup kept intact for your architecture
+const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000); 
+scene.fog = new THREE.FogExp2(0x000000, 0.015); // Subtle fog for depth
+
+const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+camera.position.set(0, 0, 5); // Centered, looking down the tunnel of space
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(container.clientWidth, container.clientHeight);
+container.appendChild(renderer.domElement);
+
+// Orbit controls for testing (can be disabled when mounted in helmet)
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.1;
+
+// ==========================================
+// 1. THE INFINITE STARFIELD
+// ==========================================
+const starsGeometry = new THREE.BufferGeometry();
+const starsCount = 3000;
+const posArray = new Float32Array(starsCount * 3);
+for(let i = 0; i < starsCount * 3; i++) {
+    posArray[i] = (Math.random() - 0.5) * 400; // Spread stars wide
+}
+starsGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+const starsMaterial = new THREE.PointsMaterial({ size: 0.5, color: 0xffffff });
+const starField = new THREE.Points(starsGeometry, starsMaterial);
+scene.add(starField);
+
+// ==========================================
+// 2. THE DRIFTING PLANETS
+// ==========================================
+const planetTypes = [
+    { name: 'Mars', color: 0xff4500, size: 8 },    // Reddish dirt
+    { name: 'Earth', color: 0x2244ff, size: 10 },  // Blue
+    { name: 'Jupiter', color: 0xd2b48c, size: 20 } // Tan/Large
+];
+let currentPlanetIndex = 0;
+let side = 1; // 1 for right, -1 for left
+const planets = [];
+
+function spawnPlanet() {
+    const type = planetTypes[currentPlanetIndex % planetTypes.length];
+    const geometry = new THREE.SphereGeometry(type.size, 32, 32);
+    const material = new THREE.MeshBasicMaterial({ color: type.color });
+    const planet = new THREE.Mesh(geometry, material);
+
+    // Position: Far away (Z), alternating Left/Right (X), slight random height (Y)
+    planet.position.x = side * 40; 
+    planet.position.y = (Math.random() - 0.5) * 20;
+    planet.position.z = -200; // Start far in the distance
+
+    scene.add(planet);
+    planets.push(planet);
+
+    // Flip side and move to next planet type for next spawn
+    side *= -1; 
+    currentPlanetIndex++;
+}
+
+// Initial spawn
+spawnPlanet();
+
+// Spawn a new planet every 5 seconds (5000 ms)
+setInterval(spawnPlanet, 5000);
+
+// ==========================================
+// 3. ANIMATION LOOP
+// ==========================================
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    
+    // Slow forward drift of the starfield to simulate ~2 MPH movement
+    starField.position.z += 0.1;
+    if (starField.position.z > 50) starField.position.z = 0;
+
+    // Move planets past the camera (The "Fly-by" effect)
+    for (let i = planets.length - 1; i >= 0; i--) {
+        planets[i].position.z += 0.3; // Slow drift speed (~1.5 to 2 MPH equivalent)
+        planets[i].rotation.y += 0.005; // Slow rotation of the planet itself
+
+        // Remove planet if it passes behind the camera to save memory
+        if (planets[i].position.z > 20) {
+            scene.remove(planets[i]);
+            planets.splice(i, 1);
+        }
+    }
+    
+    renderer.render(scene, camera);
+}
+animate();
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+});
+
+// Note: syncMapProjection() removed for this specific world file, 
+// but Supabase client remains initialized if you want to trigger events later.
+</script>
+</body>
+</html>
