@@ -181,11 +181,33 @@ function updateMovement() {
 }
 
 // 8. ANIMATION LOOP
-function animate() {
-  requestAnimationFrame(animate);
-  updateMovement(); 
-  controls.update();
-  renderer.render(scene, camera);
+function updateMovement() {
+  let dx = 0, dz = 0;
+  if (moveState.up) dz -= speed;
+  if (moveState.down) dz += speed;
+  if (moveState.left) dx -= speed;
+  if (moveState.right) dx += speed;
+
+  // Move the Avatar
+  avatar.position.x += dx; 
+  avatar.position.z += dz;
+
+  // Enforce boundaries for the Avatar
+  avatar.position.x = Math.max(bounds.xMin, Math.min(bounds.xMax, avatar.position.x));
+  avatar.position.z = Math.max(bounds.zMin, Math.min(bounds.zMax, avatar.position.z));
+
+  // Make the Camera follow the Avatar smoothly
+  camera.position.x = avatar.position.x + cameraOffset.x;
+  camera.position.y = cameraOffset.y; // <-- ADDED THIS
+  camera.position.z = avatar.position.z + cameraOffset.z;
+  
+  // Make the controls pivot around the avatar, not the center of the world
+  controls.target.copy(avatar.position); // <-- ADDED THIS
+  
+  camera.lookAt(avatar.position);
+
+  // Update UI coordinates based on Avatar position
+  document.getElementById('coords').innerText = `X: ${avatar.position.x.toFixed(1)} | Z: ${avatar.position.z.toFixed(1)}`;
 }
 
 // 9. INITIALIZATION
