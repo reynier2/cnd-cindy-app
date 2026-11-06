@@ -6,7 +6,6 @@
 <title>CND - The World</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -39,18 +38,12 @@
 <div id="canvas-container"></div>
 
 <script>
+// 1. SUPABASE CONNECTION
 const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const MENU_CATEGORIES = {
-  'Tacos': ['Tacos'],
-  'Quesabirrias': ['Quesabirrias'],
-  'Gorditas & Sopes': ['Gorditas', 'Sopes'],
-  'Burritos': ['Burritos'],
-  'Specials': ['Pollo Frito Chapin', 'Flautas de Pollo']
-};
-
+// 2. SCENE SETUP
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x1a1a1a); 
@@ -76,7 +69,7 @@ dirLight.position.set(10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
-// --- FLOOR ---
+// 3. THE FLOOR
 const textureLoader = new THREE.TextureLoader();
 const satelliteMapUrl = 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'; 
 const floorGeo = new THREE.PlaneGeometry(100, 100);
@@ -86,7 +79,7 @@ floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-// --- AVATAR MANAGEMENT ---
+// 4. AVATAR MANAGEMENT
 const activePlayers = {};
 
 function createAvatarMesh(playerId, color, labelText) {
@@ -130,47 +123,7 @@ function updatePlayerPosition(playerId, x, z) {
   activePlayers[playerId].label.position.z = z;
 }
 
-// --- BUILDING LOGIC ---
-let map3DObjects = {};
-
-function createRealisticBuilding(name, xPos, zPos, imageUrl) {
-  const width = 3; const height = 4; const depth = 3;
-  const geometry = new THREE.BoxGeometry(width, height, depth);
-  const buildingTexture = textureLoader.load(imageUrl);
-  const material = new THREE.MeshStandardMaterial({ map: buildingTexture, roughness: 0.7 });
-  const building = new THREE.Mesh(geometry, material);
-  building.position.set(xPos, height / 2, zPos);
-  building.castShadow = true;
-  building.receiveShadow = true;
-  building.userData = { name: name };
-  scene.add(building);
-  map3DObjects[name] = building;
-}
-
-async function syncMapProjection() {
-  const { data, error } = await supabaseClient.from('menu').select('*').order('category');
-  if (error) return;
-
-  Object.values(map3DObjects).forEach(mesh => scene.remove(mesh));
-  map3DObjects = {};
-
-  let xPos = -6; let zPos = -2;
-
-  Object.keys(MENU_CATEGORIES).forEach((cat) => {
-    MENU_CATEGORIES[cat].forEach((name) => {
-      const item = data.find(m => m.name === name);
-      if (!item) return;
-      
-      const propertyImageUrl = item.image_url || 'https://threejs.org/examples/textures/crate.gif'; 
-      createRealisticBuilding(name, xPos, zPos, propertyImageUrl);
-      
-      xPos += 4;
-      if (xPos > 6) { xPos = -6; zPos += 4; }
-    });
-  });
-}
-
-// --- SUPABASE REALTIME LISTENER ---
+// 5. SUPABASE REALTIME LISTENER
 async function initWorld() {
   // 1. Get current positions on load
   const { data } = await supabaseClient.from('player_positions').select('*');
@@ -195,7 +148,7 @@ async function initWorld() {
     .subscribe();
 }
 
-// --- ANIMATION LOOP ---
+// 6. ANIMATION LOOP
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
@@ -209,8 +162,7 @@ window.addEventListener('resize', () => {
   renderer.setSize(container.clientWidth, container.clientHeight);
 });
 
-syncMapProjection();
-setInterval(syncMapProjection, 5000);
+// Start listening for players
 initWorld();
 </script>
 </body>
