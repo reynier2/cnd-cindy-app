@@ -69,16 +69,16 @@ dirLight.position.set(10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
-// 3. THE FLOOR
-const textureLoader = new THREE.TextureLoader();
-const satelliteMapUrl = 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'; 
+// 3. THE CLEAN FLOOR (Grid for spatial reference)
+const gridHelper = new THREE.GridHelper(100, 100, 0xffb703, 0x333333);
+scene.add(gridHelper);
+
 const floorGeo = new THREE.PlaneGeometry(100, 100);
-const floorMat = new THREE.MeshStandardMaterial({ map: textureLoader.load(satelliteMapUrl), roughness: 0.8 });
+const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
 const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
-
 // 4. AVATAR MANAGEMENT
 const activePlayers = {};
 
