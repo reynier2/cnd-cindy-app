@@ -54,15 +54,18 @@ const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 2. GET PLAYER ID FROM URL (e.g., phone.html?id=ray or ?id=mary)
+// 2. GET PLAYER ID FROM URL
 const urlParams = new URLSearchParams(window.location.search);
-let myPlayerId = urlParams.get('id') || 'player_ray'; // Defaults to ray if nothing is in the URL
+let myPlayerId = urlParams.get('id') || 'player_ray'; 
 
 // 3. THREE.JS SETUP
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x111111); 
+scene.background = new THREE.Color(0x2a2a2a); // LIGHTER GRAY SO WE CAN SEE
+
 const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+camera.position.set(0, 12, 15); // FORCED CAMERA TO START HIGH UP
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.shadowMap.enabled = true;
@@ -75,7 +78,7 @@ dirLight.position.set(10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
-const gridHelper = new THREE.GridHelper(100, 100, 0xffb703, 0x333333);
+const gridHelper = new THREE.GridHelper(100, 100, 0xffb703, 0x555555); // BRIGHTER GRID LINES
 scene.add(gridHelper);
 const floorGeo = new THREE.PlaneGeometry(100, 100);
 const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
@@ -84,24 +87,21 @@ floor.rotation.x = -Math.PI / 2;
 scene.add(floor);
 
 // 4. AVATAR & LABEL BUILDER
-const players = {}; // Stores all avatars in the scene
+const players = {}; 
 
 function createAvatarWithLabel(color, labelText, startX, startZ, isMe) {
-  // The Pin
   const pinGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.2, 32);
   const pin = new THREE.Mesh(pinGeo, new THREE.MeshBasicMaterial({ color: 0xffb703 }));
   pin.position.set(startX, 0.1, startZ);
   scene.add(pin);
 
-  // The Avatar Body
   const avatarGeo = new THREE.CapsuleGeometry(1.2, 3, 4, 16);
-  const avatarMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.4 });
+  const avatarMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.5 }); // BRIGHTER GLOW
   const avatar = new THREE.Mesh(avatarGeo, avatarMat);
   avatar.position.set(startX, 2.5, startZ);
   avatar.castShadow = true;
   scene.add(avatar);
 
-  // The Floating Label
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   canvas.width = 512; canvas.height = 128;
@@ -118,16 +118,15 @@ function createAvatarWithLabel(color, labelText, startX, startZ, isMe) {
   return { avatar, label };
 }
 
-// 5. INITIALIZE LOCAL AVATAR BASED ON URL ID
-let myColor = 0xff0000; // Default Red for Ray
+// 5. INITIALIZE LOCAL AVATAR
+let myColor = 0xff0000; 
 let myLabel = 'PLAYER 1 (RAY)';
 
 if (myPlayerId.toLowerCase().includes('mary')) {
-  myColor = 0x00ff00; // Green for Mary
+  myColor = 0x00ff00; 
   myLabel = 'PLAYER 2 (MARY)';
 }
 
-// Spawn ONLY the local player's avatar
 createAvatarWithLabel(myColor, myLabel, 0, 0, true);
 
 // 6. MOVEMENT & SYNC LOGIC
@@ -150,7 +149,6 @@ function setupDpad() {
   });
 }
 
-// SEND LOCAL POSITION TO SUPABASE
 async function sendPosition(x, z) {
   const { error } = await supabase
     .from('player_positions')
@@ -158,25 +156,19 @@ async function sendPosition(x, z) {
   if (error) console.error('Sync error:', error);
 }
 
-// LISTEN FOR OTHER PLAYERS MOVING IN REAL-TIME
 supabase
   .channel('room1')
   .on('postgres_changes', { event: '*', schema: 'public', table: 'player_positions' }, (payload) => {
     const data = payload.new;
-    
-    // Don't process our own updates
     if (data.player_id === myPlayerId) return;
 
-    // Determine what to call the other player based on their ID
     const otherLabel = data.player_id.toLowerCase().includes('mary') ? 'PLAYER 2 (MARY)' : 'PLAYER 1 (RAY)';
     const otherColor = otherLabel.includes('MARY') ? 0x00ff00 : 0xff0000;
     
-    // If they don't exist in our scene yet, spawn them!
     if (!players[otherLabel]) {
       createAvatarWithLabel(otherColor, otherLabel, data.x_pos, data.z_pos, false);
     } 
     
-    // If they already exist, smoothly update their position
     if (players[otherLabel]) {
       players[otherLabel].avatar.position.x = data.x_pos;
       players[otherLabel].avatar.position.z = data.z_pos;
@@ -196,28 +188,22 @@ function updateMovement() {
   const myAvatar = players[myLabel].avatar;
   const myLabelObj = players[myLabel].label;
 
-  // Move local avatar
   myAvatar.position.x += dx; 
   myAvatar.position.z += dz;
   
-  // Keep within bounds
   myAvatar.position.x = Math.max(bounds.xMin, Math.min(bounds.xMax, myAvatar.position.x));
   myAvatar.position.z = Math.max(bounds.zMin, Math.min(bounds.zMax, myAvatar.position.z));
 
-  // Keep label attached to avatar
   myLabelObj.position.x = myAvatar.position.x;
   myLabelObj.position.z = myAvatar.position.z;
 
-  // Camera follows local avatar
   camera.position.x = myAvatar.position.x;
   camera.position.z = myAvatar.position.z + 15;
   camera.position.y = 12;
   camera.lookAt(myAvatar.position);
 
-  // Update UI
   document.getElementById('coords').innerText = `X: ${myAvatar.position.x.toFixed(1)} | Z: ${myAvatar.position.z.toFixed(1)}`;
 
-  // Throttle network calls (send to Supabase only every 150ms to save bandwidth)
   const now = Date.now();
   if (now - lastSyncTime > 150 && (dx !== 0 || dz !== 0)) {
     sendPosition(myAvatar.position.x, myAvatar.position.z);
