@@ -64,7 +64,6 @@ renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.shadowMap.enabled = true;
 container.appendChild(renderer.domElement);
 
-// Orbit controls allow mouse dragging to look around the big screen, but NO D-PAD
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.1;
@@ -77,9 +76,9 @@ dirLight.position.set(10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
+// --- FLOOR ---
 const textureLoader = new THREE.TextureLoader();
-const satelliteMapUrl = 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'; // REPLACE WITH YOUR GITHUB SATELLITE IMAGE LINK
-
+const satelliteMapUrl = 'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg'; 
 const floorGeo = new THREE.PlaneGeometry(100, 100);
 const floorMat = new THREE.MeshStandardMaterial({ map: textureLoader.load(satelliteMapUrl), roughness: 0.8 });
 const floor = new THREE.Mesh(floorGeo, floorMat);
@@ -87,6 +86,51 @@ floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
+// --- AVATAR MANAGEMENT ---
+const activePlayers = {};
+
+function createAvatarMesh(playerId, color, labelText) {
+  // The physical body
+  const avatarGeo = new THREE.CapsuleGeometry(0.8, 2, 4, 16);
+  const avatarMat = new THREE.MeshStandardMaterial({ color: color, emissive: color, emissiveIntensity: 0.3 });
+  const avatar = new THREE.Mesh(avatarGeo, avatarMat);
+  avatar.position.set(0, 1.5, 0);
+  avatar.castShadow = true;
+  scene.add(avatar);
+
+  // The name tag floating above
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 512; canvas.height = 128;
+  ctx.font = 'Bold 72px Arial';
+  ctx.fillStyle = '#ffb703';
+  ctx.textAlign = 'center';
+  ctx.fillText(labelText, 256, 86);
+  const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
+  label.scale.set(8, 2, 1);
+  label.position.set(0, 4, 0);
+  scene.add(label);
+
+  activePlayers[playerId] = { avatar, label };
+}
+
+function updatePlayerPosition(playerId, x, z) {
+  if (!activePlayers[playerId]) {
+    // Determine color and name based on ID
+    const isPlayer1 = playerId.includes('1');
+    const color = isPlayer1 ? 0x00aaff : 0xffea00;
+    const name = isPlayer1 ? 'PLAYER 1' : 'PLAYER 2';
+    createAvatarMesh(playerId, color, name);
+  }
+  
+  // Move the avatar and label
+  activePlayers[playerId].avatar.position.x = x;
+  activePlayers[playerId].avatar.position.z = z;
+  activePlayers[playerId].label.position.x = x;
+  activePlayers[playerId].label.position.z = z;
+}
+
+// --- BUILDING LOGIC ---
 let map3DObjects = {};
 
 function createRealisticBuilding(name, xPos, zPos, imageUrl) {
@@ -112,8 +156,8 @@ async function syncMapProjection() {
 
   let xPos = -6; let zPos = -2;
 
-  Object.keys(MENU_CATEGORIES).forEach((cat, catIndex) => {
-    MENU_CATEGORIES[cat].forEach((name, itemIndex) => {
+  Object.keys(MENU_CATEGORIES).forEach((cat) => {
+    MENU_CATEGORIES[cat].forEach((name) => {
       const item = data.find(m => m.name === name);
       if (!item) return;
       
@@ -126,6 +170,32 @@ async function syncMapProjection() {
   });
 }
 
+// --- SUPABASE REALTIME LISTENER ---
+async function initWorld() {
+  // 1. Get current positions on load
+  const { data } = await supabaseClient.from('player_positions').select('*');
+  if (data) {
+    data.forEach(p => updatePlayerPosition(p.id, p.x_pos, p.z_pos));
+  }
+
+  // 2. Listen for live movements
+  supabaseClient
+    .channel('world-room')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'player_positions' }, (payload) => {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        updatePlayerPosition(payload.new.id, payload.new.x_pos, payload.new.z_pos);
+      } else if (payload.eventType === 'DELETE') {
+        if (activePlayers[payload.old.id]) {
+          scene.remove(activePlayers[payload.old.id].avatar);
+          scene.remove(activePlayers[payload.old.id].label);
+          delete activePlayers[payload.old.id];
+        }
+      }
+    })
+    .subscribe();
+}
+
+// --- ANIMATION LOOP ---
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
@@ -141,6 +211,7 @@ window.addEventListener('resize', () => {
 
 syncMapProjection();
 setInterval(syncMapProjection, 5000);
+initWorld();
 </script>
 </body>
 </html>
