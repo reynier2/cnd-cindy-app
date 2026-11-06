@@ -8,20 +8,49 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <style>
-  body { margin: 0; padding: 0; background: #000; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
-  #top-view { height: 55vh; width: 100%; position: relative; background: #000; border-bottom: 2px solid #ffb703; }
-  #canvas-container { width: 100%; height: 100%; display: block; background-color: #000; }
-  #ui-overlay { position: absolute; top: 15px; left: 0; width: 100%; text-align: center; pointer-events: none; z-index: 10; }
+  body { margin: 0; padding: 0; background: #0a0a0a; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+  
+  #top-view { 
+    height: 55vh; width: 100%; position: relative; background: #111;
+    border-bottom: 2px solid #ffb703;
+  }
+  #canvas-container { width: 100%; height: 100%; display: block; }
+  
+  #ui-overlay {
+    position: absolute; top: 15px; left: 0; width: 100%; text-align: center;
+    pointer-events: none; z-index: 10;
+  }
   #ui-overlay h1 { color: #ffb703; font-size: 1.2rem; letter-spacing: 3px; margin: 0; text-shadow: 0 0 10px #000; }
   #ui-overlay p { color: #888; font-size: 0.8rem; margin: 5px 0 0 0; }
-  #live-dot { display: inline-block; width: 8px; height: 8px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 8px #00ff00; margin-right: 5px; }
-  #coords { position: absolute; bottom: 10px; right: 10px; color: #00ff00; font-family: monospace; font-size: 0.8rem; z-index: 10; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px; }
-  #bottom-controls { height: 45vh; width: 100%; background: #111; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box; }
+  #live-dot {
+    display: inline-block; width: 8px; height: 8px; background: #00ff00;
+    border-radius: 50%; box-shadow: 0 0 8px #00ff00; margin-right: 5px;
+  }
+  #coords {
+    position: absolute; bottom: 10px; right: 10px; color: #00ff00; 
+    font-family: monospace; font-size: 0.8rem; z-index: 10; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px;
+  }
+  
+  #bottom-controls { 
+    height: 45vh; width: 100%; background: #111; 
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 15px; box-sizing: border-box;
+  }
   h2 { color: #ffb703; margin: 0 0 20px 0; font-size: 1.2rem; letter-spacing: 2px; text-align: center; }
+  
   .dpad { display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .dpad-row { display: flex; gap: 10px; }
-  .dpad-btn { width: 70px; height: 70px; border: 2px solid #ffb703; border-radius: 15px; background: #1a1a1a; color: #ffb703; font-size: 2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; touch-action: manipulation; box-shadow: 0 0 10px rgba(255, 183, 3, 0.2); transition: all 0.1s; }
-  .dpad-btn:active, .dpad-btn.active { background: #ffb703; color: #000; box-shadow: 0 0 20px #ffb703; transform: scale(0.95); }
+  
+  .dpad-btn {
+    width: 70px; height: 70px; border: 2px solid #ffb703; border-radius: 15px;
+    background: #1a1a1a; color: #ffb703; font-size: 2rem; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none; -webkit-user-select: none; touch-action: manipulation;
+    box-shadow: 0 0 10px rgba(255, 183, 3, 0.2); transition: all 0.1s;
+  }
+  .dpad-btn:active, .dpad-btn.active {
+    background: #ffb703; color: #000; box-shadow: 0 0 20px #ffb703; transform: scale(0.95);
+  }
 </style>
 </head>
 <body>
@@ -36,7 +65,7 @@
 </div>
 
 <div id="bottom-controls">
-  <h2>MOVE YOUR AVATAR</h2>
+  <h2>MOVE THE AVATAR</h2>
   <div class="dpad">
     <button id="btn-up" class="dpad-btn">▲</button>
     <div class="dpad-row">
@@ -48,77 +77,82 @@
 </div>
 
 <script>
+// 1. SCENE SETUP
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000); // BLACK BACKGROUND
+scene.background = new THREE.Color(0x111111); 
 
+// 2. CAMERA & RENDERER
 const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-camera.position.set(0, 12, 15); 
-camera.lookAt(0, 2.5, 0); 
+// Camera will follow the avatar, so we set initial offset here
+const cameraOffset = new THREE.Vector3(0, 15, 20); 
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.shadowMap.enabled = true;
 container.appendChild(renderer.domElement);
 
+// 3. CONTROLS & LIGHTING
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; controls.dampingFactor = 0.1;
+controls.enableDamping = true;
+controls.dampingFactor = 0.1;
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambientLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 dirLight.position.set(10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
-// BIG GREY SQUARE FLOOR
+// 4. THE CLEAN FLOOR
+const gridHelper = new THREE.GridHelper(100, 100, 0xffb703, 0x333333);
+scene.add(gridHelper);
+
 const floorGeo = new THREE.PlaneGeometry(100, 100);
-const floorMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 }); 
+const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
 const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-// GRID LINES ON THE FLOOR
-const gridHelper = new THREE.GridHelper(100, 100, 0xffffff, 0x555555);
-scene.add(gridHelper);
-
-const pinGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.2, 32);
-const pin = new THREE.Mesh(pinGeo, new THREE.MeshBasicMaterial({ color: 0xffb703 }));
-pin.position.set(0, 0.1, 0);
+// 5. THE PIN (Spatial Anchor)
+const pinGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 32);
+const pinMat = new THREE.MeshBasicMaterial({ color: 0xffb703 }); // Golden Pin
+const pin = new THREE.Mesh(pinGeo, pinMat);
+pin.position.set(0, 0.05, 0); // Sitting right on the floor
 scene.add(pin);
 
-const avatarGeo = new THREE.CapsuleGeometry(1.2, 3, 4, 16);
-const avatarMat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 0.5 });
+// 6. THE AVATAR (Player 1)
+const avatarGeo = new THREE.CapsuleGeometry(0.8, 2, 4, 16);
+const avatarMat = new THREE.MeshStandardMaterial({ color: 0x00aaff, emissive: 0x004488 }); // Glowing Blue
 const avatar = new THREE.Mesh(avatarGeo, avatarMat);
-avatar.position.set(0, 2.5, 0);
+avatar.position.set(0, 1.5, 0); // Standing on the pin
 avatar.castShadow = true;
 scene.add(avatar);
 
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = 512; canvas.height = 128;
-ctx.font = 'Bold 72px Arial';
-ctx.fillStyle = '#ffb703';
-ctx.textAlign = 'center';
-ctx.fillText('PLAYER 1', 256, 86);
-const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
-label.scale.set(8, 2, 1);
-label.position.set(0, 6, 0);
-scene.add(label);
-
+// 7. MOVEMENT LOGIC (Moving the Avatar, Camera Follows)
 const moveState = { up: false, down: false, left: false, right: false };
 const speed = 0.2; 
 const bounds = { xMin: -45, xMax: 45, zMin: -45, zMax: 45 }; 
 
 function setupDpad() {
-  const buttons = { up: document.getElementById('btn-up'), down: document.getElementById('btn-down'), left: document.getElementById('btn-left'), right: document.getElementById('btn-right') };
+  const buttons = { 
+    up: document.getElementById('btn-up'), 
+    down: document.getElementById('btn-down'), 
+    left: document.getElementById('btn-left'), 
+    right: document.getElementById('btn-right') 
+  };
+  
   Object.keys(buttons).forEach(dir => {
     const btn = buttons[dir];
     const startMove = (e) => { e.preventDefault(); moveState[dir] = true; btn.classList.add('active'); };
     const stopMove = (e) => { e.preventDefault(); moveState[dir] = false; btn.classList.remove('active'); };
-    btn.addEventListener('mousedown', startMove); btn.addEventListener('touchstart', startMove, {passive: false});
-    btn.addEventListener('mouseup', stopMove); btn.addEventListener('mouseleave', stopMove); btn.addEventListener('touchend', stopMove);
+    
+    btn.addEventListener('mousedown', startMove);
+    btn.addEventListener('touchstart', startMove, {passive: false});
+    btn.addEventListener('mouseup', stopMove);
+    btn.addEventListener('mouseleave', stopMove);
+    btn.addEventListener('touchend', stopMove);
   });
 }
 
@@ -129,22 +163,24 @@ function updateMovement() {
   if (moveState.left) dx -= speed;
   if (moveState.right) dx += speed;
 
+  // Move the Avatar
   avatar.position.x += dx; 
   avatar.position.z += dz;
+
+  // Enforce boundaries for the Avatar
   avatar.position.x = Math.max(bounds.xMin, Math.min(bounds.xMax, avatar.position.x));
   avatar.position.z = Math.max(bounds.zMin, Math.min(bounds.zMax, avatar.position.z));
 
-  label.position.x = avatar.position.x;
-  label.position.z = avatar.position.z;
-
-  camera.position.x = avatar.position.x;
-  camera.position.z = avatar.position.z + 15;
-  camera.position.y = 12;
+  // Make the Camera follow the Avatar smoothly
+  camera.position.x = avatar.position.x + cameraOffset.x;
+  camera.position.z = avatar.position.z + cameraOffset.z;
   camera.lookAt(avatar.position);
 
+  // Update UI coordinates based on Avatar position
   document.getElementById('coords').innerText = `X: ${avatar.position.x.toFixed(1)} | Z: ${avatar.position.z.toFixed(1)}`;
 }
 
+// 8. ANIMATION LOOP
 function animate() {
   requestAnimationFrame(animate);
   updateMovement(); 
@@ -152,6 +188,7 @@ function animate() {
   renderer.render(scene, camera);
 }
 
+// 9. INITIALIZATION
 window.addEventListener('resize', () => {
   camera.aspect = container.clientWidth / container.clientHeight;
   camera.updateProjectionMatrix();
