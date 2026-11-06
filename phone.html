@@ -114,20 +114,6 @@ const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
-// 4. THE CLEAN FLOOR (Grid for spatial reference)
-const gridHelper = new THREE.GridHelper(100, 100, 0xffb703, 0x333333);
-scene.add(gridHelper);
-
-const floorGeo = new THREE.PlaneGeometry(100, 100);
-const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
-const floor = new THREE.Mesh(floorGeo, floorMat);
-floor.rotation.x = -Math.PI / 2;
-floor.receiveShadow = true;
-scene.add(floor);
-
-// ==========================================
-// THIS IS THE EXACT SPOT TO INJECT THE AVATAR
-// ==========================================
 
 
 // 5. MOVEMENT LOGIC (KEEPING YOUR EXACT CONTROLS)
