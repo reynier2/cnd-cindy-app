@@ -79,6 +79,37 @@ const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
+ const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+// ==========================================
+// INJECT THE AVATAR CODE RIGHT HERE
+// ==========================================
+const avatarGeo = new THREE.CapsuleGeometry(0.8, 2, 4, 16);
+const avatarMat = new THREE.MeshStandardMaterial({ color: 0x00aaff, emissive: 0x004488, emissiveIntensity: 0.3 });
+const avatar = new THREE.Mesh(avatarGeo, avatarMat);
+avatar.position.set(0, 1.5, 0);
+avatar.castShadow = true;
+scene.add(avatar);
+
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 512; canvas.height = 128;
+ctx.font = 'Bold 72px Arial';
+ctx.fillStyle = '#ffb703';
+ctx.textAlign = 'center';
+ctx.fillText('PLAYER 1', 256, 86);
+const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
+label.scale.set(8, 2, 1);
+label.position.set(0, 4, 0);
+scene.add(label);
+// ==========================================
+
+// 4. AVATAR MANAGEMENT
+const activePlayers = {};
+// ... rest of the code 
 // 4. AVATAR MANAGEMENT
 const activePlayers = {};
 
