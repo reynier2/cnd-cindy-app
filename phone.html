@@ -58,14 +58,14 @@
 <div id="top-view">
   <div id="ui-overlay">
     <h1>CND SPATIAL ENGINE</h1>
-    <p><span id="live-dot"></span> PLAYER 1 ACTIVE</p>
+    <p><span id="live-dot"></span> READY FOR AVATAR BINDING</p>
   </div>
   <div id="coords">X: 0.0 | Z: 0.0</div>
   <div id="canvas-container"></div>
 </div>
 
 <div id="bottom-controls">
-  <h2>MOVE THE AVATAR</h2>
+  <h2>NAVIGATE THE SPACE</h2>
   <div class="dpad">
     <button id="btn-up" class="dpad-btn">▲</button>
     <div class="dpad-row">
@@ -80,12 +80,11 @@
 // 1. SCENE SETUP
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x111111); 
+scene.background = new THREE.Color(0x111111); // Clean, dark background
 
 // 2. CAMERA & RENDERER
 const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-// Camera will follow the avatar, so we set initial offset here
-const cameraOffset = new THREE.Vector3(0, 15, 20); 
+camera.position.set(0, 15, 20); // Elevated view to see the floor clearly
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(container.clientWidth, container.clientHeight);
@@ -96,6 +95,7 @@ container.appendChild(renderer.domElement);
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.1;
+controls.maxPolarAngle = Math.PI / 2 - 0.1;
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambientLight);
@@ -104,7 +104,7 @@ dirLight.position.set(10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
-// 4. THE CLEAN FLOOR
+// 4. THE CLEAN FLOOR (Grid for spatial reference)
 const gridHelper = new THREE.GridHelper(100, 100, 0xffb703, 0x333333);
 scene.add(gridHelper);
 
@@ -115,24 +115,9 @@ floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-// 5. THE PIN (Spatial Anchor)
-const pinGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 32);
-const pinMat = new THREE.MeshBasicMaterial({ color: 0xffb703 }); // Golden Pin
-const pin = new THREE.Mesh(pinGeo, pinMat);
-pin.position.set(0, 0.05, 0); // Sitting right on the floor
-scene.add(pin);
-
-// 6. THE AVATAR (Player 1)
-const avatarGeo = new THREE.CapsuleGeometry(0.8, 2, 4, 16);
-const avatarMat = new THREE.MeshStandardMaterial({ color: 0x00aaff, emissive: 0x004488 }); // Glowing Blue
-const avatar = new THREE.Mesh(avatarGeo, avatarMat);
-avatar.position.set(0, 1.5, 0); // Standing on the pin
-avatar.castShadow = true;
-scene.add(avatar);
-
-// 7. MOVEMENT LOGIC (Moving the Avatar, Camera Follows)
+// 5. MOVEMENT LOGIC (KEEPING YOUR EXACT CONTROLS)
 const moveState = { up: false, down: false, left: false, right: false };
-const speed = 0.2; 
+const speed = 0.3; 
 const bounds = { xMin: -45, xMax: 45, zMin: -45, zMax: 45 }; 
 
 function setupDpad() {
@@ -163,54 +148,28 @@ function updateMovement() {
   if (moveState.left) dx -= speed;
   if (moveState.right) dx += speed;
 
-  // Move the Avatar
-  avatar.position.x += dx; 
-  avatar.position.z += dz;
+  // Move camera and controls target together
+  camera.position.x += dx; camera.position.z += dz;
+  controls.target.x += dx; controls.target.z += dz;
 
-  // Enforce boundaries for the Avatar
-  avatar.position.x = Math.max(bounds.xMin, Math.min(bounds.xMax, avatar.position.x));
-  avatar.position.z = Math.max(bounds.zMin, Math.min(bounds.zMax, avatar.position.z));
+  // Enforce boundaries
+  camera.position.x = Math.max(bounds.xMin, Math.min(bounds.xMax, camera.position.x));
+  camera.position.z = Math.max(bounds.zMin, Math.min(bounds.zMax, camera.position.z));
+  controls.target.x = Math.max(bounds.xMin, Math.min(bounds.xMax, controls.target.x));
+  controls.target.z = Math.max(bounds.zMin, Math.min(bounds.zMax, controls.target.z));
 
-  // Make the Camera follow the Avatar smoothly
-  camera.position.x = avatar.position.x + cameraOffset.x;
-  camera.position.z = avatar.position.z + cameraOffset.z;
-  camera.lookAt(avatar.position);
-
-  // Update UI coordinates based on Avatar position
-  document.getElementById('coords').innerText = `X: ${avatar.position.x.toFixed(1)} | Z: ${avatar.position.z.toFixed(1)}`;
+  document.getElementById('coords').innerText = `X: ${camera.position.x.toFixed(1)} | Z: ${camera.position.z.toFixed(1)}`;
 }
 
-// 8. ANIMATION LOOP
-function updateMovement() {
-  let dx = 0, dz = 0;
-  if (moveState.up) dz -= speed;
-  if (moveState.down) dz += speed;
-  if (moveState.left) dx -= speed;
-  if (moveState.right) dx += speed;
-
-  // Move the Avatar
-  avatar.position.x += dx; 
-  avatar.position.z += dz;
-
-  // Enforce boundaries for the Avatar
-  avatar.position.x = Math.max(bounds.xMin, Math.min(bounds.xMax, avatar.position.x));
-  avatar.position.z = Math.max(bounds.zMin, Math.min(bounds.zMax, avatar.position.z));
-
-  // Make the Camera follow the Avatar smoothly
-  camera.position.x = avatar.position.x + cameraOffset.x;
-  camera.position.y = cameraOffset.y; // <-- ADDED THIS
-  camera.position.z = avatar.position.z + cameraOffset.z;
-  
-  // Make the controls pivot around the avatar, not the center of the world
-  controls.target.copy(avatar.position); // <-- ADDED THIS
-  
-  camera.lookAt(avatar.position);
-
-  // Update UI coordinates based on Avatar position
-  document.getElementById('coords').innerText = `X: ${avatar.position.x.toFixed(1)} | Z: ${avatar.position.z.toFixed(1)}`;
+// 6. ANIMATION LOOP
+function animate() {
+  requestAnimationFrame(animate);
+  updateMovement(); 
+  controls.update();
+  renderer.render(scene, camera);
 }
 
-// 9. INITIALIZATION
+// 7. INITIALIZATION
 window.addEventListener('resize', () => {
   camera.aspect = container.clientWidth / container.clientHeight;
   camera.updateProjectionMatrix();
