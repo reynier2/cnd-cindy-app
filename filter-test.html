@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Mode: Filter Test</title>
+    <style>
+        body { margin: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: white; font-family: sans-serif; }
+        #video-container { position: relative; width: 100%; max-width: 500px; }
+        video { width: 100%; border-radius: 12px; transform: scaleX(-1); /* Mirror effect like a selfie cam */ }
+        #ghost-overlay {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 150px;
+            border: 4px solid rgba(255, 0, 0, 0.7); /* Red ghost box */
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            pointer-events: none;
+        }
+        #status { margin-top: 20px; color: #ffb703; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="video-container">
+        <video id="webcam" autoplay playsinline></video>
+        <div id="ghost-overlay"></div>
+    </div>
+    <div id="status">Waiting for camera permission...</div>
+
+    <script>
+        const video = document.getElementById('webcam');
+        const status = document.getElementById('status');
+
+        // Request camera access
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(stream => {
+                video.srcObject = stream;
+                status.innerText = "Camera Active. Ghost Overlay is layered on top.";
+                status.style.color = "#00ff00";
+            })
+            .catch(err => {
+                status.innerText = "Camera access denied or not available. Try opening this file directly on your phone.";
+                status.style.color = "red";
+                console.error("Camera error:", err);
+            });
+    </script>
+</body>
+</html>
