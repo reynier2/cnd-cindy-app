@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CND Live Feed</title>
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
         body { margin: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: white; font-family: sans-serif; overflow: hidden; }
         #video-container { position: relative; width: 100%; height: 100%; max-width: 500px; display: flex; align-items: center; justify-content: center; }
-        video { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; transform: scaleX(-1); display: none; }
+        video { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; transform: scaleX(-1); }
         #ghost-overlay {
             position: absolute;
             top: 50%;
@@ -22,65 +19,41 @@
             border-radius: 50%;
             box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
             pointer-events: none;
-            display: none;
         }
         #status { position: absolute; bottom: 20px; color: #ffb703; font-weight: bold; text-align: center; width: 100%; }
-        #start-btn {
-            padding: 20px 40px; font-size: 1.5rem; font-weight: bold;
-            background: #ffb703; color: #000; border: none; border-radius: 12px;
-            cursor: pointer; box-shadow: 0 0 20px #ffb703;
-        }
     </style>
 </head>
 <body>
 
     <div id="video-container">
+        <!-- muted is required by iOS for seamless autoplay -->
         <video id="webcam" autoplay playsinline muted></video>
         <div id="ghost-overlay"></div>
-        <button id="start-btn">START CAMERA</button>
     </div>
-    <div id="status">Tap button to connect to Board...</div>
+    <div id="status">Initializing Camera...</div>
 
     <script>
-        // 1. COPIED FROM PLAYER 2: THE BOARD CONNECTION
-        const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        async function sendPosition(x, z) {
-            const { error } = await supabase
-                .from('player_positions')
-                .upsert({ id: 'player2', x_pos: x, z_pos: z }, { onConflict: 'id' });
-            if (error) console.error('Sync error:', error);
-        }
-
-        // 2. CAMERA INITIALIZATION (Requires button tap on phones)
         const video = document.getElementById('webcam');
-        const ghost = document.getElementById('ghost-overlay');
-        const btn = document.getElementById('start-btn');
         const status = document.getElementById('status');
 
-        btn.addEventListener('click', () => {
-            navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }, 
-                audio: false 
-            })
-            .then(stream => {
-                video.srcObject = stream;
-                video.style.display = 'block';
-                ghost.style.display = 'block';
-                btn.style.display = 'none';
-                status.innerText = "✅ Camera Active. Connected to Board.";
-                status.style.color = "#00ff00";
-                
-                // Send signal to the board
-                sendPosition(0, 0); 
-            })
-            .catch(err => {
-                status.innerText = "⚠️ Camera access denied.";
-                status.style.color = "red";
-                console.error("Camera error:", err);
-            });
+        // Request camera access (Front facing)
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: "user",
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }, 
+            audio: false 
+        })
+        .then(stream => {
+            video.srcObject = stream;
+            status.innerText = "✅ Camera Active. Ready for Projection.";
+            status.style.color = "#00ff00";
+        })
+        .catch(err => {
+            status.innerText = "⚠️ Tap screen to allow camera, or open directly on phone.";
+            status.style.color = "red";
+            console.error("Camera error:", err);
         });
     </script>
 </body>
