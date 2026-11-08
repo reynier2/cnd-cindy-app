@@ -1,1 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CND Live Feed</title>
+    <style>
+        body { margin: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: white; font-family: sans-serif; overflow: hidden; }
+        #video-container { position: relative; width: 100%; height: 100%; max-width: 500px; display: flex; align-items: center; justify-content: center; }
+        video { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; transform: scaleX(-1); }
+        #ghost-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 150px;
+            border: 4px solid rgba(255, 0, 0, 0.7);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            pointer-events: none;
+        }
+        #status { position: absolute; bottom: 20px; color: #ffb703; font-weight: bold; text-align: center; width: 100%; }
+    </style>
+</head>
+<body>
 
+    <div id="video-container">
+        <!-- muted is required by iOS for seamless autoplay -->
+        <video id="webcam" autoplay playsinline muted></video>
+        <div id="ghost-overlay"></div>
+    </div>
+    <div id="status">Initializing Camera...</div>
+
+    <script>
+        const video = document.getElementById('webcam');
+        const status = document.getElementById('status');
+
+        // Request camera access (Front facing)
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: "user",
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }, 
+            audio: false 
+        })
+        .then(stream => {
+            video.srcObject = stream;
+            status.innerText = "✅ Camera Active. Ready for Projection.";
+            status.style.color = "#00ff00";
+        })
+        .catch(err => {
+            status.innerText = "⚠️ Tap screen to allow camera, or open directly on phone.";
+            status.style.color = "red";
+            console.error("Camera error:", err);
+        });
+    </script>
+</body>
+</html>
