@@ -67,6 +67,30 @@
         // 3. Create the Renderer
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+                // --- ADDING THE FIRST ASSET TO THE WORLD ---
+
+        // 1. Create the Geometry (The Shape / Skeleton of our placeholder)
+        // Let's start with a simple, heavy box to represent the core of the Q
+        const placeholderGeometry = new THREE.BoxGeometry(2, 2, 2);
+
+        // 2. Create the Mesh (Wrapping the Red and Gold materials around the shape)
+        // We'll make the main body red, and we can add gold accents later
+        const placeholderMesh = new THREE.Mesh(placeholderGeometry, redMaterial);
+        
+        // 3. Position it in the World (Right in front of the camera)
+        placeholderMesh.position.set(0, 0, 0);
+        
+        // 4. Add it to the Scene (The Manager Board puts it in the World)
+        scene.add(placeholderMesh);
+
+        // Let's add a second, smaller gold box floating next to it as an "accent" or "eye"
+        const accentGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+        const accentMesh = new THREE.Mesh(accentGeometry, goldMaterial);
+        accentMesh.position.set(1.5, 1.5, 1); // Floating up and to the right
+        scene.add(accentMesh);
+
+        // Update the UI to show we succeeded
+        document.getElementById('connection-status').innerText = "3D Engine Ready - Assets Rendered in World";
         document.getElementById('cnd-3d-world').appendChild(renderer.domElement);
 
         // 4. Add lights so we can see the materials
