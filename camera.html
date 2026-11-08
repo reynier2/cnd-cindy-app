@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CND Live Feed</title>
+    
+    <!-- ADDED: Supabase Connection -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         body { margin: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: white; font-family: sans-serif; overflow: hidden; }
         #video-container { position: relative; width: 100%; height: 100%; max-width: 500px; display: flex; align-items: center; justify-content: center; }
@@ -33,6 +37,11 @@
     <div id="status">Initializing Camera...</div>
 
     <script>
+        // ADDED: Board Connection Setup
+        const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         const video = document.getElementById('webcam');
         const status = document.getElementById('status');
 
@@ -47,8 +56,11 @@
         })
         .then(stream => {
             video.srcObject = stream;
-            status.innerText = "✅ Camera Active. Ready for Projection.";
+            status.innerText = "✅ Camera Active. Signal sent to The World.";
             status.style.color = "#00ff00";
+            
+            // ADDED: Trigger The World to spawn the avatar at 0, 0
+            supabase.from('player_positions').upsert({ id: 'player2', x_pos: 0, z_pos: 0 }, { onConflict: 'id' });
         })
         .catch(err => {
             status.innerText = "⚠️ Tap screen to allow camera, or open directly on phone.";
