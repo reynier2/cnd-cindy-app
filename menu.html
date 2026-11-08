@@ -118,9 +118,21 @@
         
         document.getElementById('connection-status').innerText = "3D Engine Ready - Materials Loaded";
         
-        // Animation loop
+                // Animation loop
         function animate() {
             requestAnimationFrame(animate);
+            
+            // Make the main red box slowly rotate (The "breathing" idle animation)
+            if (placeholderMesh) {
+                placeholderMesh.rotation.y += 0.005;
+                placeholderMesh.rotation.x += 0.002;
+            }
+            
+            // Make the gold accent orbit slowly
+            if (accentMesh) {
+                accentMesh.rotation.y -= 0.01;
+            }
+
             renderer.render(scene, camera);
         }
         animate();
