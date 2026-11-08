@@ -39,7 +39,7 @@
         }
     </style>
 
-    <!-- 2. THE 3D ENGINE (Outside the style tags!) -->
+    <!-- 2. THE 3D ENGINE -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
@@ -54,11 +54,9 @@
 
     <!-- 3. THE LOGIC -->
     <script>
-        // --- 3D AVATAR SETUP ---
-        
         // 1. Create the Scene (The World)
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a1a); // Dark background
+        scene.background = new THREE.Color(0x1a1a1a);
 
         // 2. Create the Camera
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -67,30 +65,6 @@
         // 3. Create the Renderer
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-                // --- ADDING THE FIRST ASSET TO THE WORLD ---
-
-        // 1. Create the Geometry (The Shape / Skeleton of our placeholder)
-        // Let's start with a simple, heavy box to represent the core of the Q
-        const placeholderGeometry = new THREE.BoxGeometry(2, 2, 2);
-
-        // 2. Create the Mesh (Wrapping the Red and Gold materials around the shape)
-        // We'll make the main body red, and we can add gold accents later
-        const placeholderMesh = new THREE.Mesh(placeholderGeometry, redMaterial);
-        
-        // 3. Position it in the World (Right in front of the camera)
-        placeholderMesh.position.set(0, 0, 0);
-        
-        // 4. Add it to the Scene (The Manager Board puts it in the World)
-        scene.add(placeholderMesh);
-
-        // Let's add a second, smaller gold box floating next to it as an "accent" or "eye"
-        const accentGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-        const accentMesh = new THREE.Mesh(accentGeometry, goldMaterial);
-        accentMesh.position.set(1.5, 1.5, 1); // Floating up and to the right
-        scene.add(accentMesh);
-
-        // Update the UI to show we succeeded
-        document.getElementById('connection-status').innerText = "3D Engine Ready - Assets Rendered in World";
         document.getElementById('cnd-3d-world').appendChild(renderer.domElement);
 
         // 4. Add lights so we can see the materials
@@ -101,43 +75,48 @@
         const ambientLight = new THREE.AmbientLight(0x404040); 
         scene.add(ambientLight);
 
-        // STEP 1: Define the Iron Man Materials
-        const redMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xdc143c,      // Crimson Red
-            metalness: 0.6,       // Slightly metallic
-            roughness: 0.4        // Smooth finish
-        });
+        // 5. Load the Camry Image as a Texture
+        const textureLoader = new THREE.TextureLoader();
+        
+        // Update 'images/camry.jpg' to match the exact filename in your images folder
+        const camryTexture = textureLoader.load('images/camry.jpg', 
+            function() {
+                document.getElementById('connection-status').innerText = "3D Engine Ready - Camry Loaded in World";
+            },
+            undefined,
+            function(err) {
+                document.getElementById('connection-status').innerText = "Loading Camry...";
+                console.error("Error loading texture:", err);
+            }
+        );
 
-        const goldMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xffd700,      // Metallic Gold
-            metalness: 0.9,       // Very metallic
-            roughness: 0.3        // Polished shine
+        // 6. Create the Geometry and Mesh for the Camry
+        // Using a PlaneGeometry to display the 2D image flat in the 3D world
+        const camryGeometry = new THREE.PlaneGeometry(4, 2.5); 
+        const camryMaterial = new THREE.MeshBasicMaterial({ 
+            map: camryTexture,
+            transparent: true,
+            side: THREE.DoubleSide
         });
         
-        // -------------------------
-        
-        document.getElementById('connection-status').innerText = "3D Engine Ready - Materials Loaded";
-        
-                // Animation loop
+        const camryMesh = new THREE.Mesh(camryGeometry, camryMaterial);
+        camryMesh.position.set(0, 0, 0);
+        scene.add(camryMesh);
+
+        // Animation loop
         function animate() {
             requestAnimationFrame(animate);
             
-            // Make the main red box slowly rotate (The "breathing" idle animation)
-            if (placeholderMesh) {
-                placeholderMesh.rotation.y += 0.005;
-                placeholderMesh.rotation.x += 0.002;
-            }
-            
-            // Make the gold accent orbit slowly
-            if (accentMesh) {
-                accentMesh.rotation.y -= 0.01;
+            if (camryMesh) {
+                // Static for now, or add slight rotation if desired
+                // camryMesh.rotation.y += 0.005;
             }
 
             renderer.render(scene, camera);
         }
         animate();
         
-        console.log("CND 3D Environment initialized. Red and Gold materials ready.");
+        console.log("CND 3D Environment initialized. Camry ready.");
     </script>
 
 </body>
