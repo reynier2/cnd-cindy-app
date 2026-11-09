@@ -173,7 +173,7 @@ const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x111111);
 
-// INITIAL CAMERA VIEW ANGLE POSITION LOOKING AT GROUND
+// --- CAMERA & RENDERER ---
 const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
 camera.position.set(0, 10, 15);
 
@@ -182,162 +182,216 @@ renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.shadowMap.enabled = true;
 container.appendChild(renderer.domElement);
 
+// --- CONTROLS & LIGHTING ---
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambientLight);
+
 const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 dirLight.position.set(10, 20, 10);
+dirLight.castShadow = true;
 scene.add(dirLight);
 
+// --- ENVIRONMENT FLOOR ---
 const floorGeo = new THREE.PlaneGeometry(30, 30);
 const floorMat = new THREE.MeshStandardMaterial({ color: 0x222222, side: THREE.DoubleSide });
 const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
 scene.add(floor);
 
 const grid = new THREE.GridHelper(30, 30, 0xffb703, 0x444444);
 grid.position.y = 0.01;
 scene.add(grid);
 
-// --- MULTI-DEVICE DEVICE CONFIGURATION ---
+// --- MULTI-DEVICE ROLE CONFIGURATION ---
 const urlParams = new URLSearchParams(window.location.search);
 const myPlayerId = parseInt(urlParams.get('player')) || 1; 
 const remotePlayerId = myPlayerId === 1 ? 2 : 1;
+
 const myPlayerStringId = myPlayerId.toString();
 const remotePlayerStringId = remotePlayerId.toString();
 
+// Dynamic labels assignment
 document.querySelector('#ui-overlay p').innerHTML = `<span id="live-dot"></span> CONTROLLING AVATAR ${myPlayerId}`;
 
+// --- HUMANOID ROBOT AVATAR CREATION ---
 function createAvatarBody(mainColor) {
   const group = new THREE.Group();
   const material = new THREE.MeshStandardMaterial({ color: mainColor, roughness: 0.4 });
+  const jointMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.2 });
 
-  const torso = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 0.7), material);
+  // Torso
+  const torsoGeo = new THREE.BoxGeometry(1.2, 1.4, 0.7);
+  const torso = new THREE.Mesh(torsoGeo, material);
   torso.position.y = 1.2;
+  torso.castShadow = true;
   group.add(torso);
 
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), material);
+  // Head
+  const headGeo = new THREE.SphereGeometry(0.4, 32, 32);
+  const head = new THREE.Mesh(headGeo, material);
   head.position.y = 2.2;
+  head.castShadow = true;
   group.add(head);
 
-  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.15, 0.2), new THREE.MeshStandardMaterial({ color: 0x111111, emissive: mainColor }));
+  // Directional Visor
+  const visorGeo = new THREE.BoxGeometry(0.6, 0.15, 0.2);
+  const visorMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: mainColor });
+  const visor = new THREE.Mesh(visorGeo, visorMat);
   visor.position.set(0, 2.2, 0.35);
   group.add(visor);
 
+  // Limbs
   const limbGeo = new THREE.CylinderGeometry(0.15, 0.15, 1.0, 16);
-  const leftArm = new THREE.Mesh(limbGeo, material); leftArm.position.set(-0.85, 1.2, 0); group.add(leftArm);
-  const rightArm = new THREE.Mesh(limbGeo, material); rightArm.position.set(0.85, 1.2, 0); group.add(rightArm);
-  const leftLeg = new THREE.Mesh(limbGeo, material); leftLeg.position.set(-0.4, 0.5, 0); group.add(leftLeg);
-  const rightLeg = new THREE.Mesh(limbGeo, material); rightLeg.position.set(0.4, 0.5, 0); group.add(rightLeg);
-  group.userData = { leftArm, rightArm, leftLeg, rightLeg };
+  const jointGeo = new THREE.SphereGeometry(0.18, 16, 16);
+
+  const leftArm = new THREE.Mesh(limbGeo, material);
+  leftArm.position.set(-0.85, 1.2, 0);
+  leftArm.castShadow = true;
+  group.add(leftArm);
+
+  const rightArm = new THREE.Mesh(limbGeo, material);
+  rightArm.position.set(0.85, 1.2, 0);
+  rightArm.castShadow = true;
+  group.add(rightArm);
+
+  const leftLeg = new THREE.Mesh(limbGeo, material);
+  leftLeg.position.set(-0.4, 0.5, 0);
+  leftLeg.castShadow = true;
+  group.add(leftLeg);
+
+  const rightLeg = new THREE.Mesh(limbGeo, material);
+  rightLeg.position.set(0.4, 0.5, 0);
+  rightLeg.castShadow = true;
+  group.add(rightLeg);
+
+  // Joints
+  const leftShoulder = new THREE.Mesh(jointGeo, jointMaterial);
+  leftShoulder.position.set(-0.7, 1.7, 0);
+  group.add(leftShoulder);
+
+  const rightShoulder = new THREE.Mesh(jointGeo, jointMaterial);
+  rightShoulder.position.set(0.7, 1.7, 0);
+  group.add(rightShoulder);
+
   return group;
-  }
-  const player1 = createAvatarBody(0xffb703); player1.position.set(-2, 0, 0); scene.add(player1);
-  const player2 = createAvatarBody(0x00f5ff); player2.position.set(2, 0, 0); scene.add(player2);
-  const players = { 1: player1, 2: player2 };
-  const localPlayer = players[myPlayerId];
-  const remotePlayer = players[remotePlayerId];
-  controls.target.set(0, 0, 0);
-  // --- POSITIONING HANDLING ENGINE ---
-  const speed = 0.15;
-  const keysPressed = {};
-  let positionChanged = false;
-  window.addEventListener('keydown', (e) => {
-  if(['KeyW','KeyS','KeyA','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) {
-  keysPressed[e.code] = true;
+}
+
+const player1 = createAvatarBody(0xffb703); // Orange Avatar
+player1.position.set(-2, 0, 0);
+scene.add(player1);
+
+const player2 = createAvatarBody(0x00f5ff); // Cyan Avatar
+player2.position.set(2, 0, 0);
+scene.add(player2);
+
+const players = { 1: player1, 2: player2 };
+const localPlayer = players[myPlayerId];
+const remotePlayer = players[remotePlayerId];
+
+controls.target.set(0, 0, 0);
+
+// --- MOVEMENT CONTROLS STATE ---
+const speed = 0.15;
+const keysPressed = {};
+let positionChanged = false;
+
+window.addEventListener('keydown', (e) => { 
+  keysPressed[e.code] = true; 
   positionChanged = true;
-  }
-  });
-  window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
-  const setupDPadBtn = (id, directionalKey) => {
+});
+window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
+
+// --- ON-SCREEN D-PAD CONTROLS (PLAYER 1) ---
+const setupDPadBtn = (id, directionCode) => {
   const btn = document.getElementById(id);
   if (!btn) return;
-  const pressStart = (e) => { e.preventDefault(); keysPressed[directionalKey] = true; positionChanged = true; };
-  const pressStop = () => { keysPressed[directionalKey] = false; };
-  btn.addEventListener('mousedown', pressStart);
-  btn.addEventListener('mouseup', pressStop);
-  btn.addEventListener('mouseleave', pressStop);
-  btn.addEventListener('touchstart', pressStart);
-  btn.addEventListener('touchend', pressStop);
-  };
-  setupDPadBtn('btn-up', 'KeyW');
-  setupDPadBtn('btn-down', 'KeyS');
-  setupDPadBtn('btn-left', 'KeyA');
-  setupDPadBtn('btn-right', 'KeyD');
-  async function pushMyPosition() {
+  btn.addEventListener('mousedown', () => { keysPressed[directionCode] = true; positionChanged = true; });
+  btn.addEventListener('mouseup', () => { keysPressed[directionCode] = false; });
+  btn.addEventListener('mouseleave', () => { keysPressed[directionCode] = false; });
+  btn.addEventListener('touchstart', (e) => { e.preventDefault(); keysPressed[directionCode] = true; positionChanged = true; });
+  btn.addEventListener('touchend', (e) => { e.preventDefault(); keysPressed[directionCode] = false; });
+};
+
+setupDPadBtn('btn-up', 'ArrowUp');
+setupDPadBtn('btn-down', 'ArrowDown');
+setupDPadBtn('btn-left', 'ArrowLeft');
+setupDPadBtn('btn-right', 'ArrowRight');
+
+// --- DATABASE SYNC ENGINE ---
+async function pushMyPosition() {
   if (!positionChanged) return;
   positionChanged = false;
-  await fetch(${SUPA}/rest/v1/player_positions?id=eq.${myPlayerStringId}, {
-  method: 'PATCH',
-  headers: { 'apikey': KEY, 'Authorization': Bearer ${KEY}, 'Content-Type': 'application/json' },
-  body: JSON.stringify({ x_pos: localPlayer.position.x, z_pos: localPlayer.position.z, updated_at: new Date().toISOString() })
+
+  await fetch(`${SUPA}/rest/v1/player_positions?id=eq.${myPlayerStringId}`, {
+    method: 'PATCH',
+    headers: { 
+      'apikey': KEY, 
+      'Authorization': `Bearer ${KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 
+      x_pos: localPlayer.position.x, 
+      z_pos: localPlayer.position.z, 
+      updated_at: new Date().toISOString() 
+    })
   });
-  }
-  async function pullRemotePosition() {
+}
+
+async function pullRemotePosition() {
   try {
-  const res = await fetch(${SUPA}/rest/v1/player_positions?id=eq.${remotePlayerStringId}&select=x_pos,z_pos, {
-  headers: { 'apikey': KEY, 'Authorization': Bearer ${KEY} }
-  });
-  const data = await res.json();
-  if (data && data.length > 0) {
-  const remoteRow = data[0];
-  const dx = remoteRow.x_pos - remotePlayer.position.x;
-  const dz = remoteRow.z_pos - remotePlayer.position.z;
-  if (Math.abs(dx) > 0.01 || Math.abs(dz) > 0.01) {
-  remotePlayer.rotation.y = Math.atan2(dx, dz);
-  animateLimbs(remotePlayer, Date.now() * 0.008);
-  } else {
-  resetLimbs(remotePlayer);
-  }
-  remotePlayer.position.x = remoteRow.x_pos;
-  remotePlayer.position.z = remoteRow.z_pos;
-  }
+    const res = await fetch(`${SUPA}/rest/v1/player_positions?id=eq.${remotePlayerStringId}&select=x_pos,z_pos`, {
+      headers: { 'apikey': KEY, 'Authorization': `Bearer ${KEY}` }
+    });
+    const data = await res.json();
+    if (data && data.length > 0) {
+      remotePlayer.position.x = data[0].x_pos;
+      remotePlayer.position.z = data[0].z_pos;
+    }
   } catch (err) {
-  console.error(err);
+    console.error("Sync error:", err);
   }
-  }
-  setInterval(pushMyPosition, 100);
-  setInterval(pullRemotePosition, 150);
-  function animateLimbs(player, time) {
-  const angle = Math.sin(time) * 0.5;
-  player.userData.leftArm.rotation.x = angle; player.userData.rightArm.rotation.x = -angle;
-  player.userData.leftLeg.rotation.x = -angle; player.userData.rightLeg.rotation.x = angle;
-  }
-  // Reset limb positions when resting still
-  function resetLimbs(player) {
-  player.userData.leftArm.rotation.x = 0; player.userData.rightArm.rotation.x = 0;
-  player.userData.leftLeg.rotation.x = 0; player.userData.rightLeg.rotation.x = 0;
-  }
-  // --- MAIN ANIMATION INTERPOLATION RENDERING LOOP ---
-  function animate() {
+}
+
+setInterval(pushMyPosition, 100);    // Push positions every 100ms
+setInterval(pullRemotePosition, 150); // Pull remote device positions every 150ms
+
+// --- ANIMATION / ENGINE LOOP ---
+function animate() {
   requestAnimationFrame(animate);
-  let moving = false;
-  let targetAngle = localPlayer.rotation.y;
-  if (keysPressed['KeyW'] || keysPressed['ArrowUp'])    { localPlayer.position.z -= speed; targetAngle = Math.PI; moving = true; }
-  if (keysPressed['KeyS'] || keysPressed['ArrowDown'])  { localPlayer.position.z += speed; targetAngle = 0; moving = true; }
-  if (keysPressed['KeyA'] || keysPressed['ArrowLeft'])  { localPlayer.position.x -= speed; targetAngle = Math.PI / 2; moving = true; }
-  if (keysPressed['KeyD'] || keysPressed['ArrowRight']) { localPlayer.position.x += speed; targetAngle = -Math.PI / 2; moving = true; }
-  if (moving) {
-  localPlayer.rotation.y = targetAngle;
-  animateLimbs(localPlayer, Date.now() * 0.008);
-  } else {
-  resetLimbs(localPlayer);
-  }
-  // FIXED CAMERA ATTACHMENT WINDOW OVER TARGET AVATAR COORDINATES
-  camera.position.set(localPlayer.position.x, localPlayer.position.y + 7, localPlayer.position.z + 11);
-  controls.target.copy(localPlayer.position);
-  document.getElementById('coords').innerText = X: ${localPlayer.position.x.toFixed(1)} | Z: ${localPlayer.position.z.toFixed(1)};
+
+  // Player 1 Movement (Arrow keys or D-Pad)
+  if (keysPressed['ArrowUp'] || keysPressed['KeyW'])    localPlayer.position.z -= speed;
+  if (keysPressed['ArrowDown'] || keysPressed['KeyS'])  localPlayer.position.z += speed;
+  if (keysPressed['ArrowLeft'] || keysPressed['KeyA'])  localPlayer.position.x -= speed;
+  if (keysPressed['ArrowRight'] || keysPressed['KeyD']) localPlayer.position.x += speed;
+
+  // Face moving direction smoothly
+  if (keysPressed['KeyW'] || keysPressed['ArrowUp']) localPlayer.rotation.y = Math.PI;
+  if (keysPressed['KeyS'] || keysPressed['ArrowDown']) localPlayer.rotation.y = 0;
+  if (keysPressed['KeyA'] || keysPressed['ArrowLeft']) localPlayer.rotation.y = -Math.PI / 2;
+  if (keysPressed['KeyD'] || keysPressed['ArrowRight']) localPlayer.rotation.y = Math.PI / 2;
+
+  // Dynamic UI Coordinates Output
+  document.getElementById('coords').innerText = `X: ${localPlayer.position.x.toFixed(1)} | Z: ${localPlayer.position.z.toFixed(1)}`;
+
   controls.update();
   renderer.render(scene, camera);
-  }
-  window.addEventListener('resize', () => {
+}
+
+// Handle window resizing cleanly
+window.addEventListener('resize', () => {
   camera.aspect = container.clientWidth / container.clientHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(container.clientWidth, container.clientHeight);
-  });
-  loadMenu();
-  setInterval(loadMenu, 10000);
+});
+
 animate();
+</script>
+</body>
+</html>
+
