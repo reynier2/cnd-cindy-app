@@ -196,107 +196,152 @@ container.appendChild(renderer.domElement);
 // --- 3. CONTROLS & LIGHTING ---
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.dampingFactor = 0.1;
-controls.maxPolarAngle = Math.PI / 2 - 0.1;
+controls.dampingFactor = 0.05;
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambientLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 dirLight.position.set(10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
-// --- 4. FLOOR GRID ---
-const gridHelper = new THREE.GridHelper(100, 100, 0xffb703, 0x333333);
-scene.add(gridHelper);
-
-const floorGeo = new THREE.PlaneGeometry(100, 100);
-const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
+// --- 4. ENVIRONMENT ENVIRONMENT ---
+const floorGeo = new THREE.PlaneGeometry(30, 30);
+const floorMat = new THREE.MeshStandardMaterial({ color: 0x222222, side: THREE.DoubleSide });
 const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-// --- ADDING THE HIGH-CONTRAST 3D PLAYER CHARACTER ---
-const playerGeo = new THREE.CylinderGeometry(0.8, 0.8, 2.5, 16);
-const playerMat = new THREE.MeshStandardMaterial({ 
-  color: 0x00ffcc, // Bright neon cyan/teal so it stands out immediately
-  emissive: 0x003333,
-  roughness: 0.2
+const grid = new THREE.GridHelper(30, 30, 0xffb703, 0x444444);
+grid.position.y = 0.01;
+scene.add(grid);
+
+// --- 5. NETWORK DEVICE CONFIGURATION ---
+const urlParams = new URLSearchParams(window.location.search);
+const myPlayerId = parseInt(urlParams.get('player')) || 1; 
+const remotePlayerId = myPlayerId === 1 ? 2 : 1;
+
+const myPlayerStringId = myPlayerId.toString();
+const remotePlayerStringId = remotePlayerId.toString();
+
+// Dynamic labels assignment
+document.querySelector('#ui-overlay p').innerHTML = `<span id="live-dot"></span> CONTROLLING AVATAR ${myPlayerId}`;
+
+// --- 6. TWO PLAYER AVATARS ---
+const p1Geo = new THREE.BoxGeometry(1, 1, 1);
+const p1Mat = new THREE.MeshStandardMaterial({ color: 0xffb703 });
+const player1 = new THREE.Mesh(p1Geo, p1Mat);
+player1.position.set(-2, 0.5, 0);
+player1.castShadow = true;
+scene.add(player1);
+
+const p2Geo = new THREE.BoxGeometry(1, 1, 1);
+const p2Mat = new THREE.MeshStandardMaterial({ color: 0x00f5ff });
+const player2 = new THREE.Mesh(p2Geo, p2Mat);
+player2.position.set(2, 0.5, 0);
+player2.castShadow = true;
+scene.add(player2);
+
+const players = { 1: player1, 2: player2 };
+const localPlayer = players[myPlayerId];
+const remotePlayer = players[remotePlayerId];
+
+// Set OrbitControls view focus targeting center space
+controls.target.set(0, 0, 0);
+
+// --- 7. MOVEMENT ENGINE ---
+const speed = 0.15;
+const keysPressed = {};
+let positionChanged = false;
+
+window.addEventListener('keydown', (e) => { 
+  if(['KeyW', 'KeyS', 'KeyA', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+    keysPressed[e.code] = true; 
+    positionChanged = true;
+  }
 });
-const player = new THREE.Mesh(playerGeo, playerMat);
-player.position.set(0, 1.25, 0); // Sits right on top of the floor
-player.castShadow = true;
-scene.add(player);
+window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
 
-// Force camera target onto the player right away
-controls.target.copy(player.position);
+const setupDPadBtn = (id, directionalKey) => {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  const pressStart = (e) => { e.preventDefault(); keysPressed[directionalKey] = true; positionChanged = true; };
+  const pressStop = () => { keysPressed[directionalKey] = false; };
+  btn.addEventListener('mousedown', pressStart);
+  btn.addEventListener('mouseup', pressStop);
+  btn.addEventListener('mouseleave', pressStop);
+  btn.addEventListener('touchstart', pressStart);
+  btn.addEventListener('touchend', pressStop);
+};
 
-// --- 5. MOVEMENT LOGIC (MOVES THE PLAYER & FOLLOWS) ---
-const moveState = { up: false, down: false, left: false, right: false };
-const speed = 0.3; 
-const bounds = { xMin: -45, xMax: 45, zMin: -45, zMax: 45 }; 
+setupDPadBtn('btn-up', 'KeyW');
+setupDPadBtn('btn-down', 'KeyS');
+setupDPadBtn('btn-left', 'KeyA');
+setupDPadBtn('btn-right', 'KeyD');
 
-function setupDpad() {
-  const buttons = { 
-    up: document.getElementById('btn-up'), 
-    down: document.getElementById('btn-down'), 
-    left: document.getElementById('btn-left'), 
-    right: document.getElementById('btn-right') 
-  };
-  
-  Object.keys(buttons).forEach(dir => {
-    const btn = buttons[dir];
-    const startMove = (e) => { e.preventDefault(); moveState[dir] = true; btn.classList.add('active'); };
-    const stopMove = (e) => { e.preventDefault(); moveState[dir] = false; btn.classList.remove('active'); };
-    
-    btn.addEventListener('mousedown', startMove);
-    btn.addEventListener('touchstart', startMove, {passive: false});
-    btn.addEventListener('mouseup', stopMove);
-    btn.addEventListener('mouseleave', stopMove);
-    btn.addEventListener('touchend', stopMove);
+// --- 8. DATABASE SYNC ENGINE ---
+async function pushMyPosition() {
+  if (!positionChanged) return;
+  positionChanged = false;
+
+  await fetch(`${SUPA}/rest/v1/player_positions?id=eq.${myPlayerStringId}`, {
+    method: 'PATCH',
+    headers: { 
+      'apikey': KEY, 
+      'Authorization': `Bearer ${KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ 
+      x_pos: localPlayer.position.x, 
+      z_pos: localPlayer.position.z, 
+      updated_at: new Date().toISOString() 
+    })
   });
 }
 
-function updateMovement() {
-  let dx = 0, dz = 0;
-  if (moveState.up) dz -= speed;
-  if (moveState.down) dz += speed;
-  if (moveState.left) dx -= speed;
-  if (moveState.right) dx += speed;
-
-  // Move the player mesh
-  player.position.x += dx;
-  player.position.z += dz;
-
-  // Enforce grid boundaries
-  player.position.x = Math.max(bounds.xMin, Math.min(bounds.xMax, player.position.x));
-  player.position.z = Math.max(bounds.zMin, Math.min(bounds.zMax, player.position.z));
-
-  // Make camera and control target follow the player smoothly
-  camera.position.x += dx;
-  camera.position.z += dz;
-  controls.target.copy(player.position);
-
-  document.getElementById('coords').innerText = `X: ${player.position.x.toFixed(1)} | Z: ${player.position.z.toFixed(1)}`;
+async function pullRemotePosition() {
+  try {
+    const res = await fetch(`${SUPA}/rest/v1/player_positions?id=eq.${remotePlayerStringId}&select=x_pos,z_pos`, {
+      headers: { 'apikey': KEY, 'Authorization': `Bearer ${KEY}` }
+    });
+    const data = await res.json();
+    if (data && data.length > 0) {
+      remotePlayer.position.x = data[0].x_pos;
+      remotePlayer.position.z = data[0].z_pos;
+    }
+  } catch (err) {
+    console.error("Sync error:", err);
+  }
 }
 
-// --- 6. ANIMATION LOOP ---
+setInterval(pushMyPosition, 100);    
+setInterval(pullRemotePosition, 150); 
+
+// --- 9. RENDER LOOP ---
 function animate() {
   requestAnimationFrame(animate);
-  updateMovement(); 
+
+  if (keysPressed['KeyW'] || keysPressed['ArrowUp'])    localPlayer.position.z -= speed;
+  if (keysPressed['KeyS'] || keysPressed['ArrowDown'])  localPlayer.position.z += speed;
+  if (keysPressed['KeyA'] || keysPressed['ArrowLeft'])  localPlayer.position.x -= speed;
+  if (keysPressed['KeyD'] || keysPressed['ArrowRight']) localPlayer.position.x += speed;
+
+  document.getElementById('coords').innerText = `X: ${localPlayer.position.x.toFixed(1)} | Z: ${localPlayer.position.z.toFixed(1)}`;
+
   controls.update();
   renderer.render(scene, camera);
 }
 
-// --- 7. INITIALIZATION ---
 window.addEventListener('resize', () => {
   camera.aspect = container.clientWidth / container.clientHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(container.clientWidth, container.clientHeight);
 });
 
-setupDpad();
+loadMenu();
+setInterval(loadMenu, 10000);
 animate();
 </script>
 </body>
