@@ -206,7 +206,7 @@ dirLight.position.set(10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
-// --- 4. ENVIRONMENT ENVIRONMENT ---
+// --- 4. ENVIRONMENT FLOOR ---
 const floorGeo = new THREE.PlaneGeometry(30, 30);
 const floorMat = new THREE.MeshStandardMaterial({ color: 0x222222, side: THREE.DoubleSide });
 const floor = new THREE.Mesh(floorGeo, floorMat);
@@ -218,7 +218,7 @@ const grid = new THREE.GridHelper(30, 30, 0xffb703, 0x444444);
 grid.position.y = 0.01;
 scene.add(grid);
 
-// --- 5. NETWORK DEVICE CONFIGURATION ---
+// --- 5. MULTI-DEVICE ROLE CONFIGURATION ---
 const urlParams = new URLSearchParams(window.location.search);
 const myPlayerId = parseInt(urlParams.get('player')) || 1; 
 const remotePlayerId = myPlayerId === 1 ? 2 : 1;
@@ -226,32 +226,89 @@ const remotePlayerId = myPlayerId === 1 ? 2 : 1;
 const myPlayerStringId = myPlayerId.toString();
 const remotePlayerStringId = remotePlayerId.toString();
 
-// Dynamic labels assignment
 document.querySelector('#ui-overlay p').innerHTML = `<span id="live-dot"></span> CONTROLLING AVATAR ${myPlayerId}`;
 
-// --- 6. TWO PLAYER AVATARS ---
-const p1Geo = new THREE.BoxGeometry(1, 1, 1);
-const p1Mat = new THREE.MeshStandardMaterial({ color: 0xffb703 });
-const player1 = new THREE.Mesh(p1Geo, p1Mat);
-player1.position.set(-2, 0.5, 0);
-player1.castShadow = true;
+// --- 6. HUMANOID ROBOT AVATAR CREATION ---
+function createAvatarBody(mainColor) {
+  const group = new THREE.Group();
+  const material = new THREE.MeshStandardMaterial({ color: mainColor, roughness: 0.4 });
+  const jointMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.2 });
+
+  // Torso
+  const torsoGeo = new THREE.BoxGeometry(1.2, 1.4, 0.7);
+  const torso = new THREE.Mesh(torsoGeo, material);
+  torso.position.y = 1.2;
+  torso.castShadow = true;
+  group.add(torso);
+
+  // Head
+  const headGeo = new THREE.SphereGeometry(0.4, 32, 32);
+  const head = new THREE.Mesh(headGeo, material);
+  head.position.y = 2.2;
+  head.castShadow = true;
+  group.add(head);
+
+  // Directional Visor
+  const visorGeo = new THREE.BoxGeometry(0.6, 0.15, 0.2);
+  const visorMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: mainColor });
+  const visor = new THREE.Mesh(visorGeo, visorMat);
+  visor.position.set(0, 2.2, 0.35);
+  group.add(visor);
+
+  // Limbs
+  const limbGeo = new THREE.CylinderGeometry(0.15, 0.15, 1.0, 16);
+  const jointGeo = new THREE.SphereGeometry(0.18, 16, 16);
+
+  const leftArm = new THREE.Mesh(limbGeo, material);
+  leftArm.position.set(-0.85, 1.2, 0);
+  leftArm.castShadow = true;
+  group.add(leftArm);
+
+  const rightArm = new THREE.Mesh(limbGeo, material);
+  rightArm.position.set(0.85, 1.2, 0);
+  rightArm.castShadow = true;
+  group.add(rightArm);
+
+  const leftLeg = new THREE.Mesh(limbGeo, material);
+  leftLeg.position.set(-0.4, 0.5, 0);
+  leftLeg.castShadow = true;
+  group.add(leftLeg);
+
+  const rightLeg = new THREE.Mesh(limbGeo, material);
+  rightLeg.position.set(0.4, 0.5, 0);
+  rightLeg.castShadow = true;
+  group.add(rightLeg);
+
+  // Joints
+  const leftShoulder = new THREE.Mesh(jointGeo, jointMaterial);
+  leftShoulder.position.set(-0.7, 1.7, 0);
+  group.add(leftShoulder);
+
+  const rightShoulder = new THREE.Mesh(jointGeo, jointMaterial);
+  rightShoulder.position.set(0.7, 1.7, 0);
+  group.add(rightShoulder);
+
+  // Expose arms and legs on the group for easy animation access
+  group.userData = { leftArm, rightArm, leftLeg, rightLeg };
+
+  return group;
+}
+
+const player1 = createAvatarBody(0xffb703); // Orange Avatar
+player1.position.set(-2, 0, 0);
 scene.add(player1);
 
-const p2Geo = new THREE.BoxGeometry(1, 1, 1);
-const p2Mat = new THREE.MeshStandardMaterial({ color: 0x00f5ff });
-const player2 = new THREE.Mesh(p2Geo, p2Mat);
-player2.position.set(2, 0.5, 0);
-player2.castShadow = true;
+const player2 = createAvatarBody(0x00f5ff); // Cyan Avatar
+player2.position.set(2, 0, 0);
 scene.add(player2);
 
 const players = { 1: player1, 2: player2 };
 const localPlayer = players[myPlayerId];
 const remotePlayer = players[remotePlayerId];
 
-// Set OrbitControls view focus targeting center space
 controls.target.set(0, 0, 0);
 
-// --- 7. MOVEMENT ENGINE ---
+// --- 7. INPUT HANDLERS ---
 const speed = 0.15;
 const keysPressed = {};
 let positionChanged = false;
@@ -308,8 +365,19 @@ async function pullRemotePosition() {
     });
     const data = await res.json();
     if (data && data.length > 0) {
-      remotePlayer.position.x = data[0].x_pos;
-      remotePlayer.position.z = data[0].z_pos;
+      // Trace remote adjustments and match rotation
+      const dx = data.x_pos - remotePlayer.position.x;
+      const dz = data.z_pos - remotePlayer.position.z;
+      
+      if (Math.abs(dx) > 0.01 || Math.abs(dz) > 0.01) {
+        remotePlayer.rotation.y = Math.atan2(dx, dz);
+        animateLimbs(remotePlayer, Date.now() * 0.008);
+      } else {
+        resetLimbs(remotePlayer);
+      }
+
+      remotePlayer.position.x = data.x_pos;
+      remotePlayer.position.z = data.z_pos;
     }
   } catch (err) {
     console.error("Sync error:", err);
@@ -319,14 +387,40 @@ async function pullRemotePosition() {
 setInterval(pushMyPosition, 100);    
 setInterval(pullRemotePosition, 150); 
 
-// --- 9. RENDER LOOP ---
+// Limb swinging calculation helper
+function animateLimbs(player, time) {
+  const angle = Math.sin(time) * 0.5;
+  player.userData.leftArm.rotation.x = angle;
+  player.userData.rightArm.rotation.x = -angle;
+  player.userData.leftLeg.rotation.x = -angle;
+  player.userData.rightLeg.rotation.x = angle;
+}
+
+function resetLimbs(player) {
+  player.userData.leftArm.rotation.x = 0;
+  player.userData.rightArm.rotation.x = 0;
+  player.userData.leftLeg.rotation.x = 0;
+  player.userData.rightLeg.rotation.x = 0;
+}
+
+// --- 9. ANIMATION LOOP ---
 function animate() {
   requestAnimationFrame(animate);
 
-  if (keysPressed['KeyW'] || keysPressed['ArrowUp'])    localPlayer.position.z -= speed;
-  if (keysPressed['KeyS'] || keysPressed['ArrowDown'])  localPlayer.position.z += speed;
-  if (keysPressed['KeyA'] || keysPressed['ArrowLeft'])  localPlayer.position.x -= speed;
-  if (keysPressed['KeyD'] || keysPressed['ArrowRight']) localPlayer.position.x += speed;
+  let moving = false;
+  let targetAngle = localPlayer.rotation.y;
+
+  if (keysPressed['KeyW'] || keysPressed['ArrowUp'])    { localPlayer.position.z -= speed; targetAngle = Math.PI; moving = true; }
+  if (keysPressed['KeyS'] || keysPressed['ArrowDown'])  { localPlayer.position.z += speed; targetAngle = 0; moving = true; }
+  if (keysPressed['KeyA'] || keysPressed['ArrowLeft'])  { localPlayer.position.x -= speed; targetAngle = Math.PI / 2; moving = true; }
+  if (keysPressed['KeyD'] || keysPressed['ArrowRight']) { localPlayer.position.x += speed; targetAngle = -Math.PI / 2; moving = true; }
+
+  if (moving) {
+    localPlayer.rotation.y = targetAngle;
+    animateLimbs(localPlayer, Date.now() * 0.008);
+  } else {
+    resetLimbs(localPlayer);
+  }
 
   document.getElementById('coords').innerText = `X: ${localPlayer.position.x.toFixed(1)} | Z: ${localPlayer.position.z.toFixed(1)}`;
 
