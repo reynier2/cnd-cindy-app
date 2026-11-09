@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>CND - Unified Spatial Engine & Status Board</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cloudflare.com"></script>
+<script src="https://jsdelivr.net"></script>
 
 <style>
   body { margin: 0; padding: 0; background: #0a0a0a; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
@@ -91,7 +91,7 @@
 
   <div id="ui-overlay">
     <h1>CND SPATIAL ENGINE</h1>
-    <p><span id="live-dot"></span> HIGH-CONTRAST AVATAR ACTIVE</p>
+    <p><span id="live-dot"></span> CONNECTING OBJECTS...</p>
   </div>
   <div id="coords">X: 0.0 | Z: 0.0</div>
   <div id="canvas-container"></div>
@@ -111,7 +111,7 @@
 
 <script>
 // --- SUPABASE LIVE STATUS INTEGRATION ---
-const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
+const SUPA = "https://supabase.co";
 const KEY  = "sb_publishable_CJZipjuCPS_UIT8h-xtVrw_Jy37Cq9K";
 
 function toggleBoard() {
@@ -179,12 +179,12 @@ async function updateStatus(itemName, status) {
 loadMenu();
 setInterval(loadMenu, 10000);
 
-// --- 1. THREE.JS SCENE SETUP ---
+// --- THREE.JS SCENE SETUP ---
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x111111);
 
-// --- 2. CAMERA & RENDERER ---
+// --- CAMERA & RENDERER ---
 const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
 camera.position.set(0, 8, 12);
 
@@ -193,7 +193,7 @@ renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.shadowMap.enabled = true;
 container.appendChild(renderer.domElement);
 
-// --- 3. CONTROLS & LIGHTING ---
+// --- CONTROLS & LIGHTING ---
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
@@ -206,7 +206,7 @@ dirLight.position.set(10, 20, 10);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
-// --- 4. ENVIRONMENT FLOOR ---
+// --- ENVIRONMENT FLOOR ---
 const floorGeo = new THREE.PlaneGeometry(30, 30);
 const floorMat = new THREE.MeshStandardMaterial({ color: 0x222222, side: THREE.DoubleSide });
 const floor = new THREE.Mesh(floorGeo, floorMat);
@@ -218,7 +218,7 @@ const grid = new THREE.GridHelper(30, 30, 0xffb703, 0x444444);
 grid.position.y = 0.01;
 scene.add(grid);
 
-// --- 5. MULTI-DEVICE ROLE CONFIGURATION ---
+// --- MULTI-DEVICE ROLE CONFIGURATION ---
 const urlParams = new URLSearchParams(window.location.search);
 const myPlayerId = parseInt(urlParams.get('player')) || 1; 
 const remotePlayerId = myPlayerId === 1 ? 2 : 1;
@@ -228,7 +228,7 @@ const remotePlayerStringId = remotePlayerId.toString();
 
 document.querySelector('#ui-overlay p').innerHTML = `<span id="live-dot"></span> CONTROLLING AVATAR ${myPlayerId}`;
 
-// --- 6. HUMANOID ROBOT AVATAR CREATION ---
+// --- HUMANOID ROBOT AVATAR CREATION ---
 function createAvatarBody(mainColor) {
   const group = new THREE.Group();
   const material = new THREE.MeshStandardMaterial({ color: mainColor, roughness: 0.4 });
@@ -245,198 +245,3 @@ function createAvatarBody(mainColor) {
   const headGeo = new THREE.SphereGeometry(0.4, 32, 32);
   const head = new THREE.Mesh(headGeo, material);
   head.position.y = 2.2;
-  head.castShadow = true;
-  group.add(head);
-
-  // Directional Visor
-  const visorGeo = new THREE.BoxGeometry(0.6, 0.15, 0.2);
-  const visorMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: mainColor });
-  const visor = new THREE.Mesh(visorGeo, visorMat);
-  visor.position.set(0, 2.2, 0.35);
-  group.add(visor);
-
-  // Limbs
-  const limbGeo = new THREE.CylinderGeometry(0.15, 0.15, 1.0, 16);
-  const jointGeo = new THREE.SphereGeometry(0.18, 16, 16);
-
-  const leftArm = new THREE.Mesh(limbGeo, material);
-  leftArm.position.set(-0.85, 1.2, 0);
-  leftArm.castShadow = true;
-  group.add(leftArm);
-
-  const rightArm = new THREE.Mesh(limbGeo, material);
-  rightArm.position.set(0.85, 1.2, 0);
-  rightArm.castShadow = true;
-  group.add(rightArm);
-
-  const leftLeg = new THREE.Mesh(limbGeo, material);
-  leftLeg.position.set(-0.4, 0.5, 0);
-  leftLeg.castShadow = true;
-  group.add(leftLeg);
-
-  const rightLeg = new THREE.Mesh(limbGeo, material);
-  rightLeg.position.set(0.4, 0.5, 0);
-  rightLeg.castShadow = true;
-  group.add(rightLeg);
-
-  // Joints
-  const leftShoulder = new THREE.Mesh(jointGeo, jointMaterial);
-  leftShoulder.position.set(-0.7, 1.7, 0);
-  group.add(leftShoulder);
-
-  const rightShoulder = new THREE.Mesh(jointGeo, jointMaterial);
-  rightShoulder.position.set(0.7, 1.7, 0);
-  group.add(rightShoulder);
-
-  // Expose arms and legs on the group for easy animation access
-  group.userData = { leftArm, rightArm, leftLeg, rightLeg };
-
-  return group;
-}
-
-const player1 = createAvatarBody(0xffb703); // Orange Avatar
-player1.position.set(-2, 0, 0);
-scene.add(player1);
-
-const player2 = createAvatarBody(0x00f5ff); // Cyan Avatar
-player2.position.set(2, 0, 0);
-scene.add(player2);
-
-const players = { 1: player1, 2: player2 };
-const localPlayer = players[myPlayerId];
-const remotePlayer = players[remotePlayerId];
-
-controls.target.set(0, 0, 0);
-
-// --- 7. INPUT HANDLERS ---
-const speed = 0.15;
-const keysPressed = {};
-let positionChanged = false;
-
-window.addEventListener('keydown', (e) => { 
-  if(['KeyW', 'KeyS', 'KeyA', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
-    keysPressed[e.code] = true; 
-    positionChanged = true;
-  }
-});
-window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
-
-const setupDPadBtn = (id, directionalKey) => {
-  const btn = document.getElementById(id);
-  if (!btn) return;
-  const pressStart = (e) => { e.preventDefault(); keysPressed[directionalKey] = true; positionChanged = true; };
-  const pressStop = () => { keysPressed[directionalKey] = false; };
-  btn.addEventListener('mousedown', pressStart);
-  btn.addEventListener('mouseup', pressStop);
-  btn.addEventListener('mouseleave', pressStop);
-  btn.addEventListener('touchstart', pressStart);
-  btn.addEventListener('touchend', pressStop);
-};
-
-setupDPadBtn('btn-up', 'KeyW');
-setupDPadBtn('btn-down', 'KeyS');
-setupDPadBtn('btn-left', 'KeyA');
-setupDPadBtn('btn-right', 'KeyD');
-
-// --- 8. DATABASE SYNC ENGINE ---
-async function pushMyPosition() {
-  if (!positionChanged) return;
-  positionChanged = false;
-
-  await fetch(`${SUPA}/rest/v1/player_positions?id=eq.${myPlayerStringId}`, {
-    method: 'PATCH',
-    headers: { 
-      'apikey': KEY, 
-      'Authorization': `Bearer ${KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ 
-      x_pos: localPlayer.position.x, 
-      z_pos: localPlayer.position.z, 
-      updated_at: new Date().toISOString() 
-    })
-  });
-}
-
-async function pullRemotePosition() {
-  try {
-    const res = await fetch(`${SUPA}/rest/v1/player_positions?id=eq.${remotePlayerStringId}&select=x_pos,z_pos`, {
-      headers: { 'apikey': KEY, 'Authorization': `Bearer ${KEY}` }
-    });
-    const data = await res.json();
-    if (data && data.length > 0) {
-      // Trace remote adjustments and match rotation
-      const dx = data.x_pos - remotePlayer.position.x;
-      const dz = data.z_pos - remotePlayer.position.z;
-      
-      if (Math.abs(dx) > 0.01 || Math.abs(dz) > 0.01) {
-        remotePlayer.rotation.y = Math.atan2(dx, dz);
-        animateLimbs(remotePlayer, Date.now() * 0.008);
-      } else {
-        resetLimbs(remotePlayer);
-      }
-
-      remotePlayer.position.x = data.x_pos;
-      remotePlayer.position.z = data.z_pos;
-    }
-  } catch (err) {
-    console.error("Sync error:", err);
-  }
-}
-
-setInterval(pushMyPosition, 100);    
-setInterval(pullRemotePosition, 150); 
-
-// Limb swinging calculation helper
-function animateLimbs(player, time) {
-  const angle = Math.sin(time) * 0.5;
-  player.userData.leftArm.rotation.x = angle;
-  player.userData.rightArm.rotation.x = -angle;
-  player.userData.leftLeg.rotation.x = -angle;
-  player.userData.rightLeg.rotation.x = angle;
-}
-
-function resetLimbs(player) {
-  player.userData.leftArm.rotation.x = 0;
-  player.userData.rightArm.rotation.x = 0;
-  player.userData.leftLeg.rotation.x = 0;
-  player.userData.rightLeg.rotation.x = 0;
-}
-
-// --- 9. ANIMATION LOOP ---
-function animate() {
-  requestAnimationFrame(animate);
-
-  let moving = false;
-  let targetAngle = localPlayer.rotation.y;
-
-  if (keysPressed['KeyW'] || keysPressed['ArrowUp'])    { localPlayer.position.z -= speed; targetAngle = Math.PI; moving = true; }
-  if (keysPressed['KeyS'] || keysPressed['ArrowDown'])  { localPlayer.position.z += speed; targetAngle = 0; moving = true; }
-  if (keysPressed['KeyA'] || keysPressed['ArrowLeft'])  { localPlayer.position.x -= speed; targetAngle = Math.PI / 2; moving = true; }
-  if (keysPressed['KeyD'] || keysPressed['ArrowRight']) { localPlayer.position.x += speed; targetAngle = -Math.PI / 2; moving = true; }
-
-  if (moving) {
-    localPlayer.rotation.y = targetAngle;
-    animateLimbs(localPlayer, Date.now() * 0.008);
-  } else {
-    resetLimbs(localPlayer);
-  }
-
-  document.getElementById('coords').innerText = `X: ${localPlayer.position.x.toFixed(1)} | Z: ${localPlayer.position.z.toFixed(1)}`;
-
-  controls.update();
-  renderer.render(scene, camera);
-}
-
-window.addEventListener('resize', () => {
-  camera.aspect = container.clientWidth / container.clientHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(container.clientWidth, container.clientHeight);
-});
-
-loadMenu();
-setInterval(loadMenu, 10000);
-animate();
-</script>
-</body>
-</html>
