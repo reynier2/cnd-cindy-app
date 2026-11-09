@@ -111,7 +111,7 @@
 
 <script>
 // --- SUPABASE LIVE STATUS INTEGRATION ---
-const SUPA = "https://supabase.co";
+const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
 const KEY  = "sb_publishable_CJZipjuCPS_UIT8h-xtVrw_Jy37Cq9K";
 
 function toggleBoard() {
@@ -245,11 +245,161 @@ function createAvatarBody(mainColor) {
   const headGeo = new THREE.SphereGeometry(0.4, 32, 32);
   const head = new THREE.Mesh(headGeo, material);
   head.position.y = 2.2;
-  // --- PASTE THE NEW PART DIRECTLY HERE ---
-  head.castShadow = true;
-  group.add(head);
-
-  // Directional Visor
-  const visorGeo = new THREE.BoxGeometry(0.6, 0.15, 0.2);
-  const visorMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: mainColor });
-  ...
+head.castShadow = true;
+group.add(head);
+// Directional Visor
+const visorGeo = new THREE.BoxGeometry(0.6, 0.15, 0.2);
+const visorMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: mainColor });
+const visor = new THREE.Mesh(visorGeo, visorMat);
+visor.position.set(0, 2.2, 0.35);
+group.add(visor);
+// Limbs
+const limbGeo = new THREE.CylinderGeometry(0.15, 0.15, 1.0, 16);
+const jointGeo = new THREE.SphereGeometry(0.18, 16, 16);
+const leftArm = new THREE.Mesh(limbGeo, material);
+leftArm.position.set(-0.85, 1.2, 0);
+leftArm.castShadow = true;
+group.add(leftArm);
+const rightArm = new THREE.Mesh(limbGeo, material);
+rightArm.position.set(0.85, 1.2, 0);
+rightArm.castShadow = true;
+group.add(rightArm);
+const leftLeg = new THREE.Mesh(limbGeo, material);
+leftLeg.position.set(-0.4, 0.5, 0);
+leftLeg.castShadow = true;
+group.add(leftLeg);
+const rightLeg = new THREE.Mesh(limbGeo, material);
+rightLeg.position.set(0.4, 0.5, 0);
+rightLeg.castShadow = true;
+group.add(rightLeg);
+// Joints
+const leftShoulder = new THREE.Mesh(jointGeo, jointMaterial);
+leftShoulder.position.set(-0.7, 1.7, 0);
+group.add(leftShoulder);
+const rightShoulder = new THREE.Mesh(jointGeo, jointMaterial);
+rightShoulder.position.set(0.7, 1.7, 0);
+group.add(rightShoulder);
+// Expose segments for dynamic swinging animation
+group.userData = { leftArm, rightArm, leftLeg, rightLeg };
+return group;
+}
+const player1 = createAvatarBody(0xffb703); // Orange Avatar
+player1.position.set(-2, 0, 0);
+scene.add(player1);
+const player2 = createAvatarBody(0x00f5ff); // Cyan Avatar
+player2.position.set(2, 0, 0);
+scene.add(player2);
+const players = { 1: player1, 2: player2 };
+const localPlayer = players[myPlayerId];
+const remotePlayer = players[remotePlayerId];
+controls.target.set(0, 0, 0);
+// --- INPUT ENGINE HANDLING ---
+const speed = 0.15;
+const keysPressed = {};
+let positionChanged = false;
+window.addEventListener('keydown', (e) => {
+if(['KeyW', 'KeyS', 'KeyA', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+keysPressed[e.code] = true;
+positionChanged = true;
+}
+});
+window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
+const setupDPadBtn = (id, directionalKey) => {
+const btn = document.getElementById(id);
+if (!btn) return;
+const pressStart = (e) => { e.preventDefault(); keysPressed[directionalKey] = true; positionChanged = true; };
+const pressStop = () => { keysPressed[directionalKey] = false; };
+btn.addEventListener('mousedown', pressStart);
+btn.addEventListener('mouseup', pressStop);
+btn.addEventListener('mouseleave', pressStop);
+btn.addEventListener('touchstart', pressStart);
+btn.addEventListener('touchend', pressStop);
+};
+setupDPadBtn('btn-up', 'KeyW');
+setupDPadBtn('btn-down', 'KeyS');
+setupDPadBtn('btn-left', 'KeyA');
+setupDPadBtn('btn-right', 'KeyD');
+// --- REAL-TIME NETWORK LOOP ENGINE ---
+async function pushMyPosition() {
+if (!positionChanged) return;
+positionChanged = false;
+await fetch(${SUPA}/rest/v1/player_positions?id=eq.${myPlayerStringId}, {
+method: 'PATCH',
+headers: {
+'apikey': KEY,
+'Authorization': Bearer ${KEY},
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({
+x_pos: localPlayer.position.x,
+z_pos: localPlayer.position.z,
+updated_at: new Date().toISOString()
+})
+});
+}
+async function pullRemotePosition() {
+try {
+const res = await fetch(${SUPA}/rest/v1/player_positions?id=eq.${remotePlayerStringId}&select=x_pos,z_pos, {
+headers: { 'apikey': KEY, 'Authorization': Bearer ${KEY} }
+});
+const data = await res.json();
+// Crucial step: Extract inner object from Supabase array format list
+if (data && data.length > 0) {
+const remoteRow = data[0];
+const dx = remoteRow.x_pos - remotePlayer.position.x;
+const dz = remoteRow.z_pos - remotePlayer.position.z;
+if (Math.abs(dx) > 0.01 || Math.abs(dz) > 0.01) {
+remotePlayer.rotation.y = Math.atan2(dx, dz);
+animateLimbs(remotePlayer, Date.now() * 0.008);
+} else {
+resetLimbs(remotePlayer);
+}
+remotePlayer.position.x = remoteRow.x_pos;
+remotePlayer.position.z = remoteRow.z_pos;
+}
+} catch (err) {
+console.error("Sync error:", err);
+}
+}
+setInterval(pushMyPosition, 100);
+setInterval(pullRemotePosition, 150);
+function animateLimbs(player, time) {
+const angle = Math.sin(time) * 0.5;
+player.userData.leftArm.rotation.x = angle;
+player.userData.rightArm.rotation.x = -angle;
+player.userData.leftLeg.rotation.x = -angle;
+player.userData.rightLeg.rotation.x = angle;
+}
+function resetLimbs(player) {
+player.userData.leftArm.rotation.x = 0;
+player.userData.rightArm.rotation.x = 0;
+player.userData.leftLeg.rotation.x = 0;
+player.userData.rightLeg.rotation.x = 0;
+}
+// --- RENDERING ANIMATION ENGINE ---
+function animate() {
+requestAnimationFrame(animate);
+let moving = false;
+let targetAngle = localPlayer.rotation.y;
+if (keysPressed['KeyW'] || keysPressed['ArrowUp'])    { localPlayer.position.z -= speed; targetAngle = Math.PI; moving = true; }
+if (keysPressed['KeyS'] || keysPressed['ArrowDown'])  { localPlayer.position.z += speed; targetAngle = 0; moving = true; }
+if (keysPressed['KeyA'] || keysPressed['ArrowLeft'])  { localPlayer.position.x -= speed; targetAngle = Math.PI / 2; moving = true; }
+if (keysPressed['KeyD'] || keysPressed['ArrowRight']) { localPlayer.position.x += speed; targetAngle = -Math.PI / 2; moving = true; }
+if (moving) {
+localPlayer.rotation.y = targetAngle;
+animateLimbs(localPlayer, Date.now() * 0.008);
+} else {
+resetLimbs(localPlayer);
+}
+document.getElementById('coords').innerText = X: ${localPlayer.position.x.toFixed(1)} | Z: ${localPlayer.position.z.toFixed(1)};
+controls.update();
+renderer.render(scene, camera);
+}
+window.addEventListener('resize', () => {
+camera.aspect = container.clientWidth / container.clientHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(container.clientWidth, container.clientHeight);
+});
+loadMenu();
+setInterval(loadMenu, 10000);
+animate();
