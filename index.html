@@ -245,3 +245,11 @@ function createAvatarBody(mainColor) {
   const headGeo = new THREE.SphereGeometry(0.4, 32, 32);
   const head = new THREE.Mesh(headGeo, material);
   head.position.y = 2.2;
+  // --- PASTE THE NEW PART DIRECTLY HERE ---
+  head.castShadow = true;
+  group.add(head);
+
+  // Directional Visor
+  const visorGeo = new THREE.BoxGeometry(0.6, 0.15, 0.2);
+  const visorMat = new THREE.MeshStandardMaterial({ color: 0x111111, emissive: mainColor });
+  ...
