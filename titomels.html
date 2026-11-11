@@ -7,12 +7,7 @@
 <style>
   /* Warm Italian Trattoria Palette */
   :root{
-    --bg:#1a0f0a; /* Dark warm wood */
-    --card:#2a1810; /* Rich brown card */
-    --gold:#d4af37; /* Classic gold */
-    --red:#8a1c1c; /* Deep burgundy/red */
-    --cream:#fff8f0; /* Warm cream */
-    --dim:#c9a27a; /* Soft accent */
+    --bg:#1a0f0a; --card:#2a1810; --gold:#d4af37; --red:#8a1c1c; --cream:#fff8f0; --dim:#c9a27a;
   }
   *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
   body{background:var(--bg);color:var(--cream);padding-bottom:60px}
@@ -22,7 +17,6 @@
   section{max-width:960px;margin:22px auto 0;padding:0 16px}
   h3{color:var(--gold);letter-spacing:2px;margin-bottom:14px;font-size:1.1rem; font-family: Georgia, serif;}
   
-  /* Host Stage */
   .stage{text-align:center}
   .face-ring{width:190px;height:190px;margin:0 auto;border-radius:50%;overflow:hidden;
     border:4px solid var(--gold);box-shadow:0 0 34px rgba(212,175,55,.4)}
@@ -34,7 +28,6 @@
     padding:18px 20px;min-height:90px;margin:12px auto;max-width:640px;font-size:1.1rem;line-height:1.6;
     box-shadow:0 0 18px rgba(212,175,55,.1); font-style: italic;}
   
-  /* Dish Window */
   .dish-window{max-width:560px;margin:16px auto 0;border-radius:18px;overflow:hidden;
     border:3px solid var(--red);box-shadow:0 0 28px rgba(138,28,28,.4);display:none}
   .dish-window img{width:100%;display:block}
@@ -52,7 +45,6 @@
   .host-btn:hover{transform: scale(1.05);}
   .stop-btn{background:none;border:1px solid var(--red);color:var(--red);padding:12px 18px;border-radius:30px;cursor:pointer}
   
-  /* Specials & Menu */
   .specials ul{list-style:none;display:grid;gap:12px}
   .specials li{background:var(--card);border-left:4px solid var(--red);padding:14px 18px;border-radius:8px;
     box-shadow:0 0 12px rgba(138,28,28,.2); font-size: 1.05rem;}
@@ -63,6 +55,10 @@
   .mrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(201,162,122,.2)}
   .mrow:last-child{border-bottom:none}
   .mrow .p{color:var(--gold);font-weight:700;white-space:nowrap;margin-left:10px}
+  
+  /* NEW: LIVE STATUS BADGE STYLES */
+  .mrow.sold-out { opacity: 0.5; text-decoration: line-through; }
+  .mrow.sold-out .p { text-decoration: line-through; }
   
   .order-row{text-align:center;display:grid;gap:14px;justify-items:center; margin-top: 30px;}
   .call-btn{color:var(--gold);text-decoration:none;border:1px solid var(--gold);padding:14px 24px;border-radius:30px;letter-spacing:1px; font-weight: bold;}
@@ -79,14 +75,10 @@
 </header>
 
 <section class="stage">
-  <!-- REPLACE 'angela.png' WITH A WARM PHOTO OF THE OWNER OR A FRIENDLY HOST -->
   <div class="face-ring" id="ring"><img id="face" src="angela.png" alt="Your host"></div>
   <div id="nameTag">SOFIA · YOUR HOST</div>
   <div class="caption" id="caption">Benvenuti! Tap START THE TOUR and let us welcome you to our family table.</div>
-  
-  <!-- REPLACE 'welcome.png' WITH A BEAUTIFUL SHOT OF THE RESTAURANT OR PASTA -->
   <div class="dish-window" id="dishWin"><img id="dish" src="welcome.png" alt="Our food"></div>
-  
   <div class="dots" id="dots"></div>
   <div class="controls">
     <button id="btnTour" class="host-btn">▶ START THE TOUR</button>
@@ -121,21 +113,36 @@
 <script>
 const $=id=>document.getElementById(id);
 
-// --- SUPABASE CONNECTION (Keep your existing Cindy-Empire setup) ---
-const SUPA_URL = "https://hnwrhbehhjijoxavwuyq.supabase.co";
+// --- SUPABASE CONNECTION ---
+// VERIFY: This MUST match the database where your 'menu_status' table lives!
+const SUPA_URL = "https://hnwrhbehhjijoxavwuyq.supabase.co"; 
 const SUPA_KEY = "sb_publishable_wgehChMt2KQVxpT9DUN16w_qHL0WNje";
 
+// UPGRADED: Fetches BOTH menu items AND live kitchen status
 async function loadMenu() {
   try {
-    const res = await fetch(`${SUPA_URL}/rest/v1/menu_items?order=category.asc,name.asc`, {
-      headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY }
-    });
-    const data = await res.json();
+    const [menuRes, statusRes] = await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/menu_items?order=category.asc,name.asc`, {
+        headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY }
+      }),
+      fetch(`${SUPA_URL}/rest/v1/menu_status?select=item_name,status`, {
+        headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY }
+      })
+    ]);
 
-    // FALLBACK DEMO MENU if Supabase is empty or errors out
-    if (!Array.isArray(data) || data.length === 0) {
-      console.log("Using demo menu fallback");
-      const demoMenu = {
+    const menuData = await menuRes.json();
+    const statusData = await statusRes.json();
+
+    // Create a quick lookup map for kitchen statuses
+    const statusMap = {};
+    if (Array.isArray(statusData)) {
+      statusData.forEach(s => { statusMap[s.item_name.toLowerCase()] = s.status; });
+    }
+
+    // Fallback demo data if database is empty
+    let itemsToRender = {};
+    if (!Array.isArray(menuData) || menuData.length === 0) {
+      itemsToRender = {
         "Appetizers": [
           { name: "Fresh Garlic Knots", price: "5.99" },
           { name: "Toasted Ravioli", price: "8.99" },
@@ -144,38 +151,33 @@ async function loadMenu() {
         "Pasta & Entrees": [
           { name: "Homemade Vodka Cream Sauce", price: "16.99" },
           { name: "Chicken Parmigiana", price: "18.99" },
-          { name: "Seafood Ravioli", price: "19.99" },
-          { name: "Steak & Cheese Sub", price: "12.99" }
-        ],
-        "Pizza": [
-          { name: "Sicilian Pizza (Large)", price: "22.99" },
-          { name: "Angela's Special Pizza", price: "24.99" }
+          { name: "Seafood Ravioli", price: "19.99" }
         ]
       };
-      let html = "";
-      for (const [cat, items] of Object.entries(demoMenu)) {
-        html += `<div class="mcard"><h4>${cat}</h4>`;
-        items.forEach(i => {
-          html += `<div class="mrow"><span>${i.name}</span><span class="p">$${i.price}</span></div>`;
-        });
-        html += `</div>`;
-      }
-      $("menuGrid").innerHTML = html;
-      return;
+    } else {
+      menuData.forEach(item => {
+        if (!itemsToRender[item.category]) itemsToRender[item.category] = [];
+        itemsToRender[item.category].push({ name: item.name, price: parseFloat(item.price).toFixed(2) });
+      });
     }
 
-    // If Supabase has data, use it
-    const grouped = {};
-    data.forEach(item => {
-      if (!grouped[item.category]) grouped[item.category] = [];
-      grouped[item.category].push({ name: item.name, price: parseFloat(item.price).toFixed(2) });
-    });
-
+    // Render menu with LIVE status badges
     let html = "";
-    for (const [cat, items] of Object.entries(grouped)) {
+    for (const [cat, items] of Object.entries(itemsToRender)) {
       html += `<div class="mcard"><h4>${cat}</h4>`;
       items.forEach(i => {
-        html += `<div class="mrow"><span>${i.name}</span><span class="p">$${i.price}</span></div>`;
+        const status = statusMap[i.name.toLowerCase()] || 'green';
+        let badge = "";
+        let rowClass = "mrow";
+        
+        if (status === 'red') {
+          badge = `<span style="color:#dc3545; font-weight:bold; font-size:0.85rem; margin-left:8px;">🔴 SOLD OUT</span>`;
+          rowClass += " sold-out";
+        } else if (status === 'yellow') {
+          badge = `<span style="color:#ffc107; font-weight:bold; font-size:0.85rem; margin-left:8px;">🟡 LOW STOCK</span>`;
+        }
+
+        html += `<div class="${rowClass}"><span>${i.name} ${badge}</span><span class="p">$${i.price}</span></div>`;
       });
       html += `</div>`;
     }
@@ -188,20 +190,11 @@ async function loadMenu() {
 
 // --- THE ANGELA'S TOUR SCRIPT ---
 const SCENES=[
- {who:"sofia", img:"welcome.png",
-  text:"Benvenuti! Welcome to Angela's Italian Restaurant. For over twenty years, we have been a beloved community gem right here in Spotsylvania. My name is Sofia, and I am so happy you are here. Let me show you around our family kitchen!"},
-  
- {who:"chef", img:"specials.png",
-  text:"Ciao, friends! I am the chef. At Angela's, we do things the old-fashioned way. We make our dough and our sauces completely fresh, every single day. We believe in big portions, honest prices, and treating you like family."},
-  
- {who:"sofia", img:"pasta.png",
-  text:"You simply must try our Homemade Vodka Cream Sauce. It is rich, smooth, and it is our family's secret recipe. Pair it with our Fresh Garlic Knots, baked golden and tossed in real butter and roasted garlic. Perfection!"},
-  
- {who:"chef", img:"calzone.png",
-  text:"And for the hungry ones! Our Classic Calzone. We fold it by hand, packing it with creamy ricotta, melted mozzarella, and your choice of meats. It is generous, it is hot, and it is made exactly the way Nonna intended."},
-  
- {who:"sofia", img:"welcome.png",
-  text:"Are you hungry yet? You can scan the QR code on your table to order directly from your phone, or call us at 540-582-5250. We can't wait to serve you. From our family to yours... Buon Appetito!"}
+ {who:"sofia", img:"welcome.png", text:"Benvenuti! Welcome to Angela's Italian Restaurant. For over twenty years, we have been a beloved community gem right here in Spotsylvania. My name is Sofia, and I am so happy you are here. Let me show you around our family kitchen!"},
+ {who:"chef", img:"specials.png", text:"Ciao, friends! I am the chef. At Angela's, we do things the old-fashioned way. We make our dough and our sauces completely fresh, every single day. We believe in big portions, honest prices, and treating you like family."},
+ {who:"sofia", img:"pasta.png", text:"You simply must try our Homemade Vodka Cream Sauce. It is rich, smooth, and it is our family's secret recipe. Pair it with our Fresh Garlic Knots, baked golden and tossed in real butter and roasted garlic. Perfection!"},
+ {who:"chef", img:"calzone.png", text:"And for the hungry ones! Our Classic Calzone. We fold it by hand, packing it with creamy ricotta, melted mozzarella, and your choice of meats. It is generous, it is hot, and it is made exactly the way Nonna intended."},
+ {who:"sofia", img:"welcome.png", text:"Are you hungry yet? You can scan the QR code on your table to order directly from your phone, or call us at 540-582-5250. We can't wait to serve you. From our family to yours... Buon Appetito!"}
 ];
 
 let idx=-1, playing=false, token=0;
@@ -217,8 +210,8 @@ function pickVoice(male){
 function lockVoices(){
   VOICES = speechSynthesis.getVoices();
   if(!VOICES.length) return;
-  HOST_VOICE = pickVoice(false); // Female host
-  CHEF_VOICE = pickVoice(true);  // Male chef
+  HOST_VOICE = pickVoice(false); 
+  CHEF_VOICE = pickVoice(true);  
 }
 lockVoices();
 speechSynthesis.onvoiceschanged = lockVoices;
@@ -226,13 +219,9 @@ speechSynthesis.onvoiceschanged = lockVoices;
 function speakHuman(text, male, onDone){
   const my = ++token;
   speechSynthesis.cancel();
-  
-  // Split by sentences for natural pausing
   let chunks = text.match(/[^.!?]+[.!?]*/g) || [text];
   let i = 0;
-  
   $("ring").classList.add("talking");
-  
   (function next(){
     if(my!==token || !playing){ $("ring").classList.remove("talking"); return; }
     if(i >= chunks.length){
@@ -243,26 +232,20 @@ function speakHuman(text, male, onDone){
     const u = new SpeechSynthesisUtterance(chunks[i++].trim());
     u.voice = male ? CHEF_VOICE : HOST_VOICE;
     u.lang = "en-US";
-    u.rate  = 0.9; // Slightly slower, warmer, more deliberate
+    u.rate  = 0.9; 
     u.pitch = male ? 0.9 : 1.1;
-    
-    u.onend = ()=>{ 
-      if(my===token && playing) setTimeout(next, 400); // Natural pause between sentences
-    };
+    u.onend = ()=>{ if(my===token && playing) setTimeout(next, 400); };
     speechSynthesis.speak(u);
   })();
 }
 
 function renderDots(){$("dots").innerHTML=SCENES.map((s,i)=>'<span class="'+(i===idx?'on':'')+'"></span>').join("");}
-
 function setFace(s){
-  // REPLACE THESE IMAGE NAMES WITH YOUR ACTUAL FILES
   $("face").src = s.who==="sofia" ? "angela.png" : "chef.png";
   $("nameTag").textContent = s.who==="sofia" ? "SOFIA · YOUR HOST" : "THE CHEF · ANGELA'S KITCHEN";
   $("dish").src = s.img;
   $("dishWin").classList.add("show");
 }
-
 function show(i){
   idx=i; playing=true;
   const s=SCENES[i];
@@ -297,7 +280,6 @@ $("btnStop").onclick=()=>{
   $("btnTour").textContent="▶ START THE TOUR";
 };
 
-// Populate Specials
 $("specialsList").innerHTML=[
   "🥖 <b>Fresh Garlic Knots</b> — Baked daily, tossed in real butter and roasted garlic.",
   "🍝 <b>Homemade Vodka Cream Sauce</b> — Our rich, smooth, family secret recipe.",
@@ -306,6 +288,9 @@ $("specialsList").innerHTML=[
 
 renderDots();
 loadMenu();
+
+// Auto-refresh the menu every 15 seconds to catch kitchen board updates!
+setInterval(loadMenu, 15000);
 </script>
 </body>
 </html>
