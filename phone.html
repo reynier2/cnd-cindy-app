@@ -2,284 +2,275 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>CND - Spatial Controller</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Angela's Italian — Order for Pickup</title>
 <style>
-  body { margin: 0; padding: 0; background: #0a0a0a; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
-  
-  #top-view { 
-    height: 55vh; width: 100%; position: relative; background: #111;
-    border-bottom: 2px solid #ffb703;
-  }
-  #canvas-container { width: 100%; height: 100%; display: block; }
-  
-  #ui-overlay {
-    position: absolute; top: 15px; left: 0; width: 100%; text-align: center;
-    pointer-events: none; z-index: 10;
-  }
-  #ui-overlay h1 { color: #ffb703; font-size: 1.2rem; letter-spacing: 3px; margin: 0; text-shadow: 0 0 10px #000; }
-  #ui-overlay p { color: #888; font-size: 0.8rem; margin: 5px 0 0 0; pointer-events: auto; }
-  #live-dot {
-    display: inline-block; width: 8px; height: 8px; background: #00ff00;
-    border-radius: 50%; box-shadow: 0 0 8px #00ff00; margin-right: 5px;
-  }
-  #coords {
-    position: absolute; bottom: 10px; right: 10px; color: #00ff00; 
-    font-family: monospace; font-size: 0.8rem; z-index: 10; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px;
-  }
-
-  /* Status Board Toggle Button & Slide-out Panel */
-  #toggle-board-btn {
-    position: absolute; top: 15px; right: 15px; z-index: 20;
-    background: #ffb703; color: #000; border: none; padding: 8px 12px;
-    font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 0 10px rgba(255, 183, 3, 0.4);
-  }
-  #status-panel {
-    position: absolute; top: 0; right: -350px; width: 330px; height: 100%;
-    background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(8px);
-    z-index: 15; transition: right 0.3s ease-in-out; box-shadow: -5px 0 15px rgba(0,0,0,0.5);
-    display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; overflow-y: auto;
-  }
-  #status-panel.open { right: 0; }
-  #status-panel h2 { color: #ffb703; font-size: 1.1rem; margin-top: 40px; text-align: center; letter-spacing: 2px; }
-  #board-status-msg { color: #00ff00; font-size: 0.9rem; margin-bottom: 10px; text-align: center; }
-
-  .item-row { background: #2c2c2c; padding: 10px; margin: 8px 0; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-  .item-name { font-size: 1rem; font-weight: bold; color: #ffd700; text-align: left; }
-  .btn-group { display: flex; gap: 6px; justify-content: space-between; }
-  .board-btn { padding: 6px 10px; font-size: 0.8rem; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; color: white; opacity: 0.4; flex: 1; }
-  .board-btn.active { opacity: 1; box-shadow: 0 0 10px currentColor; transform: scale(1.03); border: 1px solid white; }
-  .btn-green { background: #28a745; color: white; }
-  .btn-yellow { background: #ffc107; color: black; }
-  .btn-red { background: #dc3545; color: white; }
-  
-  #bottom-controls { 
-    height: 45vh; width: 100%; background: #111; 
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 15px; box-sizing: border-box;
-  }
-  h2 { color: #ffb703; margin: 0 0 20px 0; font-size: 1.2rem; letter-spacing: 2px; text-align: center; }
-  
-  .dpad { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .dpad-row { display: flex; gap: 10px; }
-  
-  .dpad-btn {
-    width: 70px; height: 70px; border: 2px solid #ffb703; border-radius: 15px;
-    background: #1a1a1a; color: #ffb703; font-size: 2rem; font-weight: bold;
-    display: flex; align-items: center; justify-content: center;
-    user-select: none; -webkit-user-select: none; touch-action: manipulation;
-    box-shadow: 0 0 10px rgba(255, 183, 3, 0.2); transition: all 0.1s;
-  }
-  .dpad-btn:active, .dpad-btn.active {
-    background: #ffb703; color: #000; box-shadow: 0 0 20px #ffb703; transform: scale(0.95);
-  }
+:root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#8a1c1c;--cream:#fff3e0;--dim:#c9a27a}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{background:var(--bg);color:var(--cream);padding:16px;max-width:640px;margin:0 auto;padding-bottom:80px}
+h1{color:var(--gold);text-align:center;letter-spacing:4px;margin:14px 0 4px; font-family: Georgia, serif;}
+.sub{color:var(--dim);text-align:center;font-size:.85rem;margin-bottom:16px; letter-spacing: 1px;}
+h3{color:var(--gold);letter-spacing:2px;margin:18px 0 8px;font-size:.95rem; font-family: Georgia, serif;}
+.row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid rgba(255,183,3,.2);border-radius:10px;padding:10px 12px;margin-bottom:8px;gap:8px}
+.item-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+.item-info { display: flex; flex-direction: column; }
+.row .n{font-size:.95rem}
+.row .p{color:var(--gold);font-weight:700;font-size:.85rem;margin-top:4px}
+.thumb {
+width: 55px; height: 55px;
+object-fit: cover;
+border-radius: 8px;
+border: 2px solid var(--gold);
+cursor: pointer;
+transition: transform 0.2s, box-shadow 0.2s;
+flex-shrink: 0;
+}
+.thumb:active { transform: scale(0.95); box-shadow: 0 0 10px rgba(255,183,3,0.5); }
+.qty{display:flex;gap:8px;align-items:center}
+.qty button{width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:800;cursor:pointer;font-size:1.2rem}
+.qty span{min-width:18px;text-align:center;font-weight:800;font-size:1.1rem}
+input,select,textarea{width:100%;background:var(--card);border:1px solid rgba(255,183,3,.3);color:var(--cream);border-radius:10px;padding:12px;margin-bottom:10px;font-size:1rem}
+.send{width:100%;background:linear-gradient(135deg,var(--gold),#b8860b);border:none;color:#140b06;font-weight:800;letter-spacing:1px;padding:16px;border-radius:30px;font-size:1.05rem;cursor:pointer;box-shadow:0 0 22px rgba(255,183,3,.5);margin-top:10px}
+.send:disabled{opacity:0.6;cursor:not-allowed}
+#msg{text-align:center;margin:14px 0;font-weight:700;min-height:24px}
+#img-modal {
+display: none;
+position: fixed;
+z-index: 1000;
+left: 0; top: 0;
+width: 100%; height: 100%;
+background-color: rgba(0,0,0,0.9);
+justify-content: center;
+align-items: center;
+backdrop-filter: blur(5px);
+}
+#img-modal img {
+max-width: 90%;
+max-height: 85%;
+border-radius: 12px;
+border: 3px solid var(--gold);
+box-shadow: 0 0 40px rgba(255,183,3,0.4);
+object-fit: contain;
+}
+.close-modal {
+position: absolute;
+top: 20px; right: 30px;
+color: white;
+font-size: 40px;
+font-weight: bold;
+cursor: pointer;
+background: rgba(0,0,0,0.5);
+width: 50px; height: 50px;
+border-radius: 50%;
+display: flex; justify-content: center; align-items: center;
+}
+#confirmation-screen {
+display: none;
+text-align: center;
+padding: 40px 20px;
+background: var(--card);
+border: 3px solid #28a745;
+border-radius: 20px;
+margin-top: 20px;
+box-shadow: 0 0 30px rgba(40, 167, 69, 0.3);
+animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+#confirmation-screen h2 { color: #28a745; font-size: 2rem; margin-bottom: 10px; }
+#confirmation-screen .order-number { color: var(--gold); font-size: 1.5rem; font-weight: bold; margin: 15px 0; }
+#confirmation-screen p { color: var(--cream); font-size: 1.1rem; line-height: 1.6; margin-bottom: 10px; }
+#confirmation-screen .highlight { color: var(--gold); font-weight: bold; }
+#confirmation-screen .btn-home {
+display: inline-block;
+margin-top: 25px;
+padding: 14px 30px;
+background: var(--gold);
+color: #140b06;
+text-decoration: none;
+font-weight: 800;
+border-radius: 30px;
+font-size: 1rem;
+}
 </style>
 </head>
 <body>
-
-<div id="top-view">
-  <button id="toggle-board-btn" onclick="toggleBoard()">📊 Status Board</button>
-  
-  <div id="status-panel">
-    <h2>CND LIVE STATUS BOARD</h2>
-    <div id="board-status-msg">Connecting to Supabase...</div>
-    <div id="menu-list"></div>
-  </div>
-
-  <div id="ui-overlay">
-    <h1>CND SPATIAL ENGINE</h1>
-    <p><span id="live-dot"></span> READY FOR AVATAR BINDING</p>
-  </div>
-  <div id="coords">X: 0.0 | Z: 0.0</div>
-  <div id="canvas-container"></div>
+<div id="order-form">
+<h1>ANGELA'S ITALIAN</h1>
+<div class="sub">FAMILY-OWNED SINCE 2002 · ORDER FOR PICKUP</div>
+<div id="menu"></div>
+<h3>YOUR INFO</h3>
+<input id="cname" placeholder="Your name">
+<input id="cphone" placeholder="Phone number" type="tel">
+<select id="cpickup">
+<option value="ASAP">Pickup: ASAP</option>
+<option value="In 30 min">In 30 minutes</option>
+<option value="In 1 hour">In 1 hour</option>
+<option value="In 2 hours">In 2 hours</option>
+</select>
+<textarea id="cnote" rows="2" placeholder="Notes (no onions, extra sauce...)"></textarea>
+<button class="send" id="send">🛒 SEND ORDER TO THE KITCHEN</button>
+<div id="msg"></div>
 </div>
 
-<div id="bottom-controls">
-  <h2>NAVIGATE THE SPACE</h2>
-  <div class="dpad">
-    <button id="btn-up" class="dpad-btn">▲</button>
-    <div class="dpad-row">
-      <button id="btn-left" class="dpad-btn">◄</button>
-      <button id="btn-right" class="dpad-btn">►</button>
-    </div>
-    <button id="btn-down" class="dpad-btn">▼</button>
-  </div>
+<div id="confirmation-screen">
+<div style="font-size: 4rem; margin-bottom: 10px;">✅</div>
+<h2>ORDER ACCEPTED!</h2>
+<div class="order-number" id="conf-order-id">Order #---</div>
+<p>The kitchen has received your order and is preparing it now.</p>
+<p>Pickup Time: <span class="highlight" id="conf-pickup">ASAP</span></p>
+<p style="color: var(--dim); font-size: 0.9rem; margin-top: 20px;">Please pay at the counter when you arrive.<br>Thank you for choosing Angela's Italian!</p>
+<a href="/" class="btn-home">← BACK TO HOME</a>
+</div>
+
+<div id="img-modal" onclick="closeImage()">
+<div class="close-modal">&times;</div>
+<img id="modal-img" src="" alt="Food Preview">
 </div>
 
 <script>
-// --- SUPABASE LIVE STATUS INTEGRATION ---
 const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
-const KEY  = "sb_publishable_CJZipjuCPS_UIT8h-xtVrw_Jy37Cq9K";
+const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE";
+const $=id=>document.getElementById(id);
 
-function toggleBoard() {
-  const panel = document.getElementById('status-panel');
-  panel.classList.toggle('open');
+const MENU=[
+{cat:"APPETIZERS",items:[
+["Fresh Garlic Knots", 5.99, "https://images.unsplash.com/photo-1573140401552-388e7e2f00b8?w=200&h=200&fit=crop"],
+["Toasted Ravioli", 8.99, "https://images.unsplash.com/photo-1598514983318-2f64f8f4796c?w=200&h=200&fit=crop"],
+["Classic Calzone", 10.99, "https://images.unsplash.com/photo-1536964549204-cce9eab227bd?w=200&h=200&fit=crop"]
+]},
+{cat:"PASTA & ENTREES",items:[
+["Homemade Vodka Cream Sauce", 16.99, "https://images.unsplash.com/photo-1626844131082-256783844137?w=200&h=200&fit=crop"],
+["Chicken Parmigiana", 18.99, "https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?w=200&h=200&fit=crop"],
+["Seafood Ravioli", 19.99, "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=200&h=200&fit=crop"],
+["Steak & Cheese Sub", 12.99, "https://images.unsplash.com/photo-1550507992-eb63qe84b23b?w=200&h=200&fit=crop"]
+]},
+{cat:"PIZZA",items:[
+["Sicilian Pizza (Large)", 22.99, "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200&h=200&fit=crop"],
+["Angela's Special Pizza", 24.99, "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&h=200&fit=crop"]
+]},
+{cat:"SIDES",items:[
+["Side Salad", 4.99, "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&h=200&fit=crop"],
+["Garlic Bread", 3.99, "https://images.unsplash.com/photo-1573140401552-388e7e2f00b8?w=200&h=200&fit=crop"]
+]},
+{cat:"DRINKS & DESSERTS",items:[
+["Cannoli", 5.99, "https://images.unsplash.com/photo-1551024506-0bccd828d307?w=200&h=200&fit=crop"],
+["Tiramisu", 6.99, "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=200&h=200&fit=crop"],
+["Soft Drinks", 2.99, "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200&h=200&fit=crop"]
+]}
+];
+
+const FLAT=[];
+MENU.forEach(c=>c.items.forEach(i=>FLAT.push(i)));
+const qty={};
+
+$("menu").innerHTML = MENU.map(c=>{
+let html='<h3>'+c.cat+'</h3>';
+c.items.forEach(i=>{
+const key=FLAT.indexOf(i);
+const imgUrl = i[2] || '';
+html+=`
+<div class="row">
+<div class="item-left">
+${imgUrl ? `<img src="${imgUrl}" class="thumb" onclick="openImage('${imgUrl}')" alt="${i[0]}">` : ''}
+<div class="item-info">
+<span class="n">${i[0]}</span>
+<span class="p">$${i[1].toFixed(2)}</span>
+</div>
+</div>
+<span class="qty">
+<button onclick="add(${key},-1)">−</button>
+<span id="q_${key}">0</span>
+<button onclick="add(${key},1)">+</button>
+</span>
+</div>`;
+});
+return html;
+}).join("");
+
+function add(key,d){
+qty[key]=Math.max(0,(qty[key]||0)+d);
+$("q_"+key).textContent=qty[key];
 }
 
-async function loadMenu() {
-  try {
-    const res = await fetch(`${SUPA}/rest/v1/menu_status?select=item_name,status&order=item_name.asc`, {
-      headers: { 'apikey': KEY, 'Authorization': `Bearer ${KEY}` }
-    });
-    const data = await res.json();
-    
-    const list = document.getElementById('menu-list');
-    list.innerHTML = '';
-    
-    if (!data || data.length === 0) {
-      document.getElementById('board-status-msg').innerText = "⚠️ No items found.";
-      document.getElementById('board-status-msg').style.color = "orange";
-      return;
-    }
-    
-    data.forEach(item => {
-      const currentStatus = item.status || 'green';
-      const itemName = item.item_name;
-      const row = document.createElement('div');
-      row.className = 'item-row';
-      
-      row.innerHTML = `
-        <div class="item-name">${itemName}</div>
-        <div class="btn-group">
-          <button class="board-btn btn-green ${currentStatus==='green'?'active':''}" onclick="updateStatus('${itemName.replace(/'/g, "\\'")}', 'green')">Avail</button>
-          <button class="board-btn btn-yellow ${currentStatus==='yellow'?'active':''}" onclick="updateStatus('${itemName.replace(/'/g, "\\'")}', 'yellow')">Low</button>
-          <button class="board-btn btn-red ${currentStatus==='red'?'active':''}" onclick="updateStatus('${itemName.replace(/'/g, "\\'")}', 'red')">Sold</button>
-        </div>
-      `;
-      list.appendChild(row);
-    });
-    document.getElementById('board-status-msg').innerText = "✅ Board Synchronized";
-  } catch (err) {
-    document.getElementById('board-status-msg').innerText = "⚠️ Connection Error";
-    console.error(err);
-  }
+window.openImage = function(url) {
+$("modal-img").src = url;
+$("img-modal").style.display = "flex";
+}
+window.closeImage = function() {
+$("img-modal").style.display = "none";
 }
 
-async function updateStatus(itemName, status) {
-  document.getElementById('board-status-msg').innerText = "⏳ Updating...";
-  const encodedName = encodeURIComponent(itemName);
-  
-  await fetch(`${SUPA}/rest/v1/menu_status?item_name=eq.${encodedName}`, {
-    method: 'PATCH',
-    headers: { 
-      'apikey': KEY, 
-      'Authorization': `Bearer ${KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify({ status: status, updated_at: new Date().toISOString() })
-  });
-  
-  loadMenu();
+$("send").onclick=async()=>{
+const items=FLAT.map((i,idx)=>{
+const q = qty[idx]||0;
+return q > 0 ? {name:i[0], qty:q, price:i[1]} : null;
+}).filter(x=>x!==null);
+
+if(!items.length){
+$("msg").textContent="⚠️ Please add at least one item 🙂";
+$("msg").style.color = "var(--red)";
+return;
 }
 
-loadMenu();
-setInterval(loadMenu, 10000);
+const customer=$("cname").value.trim();
+const phone=$("cphone").value.trim();
 
-// --- 1. SCENE SETUP ---
-const container = document.getElementById('canvas-container');
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x111111); // Clean, dark background
-
-// --- 2. CAMERA & RENDERER ---
-const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-camera.position.set(0, 15, 20); // Elevated view to see the floor clearly
-
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(container.clientWidth, container.clientHeight);
-renderer.shadowMap.enabled = true;
-container.appendChild(renderer.domElement);
-
-// --- 3. CONTROLS & LIGHTING ---
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.1;
-controls.maxPolarAngle = Math.PI / 2 - 0.1;
-
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambientLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-dirLight.position.set(10, 20, 10);
-dirLight.castShadow = true;
-scene.add(dirLight);
-
-// --- 4. THE CLEAN FLOOR (Grid for spatial reference) ---
-const gridHelper = new THREE.GridHelper(100, 100, 0xffb703, 0x333333);
-scene.add(gridHelper);
-
-const floorGeo = new THREE.PlaneGeometry(100, 100);
-const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
-const floor = new THREE.Mesh(floorGeo, floorMat);
-floor.rotation.x = -Math.PI / 2;
-floor.receiveShadow = true;
-scene.add(floor);
-
-// --- 5. MOVEMENT LOGIC ---
-const moveState = { up: false, down: false, left: false, right: false };
-const speed = 0.3; 
-const bounds = { xMin: -45, xMax: 45, zMin: -45, zMax: 45 }; 
-
-function setupDpad() {
-  const buttons = { 
-    up: document.getElementById('btn-up'), 
-    down: document.getElementById('btn-down'), 
-    left: document.getElementById('btn-left'), 
-    right: document.getElementById('btn-right') 
-  };
-  
-  Object.keys(buttons).forEach(dir => {
-    const btn = buttons[dir];
-    const startMove = (e) => { e.preventDefault(); moveState[dir] = true; btn.classList.add('active'); };
-    const stopMove = (e) => { e.preventDefault(); moveState[dir] = false; btn.classList.remove('active'); };
-    
-    btn.addEventListener('mousedown', startMove);
-    btn.addEventListener('touchstart', startMove, {passive: false});
-    btn.addEventListener('mouseup', stopMove);
-    btn.addEventListener('mouseleave', stopMove);
-    btn.addEventListener('touchend', stopMove);
-  });
+if(!customer||!phone){
+$("msg").textContent="⚠️ Please add your name and phone number.";
+$("msg").style.color = "var(--red)";
+return;
 }
 
-function updateMovement() {
-  let dx = 0, dz = 0;
-  if (moveState.up) dz -= speed;
-  if (moveState.down) dz += speed;
-  if (moveState.left) dx -= speed;
-  if (moveState.right) dx += speed;
+const total = items.reduce((sum, item) => sum + (item.price * item.qty), 0);
 
-  // Move camera and controls target together
-  camera.position.x += dx; camera.position.z += dz;
-  controls.target.x += dx; controls.target.z += dz;
+$("send").disabled = true;
+$("send").textContent = "⏳ Sending to kitchen...";
+$("msg").textContent = "";
 
-  // Enforce boundaries
-  camera.position.x = Math.max(bounds.xMin, Math.min(bounds.xMax, camera.position.x));
-  camera.position.z = Math.max(bounds.zMin, Math.min(bounds.zMax, camera.position.z));
-  controls.target.x = Math.max(bounds.xMin, Math.min(bounds.xMax, controls.target.x));
-  controls.target.z = Math.max(bounds.zMin, Math.min(bounds.zMax, controls.target.z));
+try{
+const payload = {
+customer_name: customer,
+phone: phone,
+pickup_time: $("cpickup").value,
+notes: $("cnote").value.trim(),
+items: items,
+total: total,
+status: "new"
+};
 
-  document.getElementById('coords').innerText = `X: ${camera.position.x.toFixed(1)} | Z: ${camera.position.z.toFixed(1)}`;
-}
-
-// --- 6. ANIMATION LOOP ---
-function animate() {
-  requestAnimationFrame(animate);
-  updateMovement(); 
-  controls.update();
-  renderer.render(scene, camera);
-}
-
-// --- 7. INITIALIZATION ---
-window.addEventListener('resize', () => {
-  camera.aspect = container.clientWidth / container.clientHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(container.clientWidth, container.clientHeight);
+const r = await fetch(SUPA + "/rest/v1/orders", {
+method: "POST",
+headers: {
+apikey: KEY,
+Authorization: "Bearer " + KEY,
+"Content-Type": "application/json",
+"Prefer": "return=representation"
+},
+body: JSON.stringify(payload)
 });
 
-setupDpad();
-animate();
+if(r.ok){
+const result = await r.json();
+const orderId = result[0].id;
+$("order-form").style.display = "none";
+$("conf-order-id").textContent = "Order #" + orderId;
+$("conf-pickup").textContent = $("cpickup").value;
+$("confirmation-screen").style.display = "block";
+window.scrollTo(0, 0);
+} else {
+const t = await r.text();
+$("msg").textContent = "❌ Error: " + r.status + ". Please try again or call us.";
+$("msg").style.color = "var(--red)";
+$("send").disabled = false;
+$("send").textContent = "🛒 SEND ORDER TO THE KITCHEN";
+}
+} catch(e){
+$("msg").textContent = "❌ Network error. Please check your connection.";
+$("msg").style.color = "var(--red)";
+$("send").disabled = false;
+$("send").textContent = "🛒 SEND ORDER TO THE KITCHEN";
+}
+};
 </script>
 </body>
 </html>
