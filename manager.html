@@ -2,175 +2,263 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Manager Portal — Angela's Italian</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angela's Manager Board</title>
+<script src="https://jsdelivr.net"></script>
 <style>
-:root{--bg:#140b06;--card:#1f130a;--gold:#ffb703;--red:#8a1c1c;--cream:#fff3e0;--dim:#c9a27a}
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
-body{background:var(--bg);color:var(--cream);padding:20px;max-width:800px;margin:0 auto}
-h1,h2{color:var(--gold);text-align:center;letter-spacing:2px;margin-bottom:20px; font-family: Georgia, serif;}
-#login-screen, #manager-dashboard { display: none; }
-.active { display: block !important; }
-input, select {width:100%;background:var(--card);border:1px solid rgba(255,183,3,.3);color:var(--cream);border-radius:8px;padding:12px;margin-bottom:12px;font-size:1rem}
-.btn{width:100%;background:var(--gold);border:none;color:#140b06;font-weight:800;padding:14px;border-radius:8px;cursor:pointer;font-size:1rem;margin-top:10px; transition: opacity 0.2s;}
-.btn:hover { opacity: 0.9; }
-.btn-load{background:#333;color:var(--gold);border:1px solid var(--gold);margin-bottom:20px;}
-.btn-delete{background:var(--red);color:white;width:auto;padding:8px 16px;font-size:0.85rem;margin:0;border-radius:6px;border:none;cursor:pointer;}
-.item-row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid rgba(255,183,3,.2);border-radius:8px;padding:12px;margin-bottom:8px}
-.item-info{flex:1}
-.item-info .cat{color:var(--dim);font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;}
-.item-info .name{font-weight:700;font-size:1.05rem;margin:2px 0;}
-.item-info .price{color:var(--gold);font-weight:800;font-size:1.1rem;}
-#msg{text-align:center;margin:10px 0;font-weight:700;min-height:24px}
-.section-box{background:rgba(255,183,3,0.05);border:1px solid var(--gold);border-radius:12px;padding:20px;margin-bottom:30px;}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a0f0a; color: #ffd700; font-family: 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+/* HEADER */
+.header { background: #0d0805; padding: 15px 25px; display: flex; justify-content: space-between; border-bottom: 3px solid #ff8c00; flex-shrink: 0; }
+.header h1 { font-size: 22px; letter-spacing: 2px; color: #ff8c00; }
+.status-badge { background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+
+/* MAIN LAYOUT */
+.main-container { display: grid; grid-template-columns: 1fr 450px; flex: 1; overflow: hidden; }
+
+/* LEFT SIDE: ORDERS */
+.orders-panel { background: #1a0f0a; border-right: 3px solid #ff8c00; display: flex; flex-direction: column; overflow: hidden; }
+.panel-header { background: #0d0805; padding: 12px; border-bottom: 2px solid #ff8c00; text-align: center; flex-shrink: 0; }
+.panel-header h2 { color: #ff8c00; font-size: 18px; }
+.orders-scroll { flex: 1; overflow-y: auto; padding: 15px; }
+
+/* ORDER CARDS */
+.order-card { background: #0d0805; border: 2px solid #ff8c00; border-radius: 10px; padding: 15px; margin-bottom: 15px; position: relative; }
+.order-card.status-processing { border-color: #ffc107; }
+.order-card.status-done { border-color: #6c757d; opacity: 0.8; }
+
+.order-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px dashed #ff8c00; padding-bottom: 8px; }
+.order-id { color: #ffd700; font-weight: bold; font-size: 18px; }
+.order-timer { color: #ff8c00; font-weight: bold; font-size: 16px; }
+.order-customer { color: #aaa; font-size: 14px; margin-bottom: 10px; }
+.order-items { background: #1a0f0a; padding: 10px; border-radius: 6px; margin-bottom: 10px; max-height: 150px; overflow-y: auto; }
+.order-item { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; color: #ccc; }
+.order-total { text-align: right; font-size: 18px; font-weight: bold; color: #28a745; margin-bottom: 10px; }
+
+/* ACTION BUTTONS */
+.action-btns { display: flex; gap: 10px; }
+.btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; color: white; }
+.btn-process { background: #ffc107; color: black; }
+.btn-done { background: #28a745; }
+.btn-delete { background: #dc3545; flex: 0.5; }
+
+/* RIGHT SIDE: MENU CONTROLS */
+.controls-panel { background: #0d0805; overflow-y: auto; }
+.controls-scroll { padding: 15px; }
+.control-category { margin-bottom: 25px; }
+.control-category h3 { color: #ffd700; font-size: 14px; margin-bottom: 12px; padding-left: 10px; border-left: 4px solid #ff8c00; }
+.control-item { background: #1a0f0a; border-radius: 8px; padding: 12px; margin-bottom: 10px; border: 1px solid #333; }
+.control-name { color: #ffd700; font-size: 13px; margin-bottom: 10px; font-weight: 600; text-align: center; }
+.traffic-lights { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.light-btn { height: 45px; border-radius: 6px; border: none; font-weight: bold; font-size: 11px; cursor: pointer; opacity: 0.35; transition: all 0.3s; color: white; }
+.light-btn.active { opacity: 1; transform: scale(1.05); box-shadow: 0 0 12px rgba(255,255,255,0.6); border: 2px solid white; }
+.light-green { background: #28a745; }
+.light-yellow { background: #ffc107; color: black; }
+.light-red { background: #dc3545; }
+
+.waiting { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen" class="active">
-  <h1>🔒 ANGELA'S ITALIAN MANAGER</h1>
-  <p style="text-align:center;color:var(--dim);margin-bottom:20px;">Enter passcode to manage the menu.</p>
-  <input type="password" id="passcode" placeholder="Enter Passcode">
-  <button class="btn" onclick="checkPass()">UNLOCK</button>
-  <div id="msg"></div>
+<div class="header">
+  <h1>🍝 ANGELA'S ITALIAN MANAGER BOARD</h1>
+  <div class="status-badge">● LIVE</div>
 </div>
 
-<!-- DASHBOARD SCREEN -->
-<div id="manager-dashboard">
-  <h1>📝 MENU MANAGER</h1>
-  
-  <!-- ADD NEW ITEM SECTION -->
-  <div class="section-box">
-    <h2 style="margin-top:0;font-size:1.2rem;"> ADD NEW ITEM</h2>
-    <select id="new-cat">
-      <option value="APPETIZERS">APPETIZERS</option>
-      <option value="PASTA & ENTREES">PASTA & ENTREES</option>
-      <option value="PIZZA">PIZZA</option>
-      <option value="DRINKS & DESSERTS">DRINKS & DESSERTS</option>
-    </select>
-    <input id="new-name" placeholder="Item Name (e.g., Homemade Vodka Cream Sauce)">
-    <input id="new-price" type="number" step="0.01" placeholder="Price (e.g., 16.99)">
-    <button class="btn" onclick="addItem()">ADD TO MENU</button>
+<div class="main-container">
+  <!-- LEFT: ORDERS -->
+  <div class="orders-panel">
+    <div class="panel-header"><h2>ACTIVE ORDERS</h2></div>
+    <div class="orders-scroll" id="active-orders-list">
+      <div class="waiting">Waiting for orders...</div>
+    </div>
   </div>
 
-  <!-- LIVE MENU SECTION -->
-  <h2 style="font-size:1.2rem;">📋 CURRENT LIVE MENU</h2>
-  <p style="text-align:center;color:var(--dim);margin-bottom:10px;font-size:0.9rem;">Menu loads automatically. Click below to refresh.</p>
-  <button class="btn btn-load" onclick="loadMenu()">🔄 REFRESH MENU</button>
-  
-  <div id="menu-list"></div>
-  
-  <button class="btn" style="background:#333;color:var(--cream);margin-top:40px;" onclick="logout()">🔒 LOCK & LOGOUT</button>
+  <!-- RIGHT: MENU CONTROLS -->
+  <div class="controls-panel">
+    <div class="panel-header"><h2>🚦 MENU AVAILABILITY</h2></div>
+    <div class="controls-scroll" id="controls-content">
+      <div class="waiting">Loading menu...</div>
+    </div>
+  </div>
 </div>
 
 <script>
-// SUPABASE CREDENTIALS
-const SUPA = "https://mkvpuawmkudezotbhmxl.supabase.co";
-const KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE";
+// ==========================================
+// CONFIGURATION
+// ==========================================
+const SUPABASE_URL = 'https://supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
 
-function checkPass() {
-  if(document.getElementById("passcode").value === "CND-BOSS") {
-    document.getElementById("login-screen").classList.remove("active");
-    document.getElementById("manager-dashboard").classList.add("active");
-    loadMenu(); 
-  } else {
-    document.getElementById("msg").textContent = "❌ Incorrect passcode.";
-    document.getElementById("msg").style.color = "var(--red)";
-  }
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const MENU_CATEGORIES = {
+  'Appetizers': ['Fresh Garlic Knots', 'Toasted Ravioli', 'Classic Calzone'],
+  'Pasta & Entrees': ['Homemade Vodka Cream Sauce', 'Chicken Parmigiana', 'Seafood Ravioli', 'Steak & Cheese Sub'],
+  'Pizza': ['Sicilian Pizza (Large)', "Angela's Special Pizza"],
+  'Drinks & Desserts': ['Cannoli', 'Tiramisu', 'Soft Drinks']
+};
+
+let knownOrderIds = new Set();
+let ordersData = [];
+
+// ==========================================
+// SOUND ALARM
+// ==========================================
+function playAlarm() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.frequency.value = 880; // A5 note
+  osc.type = 'square';
+  gain.gain.setValueAtTime(0.3, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.8);
 }
 
-function logout() {
-  document.getElementById("manager-dashboard").classList.remove("active");
-  document.getElementById("login-screen").classList.add("active");
-  document.getElementById("passcode").value = "";
-  document.getElementById("msg").textContent = "";
-}
+// ==========================================
+// LOAD ORDERS & TIMER
+// ==========================================
+async function loadOrders() {
+  const { data, error } = await supabaseClient
+    .from('orders')
+    .select('*')
+    .neq('status', 'deleted')
+    .order('created_at', { ascending: false });
 
-async function loadMenu() {
-  const list = document.getElementById("menu-list");
-  list.innerHTML = "<p style='text-align:center;color:var(--gold);'>Loading menu...</p>";
-  
-  try {
-    const res = await fetch(`${SUPA}/rest/v1/menu?order=category.asc,name.asc`, {
-      headers: { "apikey": KEY, "Authorization": "Bearer " + KEY }
-    });
-    const data = await res.json();
-    list.innerHTML = "";
-    
-    if(!data || data.length === 0) {
-      list.innerHTML = "<p style='text-align:center;color:var(--dim)'>Menu is empty. Add items above!</p>";
-      return;
+  if (error) { console.error('Order Error:', error); return; }
+
+  data.forEach(o => {
+    if (!knownOrderIds.has(o.id) && o.status === 'new') {
+      playAlarm();
+      knownOrderIds.add(o.id);
     }
+  });
 
-    let currentCat = "";
-    data.forEach(item => {
-      if(item.category !== currentCat) {
-        currentCat = item.category;
-        list.innerHTML += `<h3 style="color:var(--gold);margin:20px 0 10px;font-size:1rem;letter-spacing:2px;border-bottom:1px solid var(--gold);padding-bottom:5px;">${currentCat}</h3>`;
-      }
-      list.innerHTML += `
-        <div class="item-row">
-          <div class="item-info">
-            <div class="cat">${item.category}</div>
-            <div class="name">${item.name}</div>
-            <div class="price">$${parseFloat(item.price_s).toFixed(2)}</div>
-          </div>
-          <button class="btn-delete" onclick="deleteItem(${item.id})">DELETE</button>
-        </div>
-      `;
-    });
-  } catch(e) {
-    list.innerHTML = "<p style='text-align:center;color:var(--red);'>Error loading menu. Check console.</p>";
-    console.error(e);
-  }
+  ordersData = data || [];
+  renderOrders();
 }
 
-async function addItem() {
-  const cat = document.getElementById("new-cat").value;
-  const name = document.getElementById("new-name").value.trim();
-  const price = document.getElementById("new-price").value;
+function renderOrders() {
+  const activeList = document.getElementById('active-orders-list');
+  const activeOrders = ordersData.filter(o => o.status !== 'done');
+  const doneOrders = ordersData.filter(o => o.status === 'done');
 
-  if(!name || !price) { 
-    document.getElementById("msg").textContent = "⚠️ Please fill in Name and Price.";
-    document.getElementById("msg").style.color = "var(--red)";
-    return; 
+  if (activeOrders.length === 0 && doneOrders.length === 0) {
+    activeList.innerHTML = '<div class="waiting">Waiting for orders...</div>';
+    return;
   }
 
-  const payload = { category: cat, name: name, price_s: parseFloat(price), status: 'green' };
+  let html = '';
   
-  const response = await fetch(`${SUPA}/rest/v1/menu`, {
-    method: "POST",
-    headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "application/json", "Prefer": "return=minimal" },
-    body: JSON.stringify(payload)
+  activeOrders.forEach(o => {
+    html += createOrderCard(o);
   });
 
-  if(response.ok) {
-    document.getElementById("new-name").value = "";
-    document.getElementById("new-price").value = "";
-    document.getElementById("msg").textContent = "✅ Item added successfully!";
-    document.getElementById("msg").style.color = "#28a745";
-    setTimeout(() => { document.getElementById("msg").textContent = ""; }, 3000);
-    loadMenu(); 
-  } else {
-    document.getElementById("msg").textContent = "❌ Error adding item.";
-    document.getElementById("msg").style.color = "var(--red)";
+  if (doneOrders.length > 0) {
+    html += '<div style="margin-top:30px; border-top:2px dashed #555; padding-top:20px;"><h3 style="color:#888; text-align:center; margin-bottom:15px;">📜 ORDER HISTORY</h3>';
+    doneOrders.forEach(o => {
+      html += createOrderCard(o);
+    });
+    html += '</div>';
   }
+
+  activeList.innerHTML = html;
 }
 
-async function deleteItem(id) {
-  if(!confirm("Delete this item from the live menu?")) return;
-  const response = await fetch(`${SUPA}/rest/v1/menu?id=eq.${id}`, {
-    method: "DELETE",
-    headers: { "apikey": KEY, "Authorization": "Bearer " + KEY }
-  });
-  if(response.ok) {
-    document.getElementById("msg").textContent = "✅ Item deleted.";
-    document.getElementById("msg").style.color = "#28a745";
-    setTimeout(() => { document.getElementById("msg").textContent = ""; }, 3000);
-    loadMenu();
+function createOrderCard(o) {
+  const timeAgo = getTimeAgo(new Date(o.created_at));
+  const items = o.items || [];
+  const total = o.total || 0;
+  
+  let actionButtons = '';
+  if (o.status === 'new') {
+    actionButtons = `<button class="btn btn-process" onclick="updateStatus(${o.id}, 'processing')">▶ Start Processing</button>`;
+  } else if (o.status === 'processing') {
+    actionButtons = `<button class="btn btn-done" onclick="updateStatus(${o.id}, 'done')">✓ Mark Done</button>`;
   }
+
+  const deleteBtn = o.status === 'done' ? `<button class="btn btn-delete" onclick="deleteOrder(${o.id})">🗑️</button>` : '';
+
+  return `
+    <div class="order-card status-${o.status}">
+      <div class="order-top">
+        <span class="order-id">#${o.id} <span style="font-size:12px; color:#888">(${o.status})</span></span>
+        <span class="order-timer">⏱️ ${timeAgo}</span>
+      </div>
+      <div class="order-customer">👤 ${o.customer_name || 'Customer'} | 📞 ${o.phone || 'N/A'} | 🕒 ${o.pickup_time || 'ASAP'}</div>
+      <div class="order-items">
+        ${items.map(i => `<div class="order-item"><span>${i.qty}x ${i.name}</span><span>$${(i.price * i.qty).toFixed(2)}</span></div>`).join('')}
+      </div>
+      <div class="order-total">Total: $${parseFloat(total).toFixed(2)}</div>
+      <div class="action-btns">
+        ${actionButtons}
+        ${deleteBtn}
+      </div>
+    </div>
+  `;
 }
-</script>
-</body>
-</html>
+
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ago`;
+}
+
+// ==========================================
+// UPDATE STATUS & DELETE
+// ==========================================
+window.updateStatus = async (id, status) => {
+  await supabaseClient.from('orders').update({ status }).eq('id', id);
+  loadOrders();
+};
+
+window.deleteOrder = async (id) => {
+  if(confirm('Permanently delete order #' + id + '?')) {
+    await supabaseClient.from('orders').update({ status: 'deleted' }).eq('id', id);
+    loadOrders();
+  }
+};
+
+// ==========================================
+// MENU CONTROLS (Right Side)
+// ==========================================
+async function loadMenu() {
+  const { data, error } = await supabaseClient.from('menu_status').select('*').order('item_name');
+  if (error) { console.error('Menu Error:', error); return; }
+  
+  const div = document.getElementById('controls-content');
+  div.innerHTML = '';
+  
+  Object.keys(MENU_CATEGORIES).forEach(cat => {
+const catDiv = document.createElement('div');
+catDiv.className = 'control-category';
+catDiv.innerHTML = <h3>${cat}</h3>;
+MENU_CATEGORIES[cat].forEach(name => {
+const item = data.find(m => m.item_name === name);
+const currentStatus = item ? item.status : 'green';
+catDiv.innerHTML +=  <div class="control-item"> <div class="control-name">${name}</div> <div class="traffic-lights"> <button class="light-btn light-green ${currentStatus==='green'?'active':''}" onclick="updateMenu('${name.replace(/'/g, "\\'")}','green')">Avail</button> <button class="light-btn light-yellow ${currentStatus==='yellow'?'active':''}" onclick="updateMenu('${name.replace(/'/g, "\\'")}','yellow')">Low</button> <button class="light-btn light-red ${currentStatus==='red'?'active':''}" onclick="updateMenu('${name.replace(/'/g, "\\'")}','red')">Sold</button> </div> </div>;
+});
+div.appendChild(catDiv);
+});
+}
+window.updateMenu = async (name, status) => {
+await supabaseClient.from('menu_status').upsert({ item_name: name, status: status, updated_at: new Date() }, { onConflict: 'item_name' });
+loadMenu();
+};
+// ==========================================
+// INITIAL LOAD & REFRESH
+// ==========================================
+loadOrders();
+loadMenu();
+setInterval(loadOrders, 5000);
+setInterval(loadMenu, 10000);
+setInterval(renderOrders, 1000);
