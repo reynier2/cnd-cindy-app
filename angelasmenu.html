@@ -38,7 +38,7 @@
         <div class="category">
             <h2 class="category-title">Appetizers</h2>
             <div class="menu-grid">
-                <div class="menu-item" onclick="addToOrder('Garlic Knots')">
+                <div class="menu-item" onclick="addToOrder('Fresh Garlic Knots')">
                     <div class="menu-item-image"><img src="https://images.unsplash.com/photo-1573140401552-388e7e2f00b8?w=400&h=300&fit=crop" alt="Garlic Knots"></div>
                     <div class="menu-item-info"><div class="menu-item-number">1</div><div class="menu-item-name">Fresh Garlic Knots</div><span class="menu-item-price">$5.99</span><button class="order-btn">Add to Order</button></div>
                 </div>
@@ -57,11 +57,11 @@
         <div class="category">
             <h2 class="category-title">Pasta & Entrees</h2>
             <div class="menu-grid">
-                <div class="menu-item" onclick="addToOrder('Vodka Cream Sauce')">
+                <div class="menu-item" onclick="addToOrder('Homemade Vodka Cream Sauce')">
                     <div class="menu-item-image"><img src="https://images.unsplash.com/photo-1626844131082-256783844137?w=400&h=300&fit=crop" alt="Vodka Cream Sauce"></div>
                     <div class="menu-item-info"><div class="menu-item-number">4</div><div class="menu-item-name">Homemade Vodka Cream Sauce</div><span class="menu-item-price">$16.99</span><button class="order-btn">Add to Order</button></div>
                 </div>
-                <div class="menu-item" onclick="addToOrder('Chicken Parm')">
+                <div class="menu-item" onclick="addToOrder('Chicken Parmigiana')">
                     <div class="menu-item-image"><img src="https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?w=400&h=300&fit=crop" alt="Chicken Parm"></div>
                     <div class="menu-item-info"><div class="menu-item-number">5</div><div class="menu-item-name">Chicken Parmigiana</div><span class="menu-item-price">$18.99</span><button class="order-btn">Add to Order</button></div>
                 </div>
@@ -76,11 +76,11 @@
         <div class="category">
             <h2 class="category-title">Pizza</h2>
             <div class="menu-grid">
-                <div class="menu-item" onclick="addToOrder('Sicilian Pizza')">
+                <div class="menu-item" onclick="addToOrder('Sicilian Pizza (Large)')">
                     <div class="menu-item-image"><img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop" alt="Sicilian Pizza"></div>
                     <div class="menu-item-info"><div class="menu-item-number">7</div><div class="menu-item-name">Sicilian Pizza (Large)</div><span class="menu-item-price">$22.99</span><button class="order-btn">Add to Order</button></div>
                 </div>
-                <div class="menu-item" onclick="addToOrder('Angela Special')">
+                <div class="menu-item" onclick="addToOrder('Angela\'s Special Pizza')">
                     <div class="menu-item-image"><img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop" alt="Angela's Special"></div>
                     <div class="menu-item-info"><div class="menu-item-number">8</div><div class="menu-item-name">Angela's Special Pizza</div><span class="menu-item-price">$24.99</span><button class="order-btn">Add to Order</button></div>
                 </div>
@@ -103,11 +103,63 @@
         </div>
     </div>
 
+    <!-- LIVE INVENTORY SCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        const SUPABASE_URL = 'https://mkvpuawmkudezotbhmxl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rdnB1YXdta3VkZXpvdGJobXhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODM0ODUsImV4cCI6MjEwMjc1OTQ4NX0.O5QIeyMGf4Dk3iFw3GagmNWg1t4B2XT0Y1tvanz7hwE';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let menuAvailability = {};
+
+        async function checkAvailability() {
+            const { data, error } = await supabaseClient.from('menu_status').select('item_name, status');
+            if (!error && data) {
+                data.forEach(item => {
+                    menuAvailability[item.item_name] = item.status;
+                });
+                updateMenuUI();
+            }
+        }
+
+        function updateMenuUI() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            menuItems.forEach(item => {
+                const itemName = item.querySelector('.menu-item-name').textContent;
+                const btn = item.querySelector('.order-btn');
+                const status = menuAvailability[itemName];
+
+                if (status === 'red') {
+                    item.style.opacity = '0.5';
+                    item.style.pointerEvents = 'none';
+                    btn.textContent = 'SOLD OUT';
+                    btn.style.background = '#dc3545';
+                    btn.style.color = 'white';
+                } else if (status === 'yellow') {
+                    btn.textContent = 'ADD TO ORDER (LOW STOCK)';
+                    btn.style.background = '#ffc107';
+                    btn.style.color = 'black';
+                } else {
+                    item.style.opacity = '1';
+                    item.style.pointerEvents = 'auto';
+                    btn.textContent = 'Add to Order';
+                    btn.style.background = 'linear-gradient(135deg, #ffb703 0%, #b8860b 100%)';
+                    btn.style.color = '#140b06';
+                }
+            });
+        }
+
         function addToOrder(itemName) {
+            if (menuAvailability[itemName] === 'red') {
+                alert('Sorry, ' + itemName + ' is currently sold out!');
+                return;
+            }
             console.log('Added item:', itemName);
             alert(itemName + ' added to your order!');
         }
+
+        checkAvailability();
+        setInterval(checkAvailability, 30000); // Checks every 30 seconds
     </script>
 </body>
 </html>
